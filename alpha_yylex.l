@@ -1,0 +1,378 @@
+%{
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #define  YY_DECL int alpha_yylex (void* yylval)
+  #define MAX 100
+  extern YYSTYPE yylval;
+
+  char* buffer;
+  int string_count;
+  int buffer_count;
+  int tokens = 0;
+  typedef enum type{IF,ELSE,WHILE,FOR,FUNC,RETURN,BREAK,CONTINUE,AND,OR,LOCAL,TRUE,FALSE,NIL,ASSIGN,PLUS,
+    MINUS,MUL,DIV,MOD,EQ,NOT_EQ,D_PLUS,D_MINUS,LESS,GREATER,LESS_EQ,GREATER_EQ,LC_BRA,RC_BRA,
+    L_BRA,R_BRA,L_PAR,R_PAR,SEMI,COMMA,COLON,D_COLON,DOT,D_DOT,INT,REAL,ID}types;
+
+  char Enum_array[43][10]= {"IF","ELSE","WHILE","FOR","FUNC","RETURN","BREAK","CONTINUE","AND","OR","LOCAL","TRUE","FALSE","NIL","ASSIGN","PLUS",
+    "MINUS","MUL","DIV","MOD","EQ","NOT_EQ","D_PLUS","D_MINUS","LESS","GREATER","LESS_EQ","GREATER_EQ","LC_BRA","RC_BRA",
+    "L_BRA","R_BRA","L_PAR","R_PAR","SEMI","COMMA","COLON","D_COLON","DOT","D_DOT","INT","REAL","ID"};
+
+  typedef struct node node;
+
+  struct node {
+    int line_num;
+    int token_num;
+    char* content;
+    char* type;
+    char* charvalue;
+    float numbervalue;
+    node *next;
+  };
+
+node *head = NULL;
+void insert_list(int numline, int numtoken, char* content, char* type, char* charvalue, float numbervalue);
+void print_list(node *head);
+char* search_name(char* name);
+%}
+%option noyywrap
+%option yylineno
+
+id      [a-zA-Z][a-zA-Z_0-9]*
+integer (0[xX][0-9A-Fa-f]+)|([0-9]+)
+real    [0-9]*\.[0-9](e|E)?[0-9]*
+space   [\r\t \v\n]
+linecomment "//".*
+illigal ([\$ \~ \? \# \&\& \|\| \!]*)|(\_[a-zA-Z]*)|([0-9][a-zA-Z]*)
+
+%%
+
+if        {return IF;}
+else      {return ELSE;}
+while     {return WHILE;}
+for       {return FOR;}
+function  {return FUNC;}
+return    {return RETURN;}
+break     {return BREAK;}
+continue  {return CONTINUE;}
+and       {return AND;}
+or        {return OR;}
+local     {return LOCAL;}
+true      {return TRUE;}
+false     {return FALSE;}
+nil       {return NIL;}
+
+"="       {return ASSIGN;}
+"+"       {return PLUS;}
+"-"       {return MINUS;}
+"*"       {return MUL;}
+"/"       {return DIV;}
+"%"       {return MOD;}
+"=="      {return EQ;}
+"!="      {return NOT_EQ;}
+"++"      {return D_PLUS;}
+"--"      {return D_MINUS;}
+"<"       {return LESS;}
+">"       {return GREATER;}
+">="      {return LESS_EQ;}
+"<="      {return GREATER_EQ;}
+
+"{"       {return LC_BRA;}
+"}"       {return RC_BRA;}
+"["       {return L_BRA;}
+"]"       {return R_BRA;}
+"("       {return L_PAR;}
+")"       {return R_PAR;}
+";"       {return SEMI;}
+","       {return COMMA;}
+":"       {return COLON;}
+"::"      {return D_COLON;}
+"."       {return DOT;}
+".."      {return D_DOT;}
+
+
+{integer} {
+  yylval.intval = yytext; 
+  return INT;}
+{real}    {
+  yylval.intval = yytext;
+  return REAL;}
+{id}      {
+  yylval.intval = yytext;
+  return ID;}
+{space}   {}
+
+"\"" {
+
+    int c;
+    string_count = -1;
+    buffer_count = 1;
+    int tasos = 0;
+    buffer = (char*)malloc(buffer_count*MAX*sizeof(char));
+    if(buffer == NULL){
+      printf("Error in allocating memory!!!\n");
+          return -1;
+    }
+
+    while((c = input()) != EOF){
+      if(c == '\"'){
+        string_count++;
+        if(buffer_count*MAX*sizeof(char) == string_count){
+          buffer_count++;
+          buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+          if(buffer == NULL){
+            printf("Error in reallocating memory!!!\n");
+                return -1;
+          }
+        }
+        //strcpy(buffer, '\0');
+        //printf("alekosssssssssss\n");
+        buffer[string_count] = '\0';
+        tasos = 1;
+        insert_list(yylineno, tokens++, buffer, "STRING", buffer, atoi(yytext));
+        break;
+      } else if(c == '\\'){
+        if((c = input()) == 'n'){
+          string_count++;
+          if(buffer_count*MAX*sizeof(char) == string_count){
+            buffer_count++;
+            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+            if(buffer == NULL){
+              printf("Error in reallocating memory!!!\n");
+                  return -1;
+            }
+          }
+          buffer[string_count] = '\n';
+        } else if(c == 't'){
+          string_count++;
+          if(buffer_count*MAX*sizeof(char) == string_count){
+            buffer_count++;
+            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+            if(buffer == NULL){
+              printf("Error in reallocating memory!!!\n");
+                  return -1;
+            }
+          }
+          buffer[string_count] = '\t';
+        } else if(c == 'b'){
+          string_count++;
+          if(buffer_count*MAX*sizeof(char) == string_count){
+            buffer_count++;
+            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+            if(buffer == NULL){
+              printf("Error in reallocating memory!!!\n");
+                  return -1;
+            }
+          }
+          buffer[string_count] = '\b';
+        } else if(c == '\\'){
+          string_count++;
+          if(buffer_count*MAX*sizeof(char) == string_count){
+            buffer_count++;
+            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+            if(buffer == NULL){
+              printf("Error in reallocating memory!!!\n");
+                  return -1;
+            }
+          }
+          buffer[string_count] = '\\';
+
+        } else if(c == '\"'){
+          string_count++;
+          if(buffer_count*MAX*sizeof(char) == string_count){
+            buffer_count++;
+            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+            if(buffer == NULL){
+              printf("Error in reallocating memory!!!\n");
+                  return -1;
+            }
+          }
+          buffer[string_count] = '\"';
+        } else {
+          if(buffer_count*MAX*sizeof(char) == string_count){
+            buffer_count++;
+            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+            if(buffer == NULL){
+              printf("Error in reallocating memory!!!\n");
+                  return -1;
+            }
+          }
+          printf("WARNING: Illigal esc char \n");
+          buffer[string_count] = c;
+        }
+      } else {
+        string_count++;
+        if(buffer_count*MAX*sizeof(char) == string_count){
+          buffer_count++;
+          buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
+          if(buffer == NULL){
+            printf("Error in reallocating memory!!!\n");
+                return -1;
+          }
+        }
+        buffer[string_count] = c;
+      }
+    }
+
+    if(tasos == 0){
+      printf("ERROR: String Open. \n");
+  	   return -1;
+    }
+  }
+
+
+"/*"  {
+  int c;
+  int comm_counter = 1;
+  int line_counter = 0;
+  char cr_buffer[16];
+  while((c = input()) != EOF){
+    if(c == '\n'){
+      line_counter++;
+    }
+    if(c == '/'){
+      c = input();
+      if(c == '*'){
+        comm_counter++;
+      } else { unput(c); }
+    } else if(c == '*'){
+      c = input();
+      if(c == '/')`{
+        comm_counter--;
+      } else { unput(c); }
+    }
+
+    if(comm_counter == 0) break;
+  }
+  if(comm_counter != 0){
+    printf("ERROR: OPEN COMMENT\n");
+  } else{
+    sprintf(cr_buffer,"%d %c %d",yylineno, '-', yylineno + line_counter);
+     insert_list(yylineno, tokens++, cr_buffer, "COMMENT BLOCK_COMMENT", "", atoi(yytext));}
+}
+
+{linecomment} {
+  int c;
+  while ((c = input()) != '\n' && c != EOF);
+  insert_list(yylineno, tokens++, "", "COMMENT LINE_COMMENT", "", atoi(yytext));
+}
+
+{illigal} {insert_list(yylineno,tokens++, yytext, "ILLIGAL CHAR","", atoi(yytext));
+}
+<<EOF>> { return -1;}
+
+%%
+
+ char* search_name(char* name){
+    char* name1 = name;
+    if ( strcmp(name, "IF") == 0 || strcmp(name, "ELSE") == 0 || strcmp(name, "WHILE") == 0 || strcmp(name , "FOR") ==0 || strcmp(name,"FUNC")==0 || strcmp(name , "RETURN") == 0 ||
+      strcmp(name, "BREAK") == 0 || strcmp(name, "CONTINUE") == 0|| strcmp(name , "AND") == 0 || strcmp(name , "OR") == 0 || strcmp(name , "LOCAL") == 0|| strcmp(name , "TRUE") == 0 ||
+      strcmp(name , "FALSE") == 0 || strcmp(name , "NIL") == 0 )
+      {
+          name1 = "KEYWORD";
+      }
+     else if( strcmp(name, "ASSIGN") == 0 || strcmp(name, "PLUS") == 0 || strcmp(name, "MINUS") == 0 || strcmp(name, "MUL") == 0 || strcmp(name, "DIV") == 0 ||
+        strcmp(name, "MOD") == 0 || strcmp(name, "EQ") == 0 || strcmp(name, "NOT_EQ") == 0 || strcmp(name, "D_PLUS") == 0 || strcmp(name, "D_MINUS") == 0 ||
+       strcmp(name, "LESS") == 0 || strcmp(name, "GREATER") == 0 || strcmp(name, "LESS_EQ") == 0 || strcmp(name, "GREATER_EQ") == 0)
+      {
+         name1 = "OPERATOR";
+        // name1 = strcat(name1, " ");
+         //name1 = strcat(name1, name);
+      }
+
+     else if (strcmp(name , "LC_BRA") == 0 || strcmp(name , "RC_BRA") == 0 || strcmp(name , "L_BRA") == 0 || strcmp(name , "R_BRA") == 0 || strcmp(name , "L_PAR") == 0 ||
+        strcmp(name ,"R_PAR") == 0 || strcmp(name , "SEMI") == 0 || strcmp(name , "COMMA") == 0 || strcmp(name , "COLON") == 0 || strcmp(name , "D_COLON") == 0
+        || strcmp(name , "DOT") == 0 || strcmp(name , "D_DOT") == 0)
+       {
+         name1 = "PUNCTUATION";
+        // name1 = strcat(name1, " ");
+         //name1 = strcat(name1, name);
+       }
+     else if (strcmp(name,"INT") == 0)
+     {
+       name1 = "INTEGER";
+       //name1 = strcat(name1, " ");
+       //name1 = strcat(name1, name);
+     }
+     else if (strcmp(name , "REAL") == 0 )
+     {
+       name1 = "REAL";
+       //name1 = strcat(name1, " ");
+       //name1 = strcat(name1, name);
+     }
+     else if (strcmp(name,"ID") == 0)
+     {
+       name1 = "ID";
+       //name1 = strcat(name1, " ");
+       //name1 = strcat(name1, name);
+     }
+     return name1;
+}
+
+void print_list(node *head){
+  node *tmp = head;
+  printf("----------------------------------------------------- Lexical Analysis ----------------------------------------------------- \n");
+  while(tmp){
+    printf("%d: #%d \"%s\" %s %s\n",tmp->line_num, tmp->token_num, tmp->content, tmp->type, tmp->charvalue, tmp->numbervalue);
+    tmp = tmp->next;
+  }
+  return;
+}
+
+void insert_list(int line_num, int token_num, char* content, char* type, char* charvalue, float numbervalue)
+{
+ node *newnode, *tmp;
+ newnode = (node*)malloc(sizeof(node));
+ tmp = head;
+ if(head == NULL){
+   newnode->line_num = line_num;
+   newnode->token_num = token_num;
+   newnode->content = strdup(content);
+   newnode->type = type;
+   newnode->charvalue = strdup(charvalue);
+   newnode->numbervalue = numbervalue;
+   newnode->next = NULL;
+   head = newnode;
+ } else{
+   while(tmp->next){
+     tmp = tmp->next;
+   }
+   newnode->line_num = line_num;
+   newnode->token_num = token_num;
+   newnode->content = strdup(content);
+   newnode->type = type;
+   newnode->charvalue = strdup(charvalue);
+   newnode->numbervalue = numbervalue;
+   newnode->next = NULL;
+   tmp->next = newnode;
+ }
+ return;
+}
+
+int main(int argc, char *argv[]){
+
+  if(argc > 1){
+    if(!(yyin = fopen(argv[1], "r"))){
+      fprintf(stderr,"Cannot open %s\n", argv[1]);
+	return 1;
+    }
+  }else{
+    yyin = stdin;
+  }
+
+  int manos2;
+  char* name;
+
+  manos2 = alpha_yylex(NULL);
+  name = search_name(Enum_array[manos2]);
+  insert_list(yylineno, tokens++, yytext, name, yytext, atoi(yytext));
+    while(manos2 != -1){
+      int manos = alpha_yylex(NULL);
+      name = search_name(Enum_array[manos]);
+      insert_list(yylineno, tokens++, yytext, name, yytext, atoi(yytext));
+      manos2=manos;
+    }
+    print_list(head);
+
+  return 0;
+}
