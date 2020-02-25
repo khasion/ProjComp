@@ -11,7 +11,6 @@
   extern FILE* yyin;
 
   int scopeval = 0;
-
 %}
 %start program
 %union{

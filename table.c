@@ -1,7 +1,5 @@
 #include "scopelist.h"
 
-
-
 int hashCode(char* key){
     return *key % SIZE;
 }

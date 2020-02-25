@@ -31,6 +31,9 @@ DataItem *search(char* name, int scope) {
     return NULL;
 }
 
+
+
+
 void mark(char* name, int scope) {
     DataItem *temp;
     int i;
