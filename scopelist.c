@@ -6,8 +6,7 @@ DataItem *new_scope_node(char* name, int scope) {
     DataItem *new_node;
     char* new_name;
     new_node = (DataItem*) malloc(sizeof(DataItem));
-    new_name = strdup(name);
-    new_node->name = new_name;
+    new_node->name = strdup(name);
     new_node->scope = scope;
     new_node->marked = false;
     new_node->next_scope = NULL;
@@ -30,9 +29,6 @@ DataItem *search(char* name, int scope) {
         }
     return NULL;
 }
-
-
-
 
 void mark(char* name, int scope) {
     DataItem *temp;
