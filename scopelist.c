@@ -4,7 +4,6 @@ DataItem *scope_table[100];
 
 DataItem *new_scope_node(char* name, int scope) {
     DataItem *new_node;
-    char* new_name;
     new_node = (DataItem*) malloc(sizeof(DataItem));
     new_node->name = strdup(name);
     new_node->scope = scope;
