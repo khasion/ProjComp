@@ -92,13 +92,13 @@ nil       {return NIL;}
 
 
 {integer} {
-  yylval.intval = yytext; 
+  yylval.intval = atoi(yytext);
   return INT;}
 {real}    {
-  yylval.intval = yytext;
+  yylval.intval = atof(yytext);
   return REAL;}
 {id}      {
-  yylval.intval = yytext;
+  yylval.intval = strdup(yytext);
   return ID;}
 {space}   {}
 
@@ -349,7 +349,7 @@ void insert_list(int line_num, int token_num, char* content, char* type, char* c
  return;
 }
 
-int main(int argc, char *argv[]){
+/* int main(int argc, char *argv[]){
 
   if(argc > 1){
     if(!(yyin = fopen(argv[1], "r"))){
@@ -375,4 +375,4 @@ int main(int argc, char *argv[]){
     print_list(head);
 
   return 0;
-}
+} */

@@ -53,25 +53,25 @@ smt: expr SEMI{;}
    | SEMI{;}
    ;
 
-expr: assignexpr{;}
-    | expr PLUS expr{;}
-    | expr MINUS expr{;}
-    | expr MUL expr{;}
-    | expr DIV expr{;}
-    | expr MOD expr{;}
-    | expr GREATER expr{;}
-    | expr GREATER_EQ expr{;}
-    | expr LESS expr{;}
-    | expr LESS_EQ expr{;}
-    | expr EQ expr{;}
-    | expr NOT_EQ expr{;}
-    | expr AND expr{;}
-    | expr OR expr{;}
+expr: assignexpr{ $$ = $1;}
+    | expr PLUS expr{ $$ = $1 + $3;}
+    | expr MINUS expr{ $$ = $1 - $3;}
+    | expr MUL expr{ $$ = $1 * $3;}
+    | expr DIV expr{$$ = $1 / $3;}
+    | expr MOD expr{ $$ = $1 % $3;}
+    | expr GREATER expr{if($1 > $3){$$ = 1;}else{$$ = 0};}
+    | expr GREATER_EQ expr{if($1 >= $3){$$ = 1;}else{$$ = 0};}
+    | expr LESS expr{if($1 < $3){$$ = 1;}else{$$ = 0};}
+    | expr LESS_EQ expr{if($1 <= $3){$$ = 1;}else{$$ = 0};}
+    | expr EQ expr{if($1 == $3){$$ = 1;}else{$$ = 0};}
+    | expr NOT_EQ expr{if($1 != $3){$$ = 1;}else{$$ = 0};}
+    | expr AND expr{if($1 && $3){$$ = 1;}else{$$ = 0};}
+    | expr OR expr{if($1 || $3){$$ = 1;}else{$$ = 0};}
     |term{;}
     ;
 
 term: L_PAR expr R_PAR{;}
-    | UMINUS expr{;}
+    | UMINUS expr %prec UMINUS{;}
     | NOT expr{;}
     | D_PLUS lvalue{;}
     | lvalue D_PLUS{;}
@@ -116,7 +116,7 @@ methodcall: D_DOT L_PAR elist R_PAR {;};
 
 elist:  expr {;}
       | elist COMMA expr{;}
-      | 
+      |
       ;
 
 objectdef: L_BRA elist R_BRA{;}
@@ -129,7 +129,7 @@ indexed: indexedelem{;}
        ;
 
 indexedelem: LC_BRA {scopeval++; }
-            expr COLON expr 
+            expr COLON expr
             RC_BRA{scopeval--;}
 
 block:  LC_BRA{scopeval++;} RC_BRA{scopeval--;}
