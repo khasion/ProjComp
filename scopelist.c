@@ -34,8 +34,8 @@ void mark(char* name, int scope) {
     DataItem *temp;
     int i;
     if (scope != -1) {
-        for (i=0; i<100; i++) {
-            if ( (temp = search(name, i)) ) temp->marked = true;
+        for (scope=0; scope<100; scope++) {
+            if ( (temp = search(name, scope)) ) temp->marked = true;
         }
     }
     else {
@@ -47,8 +47,8 @@ void unmark(char *name, int scope) {
     DataItem *temp;
     int i;
     if (scope != -1) {
-        for (i=0; i<100; i++) {
-            if ( (temp = search(name, i)) ) temp->marked = false;
+        for (scope=0; scope<100; scope++) {
+            if ( (temp = search(name, scope)) ) temp->marked = false;
         }
     }
     else {
