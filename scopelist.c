@@ -35,7 +35,7 @@ void mark(char* name, int scope) {
     int i;
     if (scope != -1) {
         for (i=0; i<100; i++) {
-            if ( (temp = search(name, scope)) ) temp->marked = true;
+            if ( (temp = search(name, i)) ) temp->marked = true;
         }
     }
     else {
@@ -48,7 +48,7 @@ void unmark(char *name, int scope) {
     int i;
     if (scope != -1) {
         for (i=0; i<100; i++) {
-            if ( (temp = search(name, scope)) ) temp->marked = false;
+            if ( (temp = search(name, i)) ) temp->marked = false;
         }
     }
     else {
