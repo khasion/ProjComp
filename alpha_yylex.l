@@ -2,17 +2,17 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
+  #include "y.tab.h"
   #define  YY_DECL int alpha_yylex (void* yylval)
   #define MAX 100
-  extern YYSTYPE yylval;
 
   char* buffer;
   int string_count;
   int buffer_count;
   int tokens = 0;
-  typedef enum type{IF,ELSE,WHILE,FOR,FUNC,RETURN,BREAK,CONTINUE,AND,OR,LOCAL,TRUE,FALSE,NIL,ASSIGN,PLUS,
+  /* typedef enum type{IF,ELSE,WHILE,FOR,FUNC,RETURN,BREAK,CONTINUE,AND,OR,LOCAL,TRUE,FALSE,NIL,ASSIGN,PLUS,
     MINUS,MUL,DIV,MOD,EQ,NOT_EQ,D_PLUS,D_MINUS,LESS,GREATER,LESS_EQ,GREATER_EQ,LC_BRA,RC_BRA,
-    L_BRA,R_BRA,L_PAR,R_PAR,SEMI,COMMA,COLON,D_COLON,DOT,D_DOT,INT,REAL,ID}types;
+    L_BRA,R_BRA,L_PAR,R_PAR,SEMI,COMMA,COLON,D_COLON,DOT,D_DOT,INT,REAL,ID}types; */
 
   char Enum_array[43][10]= {"IF","ELSE","WHILE","FOR","FUNC","RETURN","BREAK","CONTINUE","AND","OR","LOCAL","TRUE","FALSE","NIL","ASSIGN","PLUS",
     "MINUS","MUL","DIV","MOD","EQ","NOT_EQ","D_PLUS","D_MINUS","LESS","GREATER","LESS_EQ","GREATER_EQ","LC_BRA","RC_BRA",
@@ -95,10 +95,10 @@ nil       {return NIL;}
   yylval.intval = atoi(yytext);
   return INT;}
 {real}    {
-  yylval.intval = atof(yytext);
+  yylval.floatval = atof(yytext);
   return REAL;}
 {id}      {
-  yylval.intval = strdup(yytext);
+  yylval.strval = strdup(yytext);
   return ID;}
 {space}   {}
 
@@ -237,7 +237,7 @@ nil       {return NIL;}
       } else { unput(c); }
     } else if(c == '*'){
       c = input();
-      if(c == '/')`{
+      if(c == '/'){
         comm_counter--;
       } else { unput(c); }
     }

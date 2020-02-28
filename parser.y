@@ -14,16 +14,16 @@
   int funcscope = 0;
 %}
 %start program
-%union{
-  int intval;
-  char* strval;
-  float floatval;
-}
+%union {int intval, char* strval, float floatval;}
 
 %token <intval> INT
 %token <floatval> REAL
 %token <strval> ID STRING
 %token <strval> IF ELSE WHILE FOR FUNC RETURN BREAK CONTINUE AND OR LOCAL TRUE FALSE NIL UMINUS ASSIGN PLUS MINUS MUL DIV MOD EQ NOT_EQ D_PLUS D_MINUS LESS GREATER LESS_EQ GREATER_EQ LC_BRA RC_BRA L_BRA R_BRA L_PAR R_PAR SEMI COMMA COLON D_COLON DOT D_DOT
+
+%type <strval> stmt
+%type <intval> expr
+%type <strval> term assignexpr primary lvalue member call callsuffix normcall elist objectdef indexed indexedelem block const idlist ifstmt whilestmt forstmt returnstmt
 
 %left ASSIGN
 %left OR
@@ -42,7 +42,7 @@ program: stmt program{;}
        |
        ;
 
-smt: expr SEMI{;}
+stmt: expr SEMI{;}
    | ifstmt{;}
    | whilestmt{;}
    | forstmt{;}
@@ -60,14 +60,14 @@ expr: assignexpr{ $$ = $1;}
     | expr MUL expr{ $$ = $1 * $3;}
     | expr DIV expr{$$ = $1 / $3;}
     | expr MOD expr{ $$ = $1 % $3;}
-    | expr GREATER expr{if($1 > $3){$$ = 1;}else{$$ = 0};}
-    | expr GREATER_EQ expr{if($1 >= $3){$$ = 1;}else{$$ = 0};}
-    | expr LESS expr{if($1 < $3){$$ = 1;}else{$$ = 0};}
-    | expr LESS_EQ expr{if($1 <= $3){$$ = 1;}else{$$ = 0};}
-    | expr EQ expr{if($1 == $3){$$ = 1;}else{$$ = 0};}
-    | expr NOT_EQ expr{if($1 != $3){$$ = 1;}else{$$ = 0};}
-    | expr AND expr{if($1 && $3){$$ = 1;}else{$$ = 0};}
-    | expr OR expr{if($1 || $3){$$ = 1;}else{$$ = 0};}
+    | expr GREATER expr{if($1 > $3){$$ = 1;}else{$$ = 0;};}
+    | expr GREATER_EQ expr{if($1 >= $3){$$ = 1;}else{$$ = 0;};}
+    | expr LESS expr{if($1 < $3){$$ = 1;}else{$$ = 0;};}
+    | expr LESS_EQ expr{if($1 <= $3){$$ = 1;}else{$$ = 0;};}
+    | expr EQ expr{if($1 == $3){$$ = 1;}else{$$ = 0;};}
+    | expr NOT_EQ expr{if($1 != $3){$$ = 1;}else{$$ = 0;};}
+    | expr AND expr{if($1 && $3){$$ = 1;}else{$$ = 0;};}
+    | expr OR expr{if($1 || $3){$$ = 1;}else{$$ = 0;};}
     |term{;}
     ;
 
@@ -87,7 +87,7 @@ primary: lvalue{;}
        | call{;}
        | objectdef{;}
        | L_PAR funcdef R_PAR{;}
-       | cont{;}
+       | const{;}
        ;
 
 lvalue: ID{;}
@@ -113,11 +113,11 @@ callsuffix: normcall{;}
 
 normcall: L_PAR elist R_PAR{;}
 
-methodcall: D_DOT L_PAR elist R_PAR {;};
+methodcall: D_DOT L_PAR elist R_PAR {;}
 
 elist:  expr {;}
       | elist COMMA expr{;}
-      |
+      | {;}
       ;
 
 objectdef: L_BRA elist R_BRA{;}
@@ -126,7 +126,6 @@ objectdef: L_BRA elist R_BRA{;}
 
 indexed: indexedelem{;}
        | indexed COMMA indexedelem{;}
-       |{;}
        ;
 
 indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{globalscope--;}
@@ -135,42 +134,43 @@ block:  LC_BRA{globalscope++;} RC_BRA{globalscope--;}
      | LC_BRA {globalscope++;} stmt RC_BRA{globalscope--;}
      ;
 
-funcdef: function ID L_PAR {funcscope++;} idlist R_PAR {funcscope--;} block{;}
-       | function L_PAR{funcscope++;} idlist R_PAR {funcscope--;} block{;}
+funcdef: FUNC L_PAR {funcscope++;} idlist R_PAR {funcscope--;} block{;}
+       | FUNC ID L_PAR{funcscope++;} idlist R_PAR {funcscope--;} block{;}
        ;
 
 const: INT{;}
      | REAL{;}
-     |STRING{;}
-     |NIL{;}
-     |TRUE{;}
-     |FALSE{;}
+     | STRING{;}
+     | NIL{;}
+     | TRUE{;}
+     | FALSE{;}
      ;
 
 idlist: ID{;}
       | idlist COMMA ID{;}
-      |
+      |{;}
       ;
 
-ifstmt: IF L_PAR{funcscope ++;} expr R_PAR{funcscope--;} {globalscope++;} stmt ELSE stmt{;}
-      | IF L_PAR {funcscope ++;}  expr R_PAR {funcscope --;} stmt{;}
-      ;
+ifstmt: IF L_PAR expr R_PAR stmt {;}
+        | IF L_PAR expr R_PAR  stmt ELSE stmt{;}
+        ;
 
-whilestmt: WHILE L_PAR {funcscope ++;} expr R_PAR {funcscope --;} stmt{globalscope++;}
+whilestmt: WHILE L_PAR {funcscope++;} expr R_PAR {funcscope--;} stmt{scopeval++;}
          ;
 
-forstmt: FOR L_PAR {funcscope ++;} elist SEMICOLON expr SEMICOLON elist R_PAR {funcscope --;} stmt{globalscope++;}
+forstmt: FOR L_PAR {funcscope++;} elist SEMI expr SEMI elist R_PAR {funcscope--;} stmt{scopeval++;}
        ;
 
-returnstmt: RETURN SEMICOLON{;}
-          | RETURN expr SEMICOLON{;}
+returnstmt: RETURN SEMI{;}
+          | RETURN expr SEMI{;}
           ;
 
 %%
 
-int yyerror(char yaccProovidedMessage){
+int yyerror(char* yaccProovidedMessage){
   fprintf(stderr, "%s: at line %d, before token: %s\n",yaccProovidedMessage, yylineno, yytext);
   fprintf(stderr, "INPUT NOT VALID\n");
+  return -1;
 }
 
 int main(int argc, char** argv){
