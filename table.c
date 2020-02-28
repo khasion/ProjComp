@@ -36,7 +36,7 @@ void print_table() {
             DataItem* temp = hashArray[i][j];
             while (temp) {
                 printf("Name: %s\nType: %s\nRange: %s\nScope: %d\n \
-                Line: %d\nHidden: %d\n", temp->name, temp->type, \
+                Line: %d\nHidden: %d\n", temp->name, temp->type,
                 temp->func_name, temp->scope, temp->line, temp->hide);
                 temp = temp->next;
             }
