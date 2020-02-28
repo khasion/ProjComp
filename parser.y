@@ -11,6 +11,7 @@
   extern FILE* yyin;
 
   int scopeval = 0;
+  int funcscope = 0;
 %}
 %start program
 %union{
@@ -42,7 +43,7 @@ program: stmt program{;}
        ;
 
 smt: expr SEMI{;}
-   | ifstmt{scopeval++;}
+   | ifstmt{;}
    | whilestmt{;}
    | forstmt{;}
    | returnstmt{;}
@@ -128,16 +129,14 @@ indexed: indexedelem{;}
        |{;}
        ;
 
-indexedelem: LC_BRA {scopeval++; }
-            expr COLON expr
-            RC_BRA{scopeval--;}
+indexedelem: LC_BRA {scopeval++; } expr COLON expr RC_BRA{scopeval--;}
 
 block:  LC_BRA{scopeval++;} RC_BRA{scopeval--;}
      | LC_BRA {scopeval++;} stmt RC_BRA{scopeval--;}
      ;
 
-funcdef: function ID L_PAR {scopeval++;} idlist L_PAR {scopeval--;} block{;}
-       | function L_PAR{scopeval++;} idlist L_PAR {scopeval--;} block{;}
+funcdef: function ID L_PAR {funcscope++;} idlist R_PAR {funcscope--;} block{;}
+       | function L_PAR{funcscope++;} idlist R_PAR {funcscope--;} block{;}
        ;
 
 const: INT{;}
@@ -153,14 +152,14 @@ idlist: ID{;}
       |
       ;
 
-ifstmt: IF L_PAR expr R_PAR stmt ELSE stmt{;}
-      | IF L_PAR expr R_PAR stmt{;}
+ifstmt: IF L_PAR{funcscope ++;} expr R_PAR{funcscope--;} {scopeval++;} stmt ELSE stmt{;}
+      | IF L_PAR {funcscope ++;}  expr R_PAR {funcscope --;} stmt{;}
       ;
 
-whilestmt: WHILE L_PAR expr R_PAR stmt{;}
+whilestmt: WHILE L_PAR {funcscope ++;} expr R_PAR {funcscope --;} stmt{scopeval++;}
          ;
 
-forstmt: FOR L_PAR elist SEMICOLON expr SEMICOLON elist R_PAR stmt{;}
+forstmt: FOR L_PAR {funcscope ++;} elist SEMICOLON expr SEMICOLON elist R_PAR {funcscope --;} stmt{scopeval++;}
        ;
 
 returnstmt: RETURN SEMICOLON{;}
