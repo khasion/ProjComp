@@ -4,8 +4,8 @@ int hash_name(char* key){
     return atoi(key) % SIZE;
 }
 
-int hash_scope(int scope){
-    return scope % SIZE;
+int hash_func(char* func_name){
+    return atoi(func_name) % SIZE;
 }
 
 void table_insert(char* name, char* type, char* func_name,
@@ -13,7 +13,7 @@ int scope, int line, bool hide){
     DataItem *new_item = create_item(name, type, func_name, scope,
     line, hide);
     int hash1 = hash_name(name);
-    int hash2 = hash_scope(scope);
+    int hash2 = hash_func(func_name);
 
     if (hashArray[hash1][hash2] == NULL) {
         hashArray[hash1][hash2] = new_item;
@@ -56,8 +56,8 @@ void unhide(char* name, char* func_name) {
 
 void hide_func(char* func_name) {
     int i, j;
-    for (i=0; i<100; i++) {
-        for (j=0; j<100; j++) {
+    for (i=0; i<SIZE; i++) {
+        for (j=0; j<SIZE; j++) {
             DataItem* temp = hashArray[i][j];
             while (temp) {
                 if ( strcmp(temp->func_name, func_name) == 0) {
@@ -70,24 +70,22 @@ void hide_func(char* func_name) {
 }
 
 void unhide_func(char* func_name) {
-    int i, j;
-    for (i=0; i<100; i++) {
-        for (j=0; j<100; j++) {
-            DataItem* temp = hashArray[i][j];
-            while (temp) {
-                if ( strcmp(temp->func_name, func_name) == 0) {
-                    temp->hide = false;
-                }
-                temp = temp->next;
+    int i;
+    for (i=0; i<SIZE; i++) {
+        DataItem* temp = hashArray[i][hash_func(func_name)];
+        while (temp) {
+            if ( strcmp(temp->func_name, func_name) == 0) {
+                temp->hide = false;
             }
+            temp = temp->next;
         }
     }
 }
 
 void hide_all_no_func(char* func_name) {
     int i, j;
-    for (i=0; i<100; i++) {
-        for (j=0; j<100; j++) {
+    for (i=0; i<SIZE; i++) {
+        for (j=0; j<SIZE; j++) {
             DataItem* temp = hashArray[i][j];
             while (temp) {
                 if ( strcmp(temp->func_name, func_name) != 0) {
@@ -101,8 +99,8 @@ void hide_all_no_func(char* func_name) {
 
 void unhide_all_no_func(char* func_name) {
     int i, j;
-    for (i=0; i<100; i++) {
-        for (j=0; j<100; j++) {
+    for (i=0; i<SIZE; i++) {
+        for (j=0; j<SIZE; j++) {
             DataItem* temp = hashArray[i][j];
             while (temp) {
                 if ( strcmp(temp->func_name, func_name) != 0) {
@@ -116,8 +114,8 @@ void unhide_all_no_func(char* func_name) {
 
 void hide_all_no_globals(){
     int i, j;
-    for (i=0; i<100; i++) {
-        for (j=0; j<100; j++) {
+    for (i=0; i<SIZE; i++) {
+        for (j=0; j<SIZE; j++) {
             DataItem* temp = hashArray[i][j];
             while(temp) {
                 if ( strcmp(temp->func_name, "global") != 0) {
@@ -131,8 +129,8 @@ void hide_all_no_globals(){
 
 void unhide_all_no_globals(){
     int i, j;
-    for (i=0; i<100; i++) {
-        for (j=0; j<100; j++) {
+    for (i=0; i<SIZE; i++) {
+        for (j=0; j<SIZE; j++) {
             DataItem* temp = hashArray[i][j];
             while(temp) {
                 if ( strcmp(temp->func_name, "global") != 0) {
@@ -145,10 +143,9 @@ void unhide_all_no_globals(){
 }
 
 DataItem* table_lookup(char* name, char* func_name){
-    int i, j;
-    for (i=0; i<100; i++) {
-        for (j=0; j<100; j++) {
-            DataItem* temp = hashArray[i][j];
+    int j;
+    for (j=0; j<SIZE; j++) {
+        DataItem* temp = hashArray[hash_name(name)][j];
             while (temp) {
                 if ( strcmp(temp->name, name) == 0 &&
                 strcmp(temp->func_name, func_name) == 0) {
@@ -157,7 +154,6 @@ DataItem* table_lookup(char* name, char* func_name){
                 temp = temp->next;
             }
         }
-    }
     return NULL;
 }
 
