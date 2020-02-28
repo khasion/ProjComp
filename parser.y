@@ -10,7 +10,7 @@
   extern char* yytext;
   extern FILE* yyin;
 
-  int scopeval = 0;
+  int globalscope = 0;
   int funcscope = 0;
 %}
 %start program
@@ -129,10 +129,10 @@ indexed: indexedelem{;}
        |{;}
        ;
 
-indexedelem: LC_BRA {scopeval++; } expr COLON expr RC_BRA{scopeval--;}
+indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{globalscope--;}
 
-block:  LC_BRA{scopeval++;} RC_BRA{scopeval--;}
-     | LC_BRA {scopeval++;} stmt RC_BRA{scopeval--;}
+block:  LC_BRA{globalscope++;} RC_BRA{globalscope--;}
+     | LC_BRA {globalscope++;} stmt RC_BRA{globalscope--;}
      ;
 
 funcdef: function ID L_PAR {funcscope++;} idlist R_PAR {funcscope--;} block{;}
@@ -152,14 +152,14 @@ idlist: ID{;}
       |
       ;
 
-ifstmt: IF L_PAR{funcscope ++;} expr R_PAR{funcscope--;} {scopeval++;} stmt ELSE stmt{;}
+ifstmt: IF L_PAR{funcscope ++;} expr R_PAR{funcscope--;} {globalscope++;} stmt ELSE stmt{;}
       | IF L_PAR {funcscope ++;}  expr R_PAR {funcscope --;} stmt{;}
       ;
 
-whilestmt: WHILE L_PAR {funcscope ++;} expr R_PAR {funcscope --;} stmt{scopeval++;}
+whilestmt: WHILE L_PAR {funcscope ++;} expr R_PAR {funcscope --;} stmt{globalscope++;}
          ;
 
-forstmt: FOR L_PAR {funcscope ++;} elist SEMICOLON expr SEMICOLON elist R_PAR {funcscope --;} stmt{scopeval++;}
+forstmt: FOR L_PAR {funcscope ++;} elist SEMICOLON expr SEMICOLON elist R_PAR {funcscope --;} stmt{globalscope++;}
        ;
 
 returnstmt: RETURN SEMICOLON{;}

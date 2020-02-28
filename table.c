@@ -1,17 +1,19 @@
 #include "table.h"
 
-int hashName(char* key){
+int hash_name(char* key){
     return atoi(key) % SIZE;
 }
 
-int hashScope(int scope){
+int hash_scope(int scope){
     return scope % SIZE;
 }
 
-void table_insert(char* name, char* type, char* desc, int scope, int line, int hide){
-    DataItem *new_item = create_item(name, type, desc, scope, line, hide);
-    int hash1 = hashName(name);
-    int hash2 = hashScope(scope);
+void table_insert(char* name, char* type, char* func_name,
+int scope, int line, bool hide){
+    DataItem *new_item = create_item(name, type, func_name, scope,
+    line, hide);
+    int hash1 = hash_name(name);
+    int hash2 = hash_scope(scope);
 
     if (hashArray[hash1][hash2] == NULL) {
         hashArray[hash1][hash2] = new_item;
@@ -22,21 +24,151 @@ void table_insert(char* name, char* type, char* desc, int scope, int line, int h
     }
 }
 
-DataItem* table_lookup(DataItem* n){
-
+void set_value(char* name, char* func_name, void* value) {
+    DataItem* temp = table_lookup(name, func_name);
+    if (temp) temp->value = value;
 }
 
-
-void table_hide(DataItem* key){
-    key->hide = 0;
+void print_table() {
+    int i, j;
+    for (i=0; i<SIZE; i++) {
+        for (j=0; j<SIZE; j++) {
+            DataItem* temp = hashArray[i][j];
+            while (temp) {
+                printf("Name: %s\nType: %s\nRange: %s\nScope: %d\n \
+                Line: %d\nHidden: %d\n", temp->name, temp->type, \
+                temp->func_name, temp->scope, temp->line, temp->hide);
+                temp = temp->next;
+            }
+        }
+    }
 }
 
-DataItem* create_item(char* name, char* type, char* desc, int scope, int line, int hide){
+void hide(char* name, char* func_name) {
+    DataItem* temp = table_lookup(name, func_name);
+    if (temp) temp->hide = true;
+}
+
+void unhide(char* name, char* func_name) {
+    DataItem* temp = table_lookup(name, func_name);
+    if (temp) temp->hide = false;
+}
+
+void hide_func(char* func_name) {
+    int i, j;
+    for (i=0; i<100; i++) {
+        for (j=0; j<100; j++) {
+            DataItem* temp = hashArray[i][j];
+            while (temp) {
+                if ( strcmp(temp->func_name, func_name) == 0) {
+                    temp->hide = true;
+                }
+                temp = temp->next;
+            }
+        }
+    }
+}
+
+void unhide_func(char* func_name) {
+    int i, j;
+    for (i=0; i<100; i++) {
+        for (j=0; j<100; j++) {
+            DataItem* temp = hashArray[i][j];
+            while (temp) {
+                if ( strcmp(temp->func_name, func_name) == 0) {
+                    temp->hide = false;
+                }
+                temp = temp->next;
+            }
+        }
+    }
+}
+
+void hide_all_no_func(char* func_name) {
+    int i, j;
+    for (i=0; i<100; i++) {
+        for (j=0; j<100; j++) {
+            DataItem* temp = hashArray[i][j];
+            while (temp) {
+                if ( strcmp(temp->func_name, func_name) != 0) {
+                    temp->hide = true;
+                }
+                temp = temp->next;
+            }
+        }
+    }
+}
+
+void unhide_all_no_func(char* func_name) {
+    int i, j;
+    for (i=0; i<100; i++) {
+        for (j=0; j<100; j++) {
+            DataItem* temp = hashArray[i][j];
+            while (temp) {
+                if ( strcmp(temp->func_name, func_name) != 0) {
+                    temp->hide = false;
+                }
+                temp = temp->next;
+            }
+        }
+    }
+}
+
+void hide_all_no_globals(){
+    int i, j;
+    for (i=0; i<100; i++) {
+        for (j=0; j<100; j++) {
+            DataItem* temp = hashArray[i][j];
+            while(temp) {
+                if ( strcmp(temp->func_name, "global") != 0) {
+                    temp->hide = true;
+                }
+                temp = temp->next;
+            }
+        }
+    }
+}
+
+void unhide_all_no_globals(){
+    int i, j;
+    for (i=0; i<100; i++) {
+        for (j=0; j<100; j++) {
+            DataItem* temp = hashArray[i][j];
+            while(temp) {
+                if ( strcmp(temp->func_name, "global") != 0) {
+                    temp->hide = false;
+                }
+                temp = temp->next;
+            }
+        }
+    }
+}
+
+DataItem* table_lookup(char* name, char* func_name){
+    int i, j;
+    for (i=0; i<100; i++) {
+        for (j=0; j<100; j++) {
+            DataItem* temp = hashArray[i][j];
+            while (temp) {
+                if ( strcmp(temp->name, name) == 0 &&
+                strcmp(temp->func_name, func_name) == 0) {
+                    return temp;
+                }
+                temp = temp->next;
+            }
+        }
+    }
+    return NULL;
+}
+
+DataItem* create_item(char* name, char* type, char* func_name,
+int scope, int line, bool hide){
     DataItem* new_node;
     new_node = (DataItem*)malloc(sizeof(DataItem));
     new_node->name = strdup(name);
     new_node->type = strdup(type);
-    new_node->desc = strdup(desc);
+    new_node->func_name = strdup(func_name);
+    new_node->value = NULL;
     new_node->scope = scope;
     new_node->line = line;
     new_node->hide = hide;
