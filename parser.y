@@ -3,29 +3,29 @@
   #include <unistd.h>
   #include <stdlib.h>
   #include <string.h>
+  #include "table.h"
 
+  #define  YY_DECL int alpha_yylex (void* yylval)
   int yyerror (char* yaccProovidedMessage);
-  int yylex (void);
   extern int yylineno;
+  int yylex();
   extern char* yytext;
   extern FILE* yyin;
 
+ 
   int globalscope = 0;
   int funcscope = 0;
 %}
+
 %start program
-%union {int intval, char* strval, float floatval;}
 
-%token <intval> INT
-%token <floatval> REAL
-%token <strval> ID STRING
-%token <strval> IF ELSE WHILE FOR FUNC RETURN BREAK CONTINUE AND OR LOCAL TRUE FALSE NIL UMINUS ASSIGN PLUS MINUS MUL DIV MOD EQ NOT_EQ D_PLUS D_MINUS LESS GREATER LESS_EQ GREATER_EQ LC_BRA RC_BRA L_BRA R_BRA L_PAR R_PAR SEMI COMMA COLON D_COLON DOT D_DOT
+%union {
+  int intval;
+  char* strval;
+  float floatval;
+}
 
-%type <strval> stmt
-%type <intval> expr
-%type <strval> term assignexpr primary lvalue member call callsuffix normcall elist objectdef indexed indexedelem block const idlist ifstmt whilestmt forstmt returnstmt
-
-%left ASSIGN
+%right ASSIGN
 %left OR
 %left AND
 %nonassoc EQ NOT_EQ
@@ -37,9 +37,26 @@
 %left L_BRA R_BRA
 %left L_PAR R_PAR
 
+
+%token <intval> INT
+%token <floatval> REAL
+%token <strval> ID 
+%token <strval> STRING
+%token <strval> IF ELSE WHILE FOR FUNC RETURN BREAK CONTINUE AND OR LOCAL TRUE FALSE NIL UMINUS 
+%token <strval> ASSIGN PLUS MINUS MUL DIV MOD EQ NOT_EQ D_PLUS D_MINUS LESS GREATER LESS_EQ GREATER_EQ 
+%token <strval> LC_BRA RC_BRA L_BRA R_BRA L_PAR R_PAR SEMI COMMA COLON D_COLON DOT D_DOT
+
+%type <strval> stmt
+%type <intval> expr  assignexpr
+%type <strval>  term  lvalue primary member call callsuffix normcall elist objectdef 
+%type <strval>indexed indexedelem comma_expr rec_stmt block const idlist ifstmt whilestmt forstmt returnstmt
+
+
+
+
 %%
-program: stmt program{;}
-       |
+program: stmt rec_stmt{;}
+       |{;}
        ;
 
 stmt: expr SEMI{;}
@@ -54,7 +71,7 @@ stmt: expr SEMI{;}
    | SEMI{;}
    ;
 
-expr: assignexpr{ $$ = $1;}
+expr: assignexpr{;}
     | expr PLUS expr{ $$ = $1 + $3;}
     | expr MINUS expr{ $$ = $1 - $3;}
     | expr MUL expr{ $$ = $1 * $3;}
@@ -68,7 +85,7 @@ expr: assignexpr{ $$ = $1;}
     | expr NOT_EQ expr{if($1 != $3){$$ = 1;}else{$$ = 0;};}
     | expr AND expr{if($1 && $3){$$ = 1;}else{$$ = 0;};}
     | expr OR expr{if($1 || $3){$$ = 1;}else{$$ = 0;};}
-    |term{;}
+    | term{;}
     ;
 
 term: L_PAR expr R_PAR{;}
@@ -81,7 +98,7 @@ term: L_PAR expr R_PAR{;}
     |primary{;}
     ;
 
-assignexpr: lvalue EQ expr{;}
+assignexpr: lvalue ASSIGN expr{;};
 
 primary: lvalue{;}
        | call{;}
@@ -97,9 +114,9 @@ lvalue: ID{;}
       ;
 
 member: lvalue DOT ID{;}
-      | lvalue L_PAR expr R_PAR{;}
+      | lvalue L_BRA expr R_BRA{;}
       | call DOT ID{;}
-      | call L_PAR expr R_PAR{;}
+      | call L_BRA expr R_BRA{;}
       ;
 
 call: call L_PAR elist R_PAR{;}
@@ -111,14 +128,17 @@ callsuffix: normcall{;}
           | methodcall{;}
           ;
 
-normcall: L_PAR elist R_PAR{;}
+normcall: L_PAR elist R_PAR{;};
 
-methodcall: D_DOT L_PAR elist R_PAR {;}
+methodcall: D_DOT ID L_PAR elist R_PAR {;};
 
-elist:  expr {;}
-      | elist COMMA expr{;}
+elist : expr comma_expr{;}
       | {;}
       ;
+
+comma_expr : COMMA expr comma_expr{;}
+            |{;}
+            ;
 
 objectdef: L_BRA elist R_BRA{;}
          | L_BRA indexed R_BRA{;}
@@ -130,8 +150,13 @@ indexed: indexedelem{;}
 
 indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{globalscope--;}
 
+rec_stmt : rec_stmt stmt{;}
+          | {;}
+          ;
+
+
 block:  LC_BRA{globalscope++;} RC_BRA{globalscope--;}
-     | LC_BRA {globalscope++;} stmt RC_BRA{globalscope--;}
+     | LC_BRA {globalscope++;} stmt  RC_BRA{globalscope--;}
      ;
 
 funcdef: FUNC L_PAR {funcscope++;} idlist R_PAR {funcscope--;} block{;}
@@ -155,10 +180,10 @@ ifstmt: IF L_PAR expr R_PAR stmt {;}
         | IF L_PAR expr R_PAR  stmt ELSE stmt{;}
         ;
 
-whilestmt: WHILE L_PAR {funcscope++;} expr R_PAR {funcscope--;} stmt{scopeval++;}
+whilestmt: WHILE L_PAR {funcscope++;} expr R_PAR {funcscope--;} stmt{globalscope++;}
          ;
 
-forstmt: FOR L_PAR {funcscope++;} elist SEMI expr SEMI elist R_PAR {funcscope--;} stmt{scopeval++;}
+forstmt: FOR L_PAR {funcscope++;} elist SEMI expr SEMI elist R_PAR {funcscope--;} stmt{globalscope++;}
        ;
 
 returnstmt: RETURN SEMI{;}

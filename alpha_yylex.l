@@ -1,9 +1,5 @@
 %{
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <string.h>
   #include "y.tab.h"
-  #define  YY_DECL int alpha_yylex (void* yylval)
   #define MAX 100
 
   char* buffer;
@@ -43,7 +39,7 @@ integer (0[xX][0-9A-Fa-f]+)|([0-9]+)
 real    [0-9]*\.[0-9](e|E)?[0-9]*
 space   [\r\t \v\n]
 linecomment "//".*
-illigal ([\$ \~ \? \# \&\& \|\| \!]*)|(\_[a-zA-Z]*)|([0-9][a-zA-Z]*)
+illegal ([\$ \~ \? \# \&\& \|\| \!]*)|(\_[a-zA-Z]*)|([0-9][a-zA-Z]*)
 
 %%
 
@@ -90,17 +86,19 @@ nil       {return NIL;}
 "."       {return DOT;}
 ".."      {return D_DOT;}
 
-
 {integer} {
   yylval.intval = atoi(yytext);
-  return INT;}
+  return INT;
+}
 {real}    {
   yylval.floatval = atof(yytext);
-  return REAL;}
+  return REAL;
+}
 {id}      {
   yylval.strval = strdup(yytext);
-  return ID;}
-{space}   {}
+  return ID;
+}
+{space}   {;}
 
 "\"" {
 
@@ -257,7 +255,7 @@ nil       {return NIL;}
   insert_list(yylineno, tokens++, "", "COMMENT LINE_COMMENT", "", atoi(yytext));
 }
 
-{illigal} {insert_list(yylineno,tokens++, yytext, "ILLIGAL CHAR","", atoi(yytext));
+{illegal} {insert_list(yylineno,tokens++, yytext, "ILLIGAL CHAR","", atoi(yytext));
 }
 <<EOF>> { return -1;}
 
