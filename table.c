@@ -153,4 +153,5 @@ void free_table(SymTable *freetable) {
             tmp_curr = tmp_next;
         }
     }
+    free(freetable);
 }
