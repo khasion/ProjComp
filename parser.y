@@ -12,7 +12,7 @@
   extern char* yytext;
   extern FILE* yyin;
 
- 
+
   int globalscope = 0;
   int funcscope = 0;
 %}
@@ -40,15 +40,15 @@
 
 %token <intval> INT
 %token <floatval> REAL
-%token <strval> ID 
+%token <strval> ID
 %token <strval> STRING
-%token <strval> IF ELSE WHILE FOR FUNC RETURN BREAK CONTINUE AND OR LOCAL TRUE FALSE NIL UMINUS 
-%token <strval> ASSIGN PLUS MINUS MUL DIV MOD EQ NOT_EQ D_PLUS D_MINUS LESS GREATER LESS_EQ GREATER_EQ 
+%token <strval> IF ELSE WHILE FOR FUNC RETURN BREAK CONTINUE AND OR LOCAL TRUE FALSE NIL UMINUS
+%token <strval> ASSIGN PLUS MINUS MUL DIV MOD EQ NOT_EQ D_PLUS D_MINUS LESS GREATER LESS_EQ GREATER_EQ
 %token <strval> LC_BRA RC_BRA L_BRA R_BRA L_PAR R_PAR SEMI COMMA COLON D_COLON DOT D_DOT
 
 %type <strval> stmt
 %type <intval> expr  assignexpr
-%type <strval>  term  lvalue primary member call callsuffix normcall elist objectdef 
+%type <strval>  term  lvalue primary member call callsuffix normcall elist objectdef
 %type <strval>indexed indexedelem comma_expr rec_stmt block const idlist ifstmt whilestmt forstmt returnstmt
 
 
@@ -59,135 +59,135 @@ program: stmt rec_stmt{;}
        |{;}
        ;
 
-stmt: expr SEMI{;}
-   | ifstmt{;}
-   | whilestmt{;}
-   | forstmt{;}
-   | returnstmt{;}
-   | BREAK SEMI{;}
-   | CONTINUE SEMI{;}
-   | block{;}
-   | funcdef{;}
-   | SEMI{;}
+stmt: expr SEMI{printf("expr;\n");}
+   | ifstmt{printf("ifstmt;\n");}
+   | whilestmt{printf("whilestmt\n");}
+   | forstmt{printf("forstmt\n");}
+   | returnstmt{printf("returnstmt\n");}
+   | BREAK SEMI{printf("break;\n");}
+   | CONTINUE SEMI{printf("continue;\n");}
+   | block{printf("block\n");}
+   | funcdef{printf("funcdef\n");}
+   | SEMI{printf(";\n");}
    ;
 
-expr: assignexpr{;}
-    | expr PLUS expr{ $$ = $1 + $3;}
-    | expr MINUS expr{ $$ = $1 - $3;}
-    | expr MUL expr{ $$ = $1 * $3;}
-    | expr DIV expr{$$ = $1 / $3;}
-    | expr MOD expr{ $$ = $1 % $3;}
-    | expr GREATER expr{if($1 > $3){$$ = 1;}else{$$ = 0;};}
-    | expr GREATER_EQ expr{if($1 >= $3){$$ = 1;}else{$$ = 0;};}
-    | expr LESS expr{if($1 < $3){$$ = 1;}else{$$ = 0;};}
-    | expr LESS_EQ expr{if($1 <= $3){$$ = 1;}else{$$ = 0;};}
-    | expr EQ expr{if($1 == $3){$$ = 1;}else{$$ = 0;};}
-    | expr NOT_EQ expr{if($1 != $3){$$ = 1;}else{$$ = 0;};}
-    | expr AND expr{if($1 && $3){$$ = 1;}else{$$ = 0;};}
-    | expr OR expr{if($1 || $3){$$ = 1;}else{$$ = 0;};}
-    | term{;}
+expr: assignexpr{printf("assignexpr\n");}
+    | expr PLUS expr{printf("expr%d + expr%d\n",$1,$3); $$ = $1 + $3;}
+    | expr MINUS expr{printf("expr - expr\n"); $$ = $1 - $3;}
+    | expr MUL expr{printf("expr * expr\n"); $$ = $1 * $3;}
+    | expr DIV expr{printf("expr \\ expr\n"); $$ = $1 / $3;}
+    | expr MOD expr{printf("expr mod expr\n"); $$ = $1 % $3;}
+    | expr GREATER expr{printf("expr > expr\n"); if($1 > $3){$$ = 1;}else{$$ = 0;};}
+    | expr GREATER_EQ expr{printf("expr >= expr\n"); if($1 >= $3){$$ = 1;}else{$$ = 0;};}
+    | expr LESS expr{printf("expr < expr\n"); if($1 < $3){$$ = 1;}else{$$ = 0;};}
+    | expr LESS_EQ expr{printf("expr <= expr\n"); if($1 <= $3){$$ = 1;}else{$$ = 0;};}
+    | expr EQ expr{printf("expr == expr\n"); if($1 == $3){$$ = 1;}else{$$ = 0;};}
+    | expr NOT_EQ expr{printf("expr != expr\n"); if($1 != $3){$$ = 1;}else{$$ = 0;};}
+    | expr AND expr{printf("expr and expr\n"); if($1 && $3){$$ = 1;}else{$$ = 0;};}
+    | expr OR expr{printf("expr or expr\n"); if($1 || $3){$$ = 1;}else{$$ = 0;};}
+    | term{printf("term\n");}
     ;
 
-term: L_PAR expr R_PAR{;}
-    | UMINUS expr %prec UMINUS{;}
-    | NOT expr{;}
-    | D_PLUS lvalue{;}
-    | lvalue D_PLUS{;}
-    | D_MINUS lvalue{;}
-    | lvalue D_MINUS{;}
-    |primary{;}
+term: L_PAR expr R_PAR{printf("L_PAR expr R_PAR\n");}
+    | UMINUS expr %prec UMINUS{printf("UMINUS expr prec UMINUS\n");}
+    | NOT expr{printf("not expr\n");}
+    | D_PLUS lvalue{printf("D_PLUS lvalue\n");}
+    | lvalue D_PLUS{printf("lvalue D_PLUS\n");}
+    | D_MINUS lvalue{printf("D_MINUS lvalue\n");}
+    | lvalue D_MINUS{printf("lvalue D_MINUS\n");}
+    |primary{printf("primary\n");}
     ;
 
-assignexpr: lvalue ASSIGN expr{;};
+assignexpr: lvalue ASSIGN expr{printf("lvalue assign expr\n");};
 
-primary: lvalue{;}
-       | call{;}
-       | objectdef{;}
-       | L_PAR funcdef R_PAR{;}
-       | const{;}
+primary: lvalue{printf("lvalue\n");}
+       | call{printf("call\n");}
+       | objectdef{printf("objectdef\n");}
+       | L_PAR funcdef R_PAR{printf("L_PAR funcdef R_PAR\n");}
+       | const{printf("const\n");}
        ;
 
-lvalue: ID{;}
-      | LOCAL ID{;}
-      | D_COLON ID{;}
-      | member{;}
+lvalue: ID{printf("id\n");}
+      | LOCAL ID{printf("local id\n");}
+      | D_COLON ID{printf("D_COLON id\n");}
+      | member{printf("member\n");}
       ;
 
-member: lvalue DOT ID{;}
-      | lvalue L_BRA expr R_BRA{;}
-      | call DOT ID{;}
-      | call L_BRA expr R_BRA{;}
+member: lvalue DOT ID{printf("lvalue dot id\n");}
+      | lvalue L_BRA expr R_BRA{printf("lvalue L_BRA expr R_BRA\n");}
+      | call DOT ID{printf("call dot id\n");}
+      | call L_BRA expr R_BRA{printf("call L_BRA expr R_BRA\n");}
       ;
 
-call: call L_PAR elist R_PAR{;}
-    | lvalue callsuffix{;}
-    | L_PAR funcdef R_PAR L_PAR elist R_PAR{;}
+call: call L_PAR elist R_PAR{printf("call L_PAR elist R_PAR\n");}
+    | lvalue callsuffix{printf("lvalue callsuffix\n");}
+    | L_PAR funcdef R_PAR L_PAR elist R_PAR{printf("L_PAR funcdef R_PAR L_PAR elist R_PAR\n");}
     ;
 
-callsuffix: normcall{;}
-          | methodcall{;}
+callsuffix: normcall{printf("callsuffix\n");}
+          | methodcall{printf("methodcall\n");}
           ;
 
-normcall: L_PAR elist R_PAR{;};
+normcall: L_PAR elist R_PAR{printf("L_PAR elist R_PAR\n");};
 
-methodcall: D_DOT ID L_PAR elist R_PAR {;};
+methodcall: D_DOT ID L_PAR elist R_PAR {printf("D_DOT id L_PAR elist R_PAR\n");};
 
-elist : expr comma_expr{;}
+elist : expr comma_expr{printf("expr comma_expr\n");}
       | {;}
       ;
 
-comma_expr : COMMA expr comma_expr{;}
+comma_expr : COMMA expr comma_expr{printf("comma expr comma_expr\n");}
             |{;}
             ;
 
-objectdef: L_BRA elist R_BRA{;}
-         | L_BRA indexed R_BRA{;}
+objectdef: L_BRA elist R_BRA{printf("l_bra elist R_BRA\n");}
+         | L_BRA indexed R_BRA{printf("L_BRA indexed R_BRA\n");}
          ;
 
-indexed: indexedelem{;}
-       | indexed COMMA indexedelem{;}
+indexed: indexedelem{printf("indexedelem\n");}
+       | indexed COMMA indexedelem{printf("indexed comma indexedelem\n");}
        ;
 
-indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{globalscope--;}
+indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{printf("indexedelem\n"); globalscope--;}
 
 rec_stmt : rec_stmt stmt{;}
           | {;}
           ;
 
 
-block:  LC_BRA{globalscope++;} RC_BRA{globalscope--;}
-     | LC_BRA {globalscope++;} stmt  RC_BRA{globalscope--;}
+block:  LC_BRA{globalscope++;} RC_BRA{printf("block1\n"); globalscope--;}
+     | LC_BRA {globalscope++;} stmt  RC_BRA{printf("block2\n"); globalscope--;}
      ;
 
-funcdef: FUNC L_PAR {funcscope++;} idlist R_PAR {funcscope--;} block{;}
-       | FUNC ID L_PAR{funcscope++;} idlist R_PAR {funcscope--;} block{;}
+funcdef: FUNC L_PAR {printf("funcdef1\n"); funcscope++;} idlist R_PAR {funcscope--;} block{;}
+       | FUNC ID L_PAR{printf("funcdef2\n"); funcscope++;} idlist R_PAR {funcscope--;} block{;}
        ;
 
-const: INT{;}
-     | REAL{;}
-     | STRING{;}
-     | NIL{;}
-     | TRUE{;}
-     | FALSE{;}
+const: INT{printf("int\n") ;}
+     | REAL{printf("real\n");}
+     | STRING{printf("string\n");}
+     | NIL{printf("nil\n");}
+     | TRUE{printf("true\n");}
+     | FALSE{printf("false\n");}
      ;
 
-idlist: ID{;}
-      | idlist COMMA ID{;}
+idlist: ID{printf("id\n");}
+      | idlist COMMA ID{printf("idlist comma id\n");}
       |{;}
       ;
 
-ifstmt: IF L_PAR expr R_PAR stmt {;}
-        | IF L_PAR expr R_PAR  stmt ELSE stmt{;}
+ifstmt: IF L_PAR expr R_PAR stmt {printf("ifstmt\n");}
+        | IF L_PAR expr R_PAR  stmt ELSE stmt{printf("ifstmt 2\n");}
         ;
 
-whilestmt: WHILE L_PAR {funcscope++;} expr R_PAR {funcscope--;} stmt{globalscope++;}
+whilestmt: WHILE L_PAR {funcscope++;} expr R_PAR {funcscope--;} stmt{printf("whilestmt\n"); globalscope++;}
          ;
 
-forstmt: FOR L_PAR {funcscope++;} elist SEMI expr SEMI elist R_PAR {funcscope--;} stmt{globalscope++;}
+forstmt: FOR L_PAR {funcscope++;} elist SEMI expr SEMI elist R_PAR {funcscope--;} stmt{printf("forstmt\n"); globalscope++;}
        ;
 
-returnstmt: RETURN SEMI{;}
-          | RETURN expr SEMI{;}
+returnstmt: RETURN SEMI{printf("return\n");}
+          | RETURN expr SEMI{printf("return2\n");}
           ;
 
 %%
