@@ -13,6 +13,7 @@ typedef struct dataitem{
     int line;
     bool hide;
     struct dataitem* next;
+    struct dataitem* next_scope;
 }DataItem;
 
 typedef struct symtable {

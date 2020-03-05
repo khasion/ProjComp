@@ -20,7 +20,7 @@ int get_next_size(int n) {
         case 4093: return 8191;
         case 8191: return 16381;
         case 16381: return 32771;
-        case 32771: return MAX_HASH; 
+        case 32771: return MAX_HASH;
     }
     return 0;
 }
@@ -41,7 +41,7 @@ void expand() {
 
     new_sym->size = 0;
     new_sym->buckets = new_size;
-    symtable = new_sym; 
+    symtable = new_sym;
 
     for (i=0; i<old_sym->size; i++) {
         DataItem* temp = old_sym->table[i];
@@ -55,15 +55,16 @@ void expand() {
 }
 
 void table_insert(char* name, char* type, void* value, int scope, int line){
+  printf("manos\n");
     DataItem *new_item = create_item(name, type, value, scope,
     line);
     int hash;
-
     if (symtable->size == symtable->buckets-1) {
         expand();
     }
 
     hash = hash_function(scope);
+    printf("manos3\n");
 
     if (symtable->table[hash] == NULL) {
         symtable->table[hash]= new_item;
@@ -131,6 +132,7 @@ DataItem* table_lookup(char* name){
 
 DataItem* create_item(char* name, char* type, void* value, int scope, int line){
     DataItem* new_data;
+    printf("manos2\n");
     new_data = (DataItem*)malloc(sizeof(DataItem));
     new_data->name = strdup(name);
     new_data->type = strdup(type);
@@ -139,7 +141,7 @@ DataItem* create_item(char* name, char* type, void* value, int scope, int line){
     new_data->line = line;
     new_data->hide = false;
     new_data->next = NULL;
-    return new_data;    
+    return new_data;
 }
 
 void free_table(SymTable *freetable) {

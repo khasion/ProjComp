@@ -107,7 +107,10 @@ primary: lvalue{printf("lvalue\n");}
        | const{printf("const\n");}
        ;
 
-lvalue: ID{printf("id\n");}
+lvalue: ID{
+          printf("id\n");
+          //table_lookup(yytext, globalscope);
+        }
       | LOCAL ID{printf("local id\n");}
       | D_COLON ID{printf("D_COLON id\n");}
       | member{printf("member\n");}
@@ -199,6 +202,9 @@ int yyerror(char* yaccProovidedMessage){
 }
 
 int main(int argc, char** argv){
+  symtable = create_new_symtable();
+  table_insert("sin", "LIBRARY_FUNCTION", 0, 5, 0);
+  //print_table();
   if(argc > 1){
     if(!(yyin = fopen(argv[1], "r"))){
       fprintf(stderr, "Cannot read  file: %s\n", argv[1]);
