@@ -13,7 +13,7 @@ typedef struct dataitem{
     int line;
     bool hide;
     struct dataitem* next;
-    struct dataitem* next_scope;
+    struct dataitem* scopenext;
 }DataItem;
 
 typedef struct symtable {
@@ -23,6 +23,7 @@ typedef struct symtable {
 }SymTable;
 
 SymTable* symtable;
+DataItem* scope_head;
 
 SymTable* create_new_symtable();
 
@@ -48,7 +49,7 @@ void hide(int scope);
 void unhide(int scope);
 
 /* Search for a DataItem in hash table. */
-DataItem* table_lookup(char* name);
+DataItem* table_lookup(char* name, char* type, void* value, int scope, int line);
 
 /* Create new DataItem. */
 DataItem* create_item(char* name, char* type, void* value, int scope, int line);

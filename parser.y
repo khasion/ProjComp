@@ -109,7 +109,7 @@ primary: lvalue{printf("lvalue\n");}
 
 lvalue: ID{
           printf("id\n");
-          //table_lookup(yytext, globalscope);
+          table_lookup(yytext, "", 0,globalscope, yylineno);
         }
       | LOCAL ID{printf("local id\n");}
       | D_COLON ID{printf("D_COLON id\n");}
@@ -203,7 +203,18 @@ int yyerror(char* yaccProovidedMessage){
 
 int main(int argc, char** argv){
   symtable = create_new_symtable();
-  table_insert("sin", "LIBRARY_FUNCTION", 0, 5, 0);
+  table_insert("print", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("input", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("objectmemberkyes", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("objectotslmembers", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("objectcopy", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("totalarguments", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("argument", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("typeof", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("strtonum", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("sqrt", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("cos", "LIBRARY_FUNCTION", 0, 0, 0);
+  table_insert("sin", "LIBRARY_FUNCTION", 0, 0, 0);
   //print_table();
   if(argc > 1){
     if(!(yyin = fopen(argv[1], "r"))){
@@ -214,5 +225,6 @@ int main(int argc, char** argv){
     yyin = stdin;
   }
   yyparse();
+  print_table();
   return 0;
 }
