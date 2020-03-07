@@ -10,6 +10,7 @@ typedef struct dataitem{
     char* type;
     void* value;
     int scope;
+    int funcscope;
     int line;
     bool hide;
     struct dataitem* next;
@@ -29,7 +30,7 @@ SymTable* create_new_symtable();
 
 int get_next_size(int n);
 
-int hash_function(int scope);
+int hash_function(char* name);
 
 void expand();
 
@@ -37,10 +38,9 @@ void expand();
 int hash_scope(int key);
 
 /* Insert a new DataItem in the hash table.*/
-void table_insert(char* name, char* type, void* value, int scope, int line);
+void table_insert(char* name, char* type, void* value, int scope, int funcscope, int line);
 
 void set_value();
-
 /* Print table contents.*/
 void print_table();
 
@@ -49,9 +49,9 @@ void hide(int scope);
 void unhide(int scope);
 
 /* Search for a DataItem in hash table. */
-DataItem* table_lookup(char* name, char* type, void* value, int scope, int line);
+DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line);
 
 /* Create new DataItem. */
-DataItem* create_item(char* name, char* type, void* value, int scope, int line);
+DataItem* create_item(char* name, char* type, void* value, int scope, int funcscope, int line);
 
 void free_table(SymTable *freetable);

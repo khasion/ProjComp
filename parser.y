@@ -15,6 +15,7 @@
 
   int globalscope = 0;
   int funcscope = 0;
+  int open_func =0;
 %}
 
 %start program
@@ -55,8 +56,8 @@
 
 
 %%
-program: stmt rec_stmt{;}
-       |{;}
+program: stmt program{;}
+       |
        ;
 
 stmt: expr SEMI{printf("expr;\n");}
@@ -109,10 +110,16 @@ primary: lvalue{printf("lvalue\n");}
 
 lvalue: ID{
           printf("id\n");
-          table_lookup(yytext, "", 0,globalscope, yylineno);
+          table_lookup(yytext, "", 0, globalscope, open_func, yylineno);
         }
-      | LOCAL ID{printf("local id\n");}
-      | D_COLON ID{printf("D_COLON id\n");}
+      | LOCAL ID{
+        printf("local id\n");
+        table_lookup(yytext, "", 1, globalscope, open_func, yylineno);
+      }
+      | D_COLON ID{
+        printf("D_COLON id\n");
+        table_lookup(yytext, "", 2, globalscope, open_func, yylineno);
+      }
       | member{printf("member\n");}
       ;
 
@@ -153,17 +160,17 @@ indexed: indexedelem{printf("indexedelem\n");}
 
 indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{printf("indexedelem\n"); globalscope--;}
 
+
 rec_stmt : rec_stmt stmt{;}
           | {;}
           ;
 
-
 block:  LC_BRA{globalscope++;} RC_BRA{printf("block1\n"); globalscope--;}
-     | LC_BRA {globalscope++;} stmt  RC_BRA{printf("block2\n"); globalscope--;}
+     | LC_BRA {globalscope++;} rec_stmt  RC_BRA{printf("block2\n"); globalscope--;}
      ;
 
-funcdef: FUNC L_PAR {printf("funcdef1\n"); funcscope++;} idlist R_PAR {funcscope--;} block{;}
-       | FUNC ID L_PAR{printf("funcdef2\n"); funcscope++;} idlist R_PAR {funcscope--;} block{;}
+funcdef: FUNC L_PAR {printf("funcdef1\n"); funcscope++;} idlist R_PAR {funcscope--; ; open_func++;} block{open_func--;}
+       | FUNC ID L_PAR{printf("funcdef2\n"); funcscope++;} idlist R_PAR {funcscope--; ; open_func++;} block{open_func--;}
        ;
 
 const: INT{printf("int\n") ;}
@@ -203,18 +210,18 @@ int yyerror(char* yaccProovidedMessage){
 
 int main(int argc, char** argv){
   symtable = create_new_symtable();
-  table_insert("print", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("input", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("objectmemberkyes", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("objectotslmembers", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("objectcopy", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("totalarguments", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("argument", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("typeof", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("strtonum", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("sqrt", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("cos", "LIBRARY_FUNCTION", 0, 0, 0);
-  table_insert("sin", "LIBRARY_FUNCTION", 0, 0, 0);
+  /* table_insert("print", "[[library function]]", 0, 0, 0);
+  table_insert("input", "[library function]", 0, 0, 0);
+  table_insert("objectmemberkyes", "[library function]", 0, 0, 0);
+  table_insert("objectotslmembers", "[library function]", 0, 0, 0);
+  table_insert("objectcopy", "[library function]", 0, 0, 0);
+  table_insert("totalarguments", "[library function]", 0, 0, 0);
+  table_insert("argument", "[library function]", 0, 0, 0);
+  table_insert("typeof", "[library function]", 0, 0, 0);
+  table_insert("strtonum", "[library function]", 0, 0, 0);
+  table_insert("sqrt", "[library function]", 0, 0, 0);
+  table_insert("cos", "[library function]", 0, 0, 0);
+  table_insert("sin", "[library function]", 0, 0, 0); */
   //print_table();
   if(argc > 1){
     if(!(yyin = fopen(argv[1], "r"))){

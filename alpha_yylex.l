@@ -311,7 +311,7 @@ void print_list(node *head){
   node *tmp = head;
   printf("----------------------------------------------------- Lexical Analysis ----------------------------------------------------- \n");
   while(tmp){
-    printf("%d: #%d \"%s\" %s %s\n",tmp->line_num, tmp->token_num, tmp->content, tmp->type, tmp->charvalue, tmp->numbervalue);
+    //printf("%d: #%d \"%s\" %s %s\n",tmp->line_num, tmp->token_num, tmp->content, tmp->type, tmp->char, tmp->numbervalue);
     tmp = tmp->next;
   }
   return;
