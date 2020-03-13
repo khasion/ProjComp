@@ -74,7 +74,7 @@ stmt: expr SEMI{;}
    | SEMI{printf(";\n");}
    ;
 
-expr: assignexpr{printf("assignexpr\n");}
+expr: assignexpr{;}
     | expr PLUS expr{printf("%d + %d\n",$1,$3); $$ = $1 + $3;}
     | expr MINUS expr{printf("%d - %d\n",$1,$3); $$ = $1 - $3;}
     | expr MUL expr{printf("%d * %d\n",$1,$3); $$ = $1 * $3;}
@@ -101,7 +101,7 @@ term: L_PAR expr R_PAR{printf("L_PAR expr R_PAR\n");}
     |primary{;}
     ;
 
-assignexpr: lvalue ASSIGN expr{printf("lvalue assign expr\n");};
+assignexpr: lvalue ASSIGN expr{;};
 
 primary: lvalue{}
        | call{printf("call\n");}
@@ -111,7 +111,6 @@ primary: lvalue{}
        ;
 
 lvalue: ID{
-
           table_lookup(yytext, "", 0, globalscope, open_func, yylineno);
         }
       | LOCAL ID{
@@ -163,17 +162,16 @@ indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{printf("indexedelem
  rec_stmt: rec_stmt stmt{;}
           | {;}
           ;
-          /* rec_stmt: rec_stmt stmt{;}
-                    | {;}
-                    ; */
+          
  block: /*LC_BRA{globalscope++;} RC_BRA{printf("block1\n"); globalscope--;}
-     |*/ LC_BRA {globalscope++;} rec_stmt RC_BRA{ globalscope--;}
+     | */
+     LC_BRA {globalscope++;} rec_stmt RC_BRA{ globalscope--;}
      ;
 
-funcdef: FUNC { funcscope++; table_lookup( yytext , "", 3 , funcscope, open_func, yylineno);}
+funcdef: FUNC { funcscope++; table_lookup( yytext , "", 3 , globalscope, open_func, yylineno);}
         L_PAR  idlist {funcscope--;} R_PAR { open_func++;} block{open_func--;}
-       | FUNC ID{table_lookup(yytext, "", 4 , globalscope, open_func, yylineno);}
-       L_PAR{ funcscope++;} idlist R_PAR {funcscope--;  open_func++;} block{open_func--;}
+       | FUNC ID{funcscope++; table_lookup(yytext, "", 4 , globalscope, open_func, yylineno);}
+       L_PAR idlist {funcscope--;}R_PAR {open_func++;} block{open_func--;}
        ;
 
 const: INT{;}
@@ -184,8 +182,9 @@ const: INT{;}
      | FALSE{printf("false\n");}
      ;
 
-idlist: ID{table_lookup( yytext , "", 5 , globalscope, open_func, yylineno);}
-      | idlist COMMA ID{table_lookup( yytext , "", 6 , globalscope, open_func, yylineno);}
+
+idlist: ID{table_lookup( yytext , "", 5 , funcscope, open_func, yylineno);}
+      | idlist COMMA ID{table_lookup( yytext , "", 6 , funcscope, open_func, yylineno);}
       |{;}
       ;
 
