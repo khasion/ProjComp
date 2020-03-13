@@ -1,59 +1,87 @@
 #include "table.h"
-
+int func_name =0;
 DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line){
-  int global_flag = 0, local_flag = 0, global_ref_flag = 0, var_flag = 0;
-  //int insert_flag = 0;
-  // for (i=0; i<symtable->buckets; i++) {
-  //   DataItem* temp = symtable->table[i];
-  //   while (temp->next) {
-  //     //printf("\t%s\n",temp->name);
-  //     if (strcmp(temp->name, name) == 0) {
-  //
-  //       return temp;
-  //     }
-  //     temp = temp->next;
-  //   }
-  // }
+
+  int insert_flag = 0;
+
+  int x;
+  int y;
   DataItem* tmp = symtable->table[hash_function(name)];
   DataItem* tmp2;
-  if(tmp){
+  if(tmp->name == NULL ){
     if(value == 0 && scope == 0){
       table_insert(name, "[global variable]", 0, scope, funcscope, line);
     } else if(value == 0 && scope > 0){
       table_insert(name, "[variable]", 0, scope, funcscope, line);
     } else if(value == 1){
       table_insert(name, "[local variable]", 0, scope, funcscope, line);
+    } else if (value == 2  ){
+      printf("ERROR: Can't find global variable %s\n",name);
+    } else if(value == 3){
+      char* natalia=malloc(30);
+      sprintf(natalia, "_f_%d", func_name);
+      table_insert(natalia, "[userfunc noname]", 0, scope, funcscope, line);
+      func_name= func_name + 1;
+    }  else if (value == 4){
+      table_insert(name, "[userfunc]", 0, scope, funcscope, line);
+    }else if (value == 5){
+      table_insert(name, "[formal argument]", 0, scope, funcscope, line);
+    }else if (value == 6){
+      table_insert(name, "[formal argument]", 0, scope, funcscope, line);
     }
-  } else{
-    while(tmp){
-      if(!strcmp(tmp->name, name) && tmp->scope == 0 && scope == 0){
-        global_flag = 1;
-      } else if(value ==  1 && !strcmp(tmp->name, name) && tmp->scope == scope){
-        local_flag = 1;
-      } else if(value == 2 && !strcmp(tmp->name, name) && tmp->scope == 0){
-        global_ref_flag = 1;
-      }
-      tmp = tmp->next;
-    }
+  }
+   else if (tmp->name != NULL) {
 
-    if(scope > 0){
-      tmp2 = symtable->table[hash_function(name)];
-      int tmp_scope = scope;
-      while(tmp_scope != -1){
-        while(tmp2){
-          if(!strcmp(tmp2->name, name) && tmp_scope == tmp2->scope  && funcscope == tmp2->funcscope){
-            var_flag = 1;
-          }
-          tmp2=tmp2->next;
-        }
+    x = strcmp(tmp->name, name);
+    while(tmp!=NULL){
+
+      if(x==0 && tmp->scope == 0 && scope == 0){
+        insert_flag = 1;
+      } else if(value ==  1 && x==0 && tmp->scope == scope){
+        insert_flag = 1;
+      } else if(value == 2 && x==0 && tmp->scope == 0){
+        insert_flag = 1;
+      } else if(scope > 0 && value == 0) {
         tmp2 = symtable->table[hash_function(name)];
-        tmp_scope--;
+        y = strcmp(tmp2->name, name);
+        int tmp_scope = scope;
+        while(tmp_scope != -1){
+          while(tmp2!=NULL){
+            if(y==0 && tmp_scope == tmp2->scope  && funcscope == tmp2->funcscope){
+              insert_flag = 1;
+            }
+            tmp2=tmp2->next;
+          }
+          tmp2 = symtable->table[hash_function(name)];
+          tmp_scope--;
       }
     }
-
-    if(global_flag == 0) table_insert(name, "[global variable]", 0, scope, funcscope, line);
-    if(local_flag == 0 && value == 1) table_insert(name, "[local variable]", 0, scope, funcscope, line);
-    if(global_ref_flag == 0 && value == 2) printf("ERROR: Can't find global variable %s\n",name);
+    if (value == 4 && x==0 && tmp->scope == scope){
+      insert_flag = 1;
+      printf("ERROR:Same name variable and function  %s\n",name);
+    }
+    if (value == 6 && x==0 && tmp->funcscope == funcscope){
+      insert_flag = 1;
+      printf("ERROR: Same name with variable at same scope %s\n",name);
+      break;
+    }
+    tmp = tmp->next;
+  }
+  if(insert_flag == 0){
+    if(value == 0 && scope == 0){
+      table_insert(name, "[global variable]", 0, scope, funcscope, line);
+    } else if(value == 0 && scope > 0){
+      table_insert(name, "[variable]", 0, scope, funcscope, line);
+    } else if(value == 1){
+      table_insert(name, "[local variable]", 0, scope, funcscope, line);
+    } else if (value == 4){
+      table_insert(name, "[userfunc]", 0, scope, funcscope, line);
+    }else if (value == 5){
+      table_insert(name, "[formal argument]", 0, scope, funcscope, line);
+    }else if (value == 6){
+      table_insert(name, "[formal argument]", 0, scope, funcscope, line);
+    }
+  }
   }
 
   return NULL;
@@ -161,21 +189,21 @@ void set_value(char* name, char* func_name, void* value) {
 }
 
 void print_table() {
-    int i ;
+  //  int i ;
     DataItem* tmp = scope_head;
-    for (i = 0 ; i < symtable->buckets; i++) {
-
-        DataItem* temp = symtable->table[i];
-        while (temp) {
-            if(temp->name != NULL){
-              printf("\"%s\" %s (line %d) (scope %d)\n", temp->name, temp->type,temp->line, temp->scope);
-
-            }
-            temp = temp->next;
-        }
-    }
+    // for (i = 0 ; i < symtable->buckets; i++) {
+    //     DataItem* temp = symtable->table[i];
+    //     while (temp) {
+    //         if(temp->name != NULL){
+    //           printf("\"%s\" %s (line %d) (scope %d)\n", temp->name, temp->type,temp->line, temp->scope);
+    //
+    //         }
+    //         temp = temp->next;
+    //     }
+    // }
     while(tmp != NULL){
-      printf("%d %s se scopelist\n",tmp->scope,tmp->name);
+      //printf("%d %s se scopelist\n",tmp->scope,tmp->name);
+      printf("\"%s\" %s (line %d) (scope %d)\n", tmp->name, tmp->type,tmp->line, tmp->scope);
       tmp = tmp->next;
     }
 }

@@ -50,43 +50,43 @@
 %type <strval> stmt
 %type <intval> expr  assignexpr
 %type <strval>  term  lvalue primary member call callsuffix normcall elist objectdef
-%type <strval>indexed indexedelem comma_expr rec_stmt block const idlist ifstmt whilestmt forstmt returnstmt
+%type <strval>indexed indexedelem  rec_stmt block const idlist ifstmt whilestmt forstmt returnstmt
 
 
 
 
 %%
 program: stmt program{;}
-       |
+       |{;}
        ;
 
-stmt: expr SEMI{printf("expr;\n");}
+stmt: expr SEMI{;}
    | ifstmt{printf("ifstmt;\n");}
    | whilestmt{printf("whilestmt\n");}
    | forstmt{printf("forstmt\n");}
    | returnstmt{printf("returnstmt\n");}
    | BREAK SEMI{printf("break;\n");}
    | CONTINUE SEMI{printf("continue;\n");}
-   | block{printf("block\n");}
-   | funcdef{printf("funcdef\n");}
+   | block{;}
+   | funcdef{;}
    | SEMI{printf(";\n");}
    ;
 
 expr: assignexpr{printf("assignexpr\n");}
-    | expr PLUS expr{printf("expr%d + expr%d\n",$1,$3); $$ = $1 + $3;}
-    | expr MINUS expr{printf("expr - expr\n"); $$ = $1 - $3;}
-    | expr MUL expr{printf("expr * expr\n"); $$ = $1 * $3;}
-    | expr DIV expr{printf("expr \\ expr\n"); $$ = $1 / $3;}
-    | expr MOD expr{printf("expr mod expr\n"); $$ = $1 % $3;}
-    | expr GREATER expr{printf("expr > expr\n"); if($1 > $3){$$ = 1;}else{$$ = 0;};}
-    | expr GREATER_EQ expr{printf("expr >= expr\n"); if($1 >= $3){$$ = 1;}else{$$ = 0;};}
-    | expr LESS expr{printf("expr < expr\n"); if($1 < $3){$$ = 1;}else{$$ = 0;};}
-    | expr LESS_EQ expr{printf("expr <= expr\n"); if($1 <= $3){$$ = 1;}else{$$ = 0;};}
-    | expr EQ expr{printf("expr == expr\n"); if($1 == $3){$$ = 1;}else{$$ = 0;};}
-    | expr NOT_EQ expr{printf("expr != expr\n"); if($1 != $3){$$ = 1;}else{$$ = 0;};}
-    | expr AND expr{printf("expr and expr\n"); if($1 && $3){$$ = 1;}else{$$ = 0;};}
-    | expr OR expr{printf("expr or expr\n"); if($1 || $3){$$ = 1;}else{$$ = 0;};}
-    | term{printf("term\n");}
+    | expr PLUS expr{printf("%d + %d\n",$1,$3); $$ = $1 + $3;}
+    | expr MINUS expr{printf("%d - %d\n",$1,$3); $$ = $1 - $3;}
+    | expr MUL expr{printf("%d * %d\n",$1,$3); $$ = $1 * $3;}
+    | expr DIV expr{printf("%d / %d\n",$1,$3); $$ = $1 / $3;}
+    | expr MOD expr{printf("%d MOD %d\n",$1,$3); $$ = $1 % $3;}
+    | expr GREATER expr{printf("%d > %d\n",$1,$3); if($1 > $3){$$ = 1;}else{$$ = 0;};}
+    | expr GREATER_EQ expr{printf("%d >= %d\n",$1,$3); if($1 >= $3){$$ = 1;}else{$$ = 0;};}
+    | expr LESS expr{printf("%d < %d\n",$1,$3); if($1 < $3){$$ = 1;}else{$$ = 0;};}
+    | expr LESS_EQ expr{printf("%d <= %d\n",$1,$3); if($1 <= $3){$$ = 1;}else{$$ = 0;};}
+    | expr EQ expr{printf("%d == %d\n",$1,$3); if($1 == $3){$$ = 1;}else{$$ = 0;};}
+    | expr NOT_EQ expr{printf("%d != %d\n",$1,$3); if($1 != $3){$$ = 1;}else{$$ = 0;};}
+    | expr AND expr{printf("%d AND %d\n",$1,$3); if($1 && $3){$$ = 1;}else{$$ = 0;};}
+    | expr OR expr{printf("%d OR %d\n",$1,$3); if($1 || $3){$$ = 1;}else{$$ = 0;};}
+    | term{;}
     ;
 
 term: L_PAR expr R_PAR{printf("L_PAR expr R_PAR\n");}
@@ -96,29 +96,29 @@ term: L_PAR expr R_PAR{printf("L_PAR expr R_PAR\n");}
     | lvalue D_PLUS{printf("lvalue D_PLUS\n");}
     | D_MINUS lvalue{printf("D_MINUS lvalue\n");}
     | lvalue D_MINUS{printf("lvalue D_MINUS\n");}
-    |primary{printf("primary\n");}
+    |primary{;}
     ;
 
 assignexpr: lvalue ASSIGN expr{printf("lvalue assign expr\n");};
 
-primary: lvalue{printf("lvalue\n");}
+primary: lvalue{}
        | call{printf("call\n");}
        | objectdef{printf("objectdef\n");}
        | L_PAR funcdef R_PAR{printf("L_PAR funcdef R_PAR\n");}
-       | const{printf("const\n");}
+       | const{;}
        ;
 
 lvalue: ID{
-          printf("id\n");
+
           table_lookup(yytext, "", 0, globalscope, open_func, yylineno);
         }
       | LOCAL ID{
-        printf("local id\n");
-        table_lookup(yytext, "", 1, globalscope, open_func, yylineno);
+
+        table_lookup(yytext, "", 1 , globalscope, open_func, yylineno);
       }
       | D_COLON ID{
-        printf("D_COLON id\n");
-        table_lookup(yytext, "", 2, globalscope, open_func, yylineno);
+
+        table_lookup(yytext, "", 2 , globalscope, open_func, yylineno);
       }
       | member{printf("member\n");}
       ;
@@ -142,13 +142,9 @@ normcall: L_PAR elist R_PAR{printf("L_PAR elist R_PAR\n");};
 
 methodcall: D_DOT ID L_PAR elist R_PAR {printf("D_DOT id L_PAR elist R_PAR\n");};
 
-elist : expr comma_expr{printf("expr comma_expr\n");}
-      | {;}
+elist : expr {;}
+      | elist COMMA expr {;}
       ;
-
-comma_expr : COMMA expr comma_expr{printf("comma expr comma_expr\n");}
-            |{;}
-            ;
 
 objectdef: L_BRA elist R_BRA{printf("l_bra elist R_BRA\n");}
          | L_BRA indexed R_BRA{printf("L_BRA indexed R_BRA\n");}
@@ -159,21 +155,26 @@ indexed: indexedelem{printf("indexedelem\n");}
        ;
 
 indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{printf("indexedelem\n"); globalscope--;}
+            ;
 
 
-rec_stmt : rec_stmt stmt{;}
+ rec_stmt: rec_stmt stmt{;}
           | {;}
           ;
-
-block:  LC_BRA{globalscope++;} RC_BRA{printf("block1\n"); globalscope--;}
-     | LC_BRA {globalscope++;} rec_stmt  RC_BRA{printf("block2\n"); globalscope--;}
+          /* rec_stmt: rec_stmt stmt{;}
+                    | {;}
+                    ; */
+ block: /*LC_BRA{globalscope++;} RC_BRA{printf("block1\n"); globalscope--;}
+     |*/ LC_BRA {globalscope++;} rec_stmt RC_BRA{ globalscope--;}
      ;
 
-funcdef: FUNC L_PAR {printf("funcdef1\n"); funcscope++;} idlist R_PAR {funcscope--; ; open_func++;} block{open_func--;}
-       | FUNC ID L_PAR{printf("funcdef2\n"); funcscope++;} idlist R_PAR {funcscope--; ; open_func++;} block{open_func--;}
+funcdef: FUNC { funcscope++; table_lookup( yytext , "", 3 , funcscope, open_func, yylineno);}
+        L_PAR  idlist {funcscope--;} R_PAR { open_func++;} block{open_func--;}
+       | FUNC ID{table_lookup(yytext, "", 4 , globalscope, open_func, yylineno);}
+       L_PAR{ funcscope++;} idlist R_PAR {funcscope--;  open_func++;} block{open_func--;}
        ;
 
-const: INT{printf("int\n") ;}
+const: INT{;}
      | REAL{printf("real\n");}
      | STRING{printf("string\n");}
      | NIL{printf("nil\n");}
@@ -181,8 +182,8 @@ const: INT{printf("int\n") ;}
      | FALSE{printf("false\n");}
      ;
 
-idlist: ID{printf("id\n");}
-      | idlist COMMA ID{printf("idlist comma id\n");}
+idlist: ID{table_lookup( yytext , "", 5 , globalscope, open_func, yylineno);}
+      | idlist COMMA ID{table_lookup( yytext , "", 6 , globalscope, open_func, yylineno);}
       |{;}
       ;
 
@@ -221,7 +222,7 @@ int main(int argc, char** argv){
   table_insert("strtonum", "[library function]", 0, 0, 0);
   table_insert("sqrt", "[library function]", 0, 0, 0);
   table_insert("cos", "[library function]", 0, 0, 0);
-  table_insert("sin", "[library function]", 0, 0, 0); */
+  table_insert("sin", "[library function]", 0, 0, 0);*/
   //print_table();
   if(argc > 1){
     if(!(yyin = fopen(argv[1], "r"))){
