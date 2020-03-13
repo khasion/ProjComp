@@ -35,6 +35,8 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
     x = strcmp(tmp->name, name);
     while(tmp!=NULL){
 
+
+
       if(x==0 && tmp->scope == 0 && scope == 0){
         insert_flag = 1;
       } else if(value ==  1 && x==0 && tmp->scope == scope){

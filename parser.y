@@ -4,7 +4,9 @@
   #include <stdlib.h>
   #include <string.h>
   #include "table.h"
-
+	
+	
+	
   #define  YY_DECL int alpha_yylex (void* yylval)
   int yyerror (char* yaccProovidedMessage);
   extern int yylineno;
