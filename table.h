@@ -8,7 +8,7 @@
 typedef struct dataitem{
     char* name;
     char* type;
-    void* value;
+    int value;
     int scope;
     int funcscope;
     int line;
@@ -38,9 +38,8 @@ void expand();
 int hash_scope(int key);
 
 /* Insert a new DataItem in the hash table.*/
-void table_insert(char* name, char* type, void* value, int scope, int funcscope, int line);
+void table_insert(char* name, char* type, int value, int scope, int funcscope, int line);
 
-void set_value();
 /* Print table contents.*/
 void print_table();
 
@@ -52,6 +51,6 @@ void unhide(int scope);
 DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line);
 
 /* Create new DataItem. */
-DataItem* create_item(char* name, char* type, void* value, int scope, int funcscope, int line);
+DataItem* create_item(char* name, char* type, int value, int scope, int funcscope, int line);
 
 void free_table(SymTable *freetable);

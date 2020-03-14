@@ -1,55 +1,54 @@
 #include "table.h"
-int func_name =0;
+
+int func_id = 0;
+
 DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line){
 
   int insert_flag = 0;
 
-  int x;
-  int y;
+  int cmp;
+  int cmp2;
   DataItem* tmp = symtable->table[hash_function(name)];
   DataItem* tmp2;
   if(tmp->name == NULL ){
     if(value == 0 && scope == 0){
-      table_insert(name, "[global variable]", 0, scope, funcscope, line);
+      table_insert(name, "[global variable]", value, scope, funcscope, line);
     } else if(value == 0  && scope > 0){
-      printf("manos %s\n",name);
-      table_insert(name, "[variable]", 0, scope, funcscope, line);
+      table_insert(name, "[variable]", value, scope, funcscope, line);
     } else if(value == 1){
-      table_insert(name, "[local variable]", 0, scope, funcscope, line);
+      table_insert(name, "[local variable]", value, scope, funcscope, line);
     } else if (value == 2  ){
       printf("ERROR: Can't find global variable %s\n",name);
     } else if(value == 3){
-      char* natalia=malloc(30);
-      sprintf(natalia, "_f_%d", func_name);
-      table_insert(natalia, "[userfunc noname]", 0, scope, funcscope, line);
-      func_name= func_name + 1;
+      char* func_name=malloc(30);
+      sprintf(func_name, "_f_%d", func_id);
+      table_insert(func_name, "[userfunc noname]", value, scope, funcscope, line);
+      func_id= func_id + 1;
     }  else if (value == 4){
-      table_insert(name, "[userfunc]", 0, scope, funcscope, line);
+      table_insert(name, "[userfunc]", value, scope, funcscope, line);
     }else if (value == 5){
-      table_insert(name, "[formal argument]", 0, scope, funcscope, line);
+      table_insert(name, "[formal argument]", value, scope, funcscope, line);
     }else if (value == 6){
-      table_insert(name, "[formal argument]", 0, scope, funcscope, line);
+      table_insert(name, "[formal argument]", value, scope, funcscope, line);
     }
   }
    else if (tmp->name != NULL) {
 
-    x = strcmp(tmp->name, name);
-    //printf("%s %s \n" , tmp->name , name);
+    cmp = strcmp(tmp->name, name);
     while(tmp!=NULL){
-      if(x==0 && tmp->scope == 0 && scope == 0){
+      if(cmp==0 && tmp->scope == 0 && scope == 0){
         insert_flag = 1;
-      } else if(value ==  1 && x==0 && tmp->scope == scope){
+      } else if(value ==  1 && cmp==0 && tmp->scope == scope){
         insert_flag = 1;
-      } else if(value == 2 && x==0 && tmp->scope == 0){
+      } else if(value == 2 && cmp==0 && tmp->scope == 0){
         insert_flag = 1;
       } else if(scope > 0 && value == 0 ) {
         tmp2 = symtable->table[hash_function(name)];
-        y = strcmp(tmp2->name, name);
-        printf("ALEXI %s %s %d %d\n" , tmp2->name, name, y, scope);
+        cmp2 = strcmp(tmp2->name, name);
         int tmp_scope = scope;
         while(tmp_scope != -1){
           while(tmp2!=NULL){
-            if(y==0 && tmp_scope == tmp2->scope  && funcscope == tmp2->funcscope){
+            if(cmp2==0 && tmp_scope == tmp2->scope  && funcscope == tmp2->funcscope){
               insert_flag = 1;
               break;
             }
@@ -59,11 +58,11 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
           tmp_scope--;
       }
     }
-    if (value == 4 && x==0 && tmp->scope == scope){
+    if (value == 4 && cmp==0 && tmp->scope == scope){
       insert_flag = 1;
       printf("ERROR:Same name variable and function  %s\n",name);
     }
-    if (value == 6 && x==0 && tmp->scope == scope){
+    if (value == 6 && cmp==0 && tmp->scope == scope){
       insert_flag = 1;
       printf("ERROR: Same name with variable at same scope %s\n",name);
       break;
@@ -74,7 +73,6 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
     if(value == 0 && scope == 0){
       table_insert(name, "[global variable]", 0, scope, funcscope, line);
     } else if(value == 0 && scope > 0){
-      //printf("%s %d \n" , name , scope);
       table_insert(name, "[variable]", 0, scope, funcscope, line);
     } else if(value == 1){
       table_insert(name, "[local variable]", 0, scope, funcscope, line);
@@ -117,7 +115,6 @@ int get_next_size(int n) {
 }
 
 int hash_function(char* name){
-  //printf("%d\n",scope % symtable->buckets );
   size_t ui;
   unsigned int uiHash = 0U;
   for (ui = 0U; name[ui] != '\0'; ui++){
@@ -144,15 +141,14 @@ void expand() {
     for (i=0; i<old_sym->size; i++) {
         DataItem* temp = old_sym->table[i];
         while (temp) {
-            // table_insert(temp->name, temp->type, temp->value, temp->scope,
-            // temp->line);
+            // table_insert(temp->name, temp->type, temp->value, temp->scope, temp->line);
             temp = temp->next;
         }
     }
     free_table(old_sym);
 }
 
-void table_insert(char* name, char* type, void* value, int scope, int funcscope, int line){
+void table_insert(char* name, char* type, int value, int scope, int funcscope, int line){
     DataItem *new_item = create_item(name, type, value, scope, funcscope, line);
     DataItem* tmp;
     int hash;
@@ -167,48 +163,39 @@ void table_insert(char* name, char* type, void* value, int scope, int funcscope,
         symtable->table[hash]->next = NULL;
     }
     else {
-
         new_item->next = symtable->table[hash];
         symtable->table[hash]= new_item;
     }
 
     if(scope_head == NULL || scope_head->scope >= new_item->scope){
-      new_item->next = scope_head;
+      new_item->scopenext = scope_head;
       scope_head = new_item;
     } else{
       tmp = scope_head;
-      while(tmp->next != NULL && tmp->next->scope <= new_item->scope){
-        tmp = tmp->next;
+      while(tmp->scopenext != NULL && tmp->next->scope <= new_item->scope){
+        tmp = tmp->scopenext;
       }
-      new_item->next = tmp->next;
-      tmp->next = new_item;
+      new_item->scopenext = tmp->scopenext;
+      tmp->scopenext = new_item;
     }
-
-
-}
-
-void set_value(char* name, char* func_name, void* value) {
-    // DataItem* temp = table_lookup(name);
-    // if (temp) temp->value = value;
 }
 
 void print_table() {
-   //int i ;
+   int i ;
     DataItem* tmp = scope_head;
-    // for (i = 0 ; i < symtable->buckets; i++) {
-    //     DataItem* temp = symtable->table[i];
-    //     while (temp) {
-    //         if(temp->name != NULL){
-    //           printf("\"%s\" %s (line %d) (scope %d)\n", temp->name, temp->type,temp->line, temp->scope);
-    
-    //         }
-    //         temp = temp->next;
-    //     }
-    // }
+    for (i = 0 ; i < symtable->buckets; i++) {
+        DataItem* temp = symtable->table[i];
+        while (temp) {
+            if(temp->name != NULL){
+              printf("\"%s\" %s (line %d) (scope %d)\n", temp->name, temp->type,temp->line, temp->scope);
+            }
+            temp = temp->next;
+        }
+    }
+    printf("---------------------\n");
     while(tmp != NULL){
-      //printf("%d %s se scopelist\n",tmp->scope,tmp->name);
       printf("\"%s\" %s (line %d) (scope %d)\n", tmp->name, tmp->type,tmp->line, tmp->scope);
-      tmp = tmp->next;
+      tmp = tmp->scopenext;
     }
 }
 
@@ -234,7 +221,7 @@ void unhide(int scope) {
     }
 }
 
-DataItem* create_item(char* name, char* type, void* value, int scope, int funcscope, int line){
+DataItem* create_item(char* name, char* type, int value, int scope, int funcscope, int line){
     DataItem* new_data;
     new_data = (DataItem*)malloc(sizeof(DataItem));
     new_data->name = strdup(name);
