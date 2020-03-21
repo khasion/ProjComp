@@ -10,7 +10,7 @@
     MINUS,MUL,DIV,MOD,EQ,NOT_EQ,D_PLUS,D_MINUS,LESS,GREATER,LESS_EQ,GREATER_EQ,LC_BRA,RC_BRA,
     L_BRA,R_BRA,L_PAR,R_PAR,SEMI,COMMA,COLON,D_COLON,DOT,D_DOT,INT,REAL,ID}types; */
 
-  char Enum_array[43][10]= {"IF","ELSE","WHILE","FOR","FUNC","RETURN","BREAK","CONTINUE","AND","OR","LOCAL","TRUE","FALSE","NIL","ASSIGN","PLUS",
+  char Enum_array[44][10]= {"IF","ELSE","WHILE","FOR","FUNC","RETURN","BREAK","CONTINUE","AND","OR","NOT","LOCAL","TRUE","FALSE","NIL","ASSIGN","PLUS",
     "MINUS","MUL","DIV","MOD","EQ","NOT_EQ","D_PLUS","D_MINUS","LESS","GREATER","LESS_EQ","GREATER_EQ","LC_BRA","RC_BRA",
     "L_BRA","R_BRA","L_PAR","R_PAR","SEMI","COMMA","COLON","D_COLON","DOT","D_DOT","INT","REAL","ID"};
 
@@ -53,6 +53,7 @@ break     {return BREAK;}
 continue  {return CONTINUE;}
 and       {return AND;}
 or        {return OR;}
+not       {return NOT;}
 local     {return LOCAL;}
 true      {return TRUE;}
 false     {return FALSE;}
@@ -216,6 +217,8 @@ nil       {return NIL;}
       printf("ERROR: String Open. \n");
   	   return -1;
     }
+    yylval.strval = strdup(yytext);
+    return STRING;
   }
 
 
@@ -264,7 +267,7 @@ nil       {return NIL;}
  char* search_name(char* name){
     char* name1 = name;
     if ( strcmp(name, "IF") == 0 || strcmp(name, "ELSE") == 0 || strcmp(name, "WHILE") == 0 || strcmp(name , "FOR") ==0 || strcmp(name,"FUNC")==0 || strcmp(name , "RETURN") == 0 ||
-      strcmp(name, "BREAK") == 0 || strcmp(name, "CONTINUE") == 0|| strcmp(name , "AND") == 0 || strcmp(name , "OR") == 0 || strcmp(name , "LOCAL") == 0|| strcmp(name , "TRUE") == 0 ||
+      strcmp(name, "BREAK") == 0 || strcmp(name, "CONTINUE") == 0|| strcmp(name , "AND") == 0 || strcmp(name , "NOT") == 0|| strcmp(name , "OR") == 0 || strcmp(name , "LOCAL") == 0|| strcmp(name , "TRUE") == 0 ||
       strcmp(name , "FALSE") == 0 || strcmp(name , "NIL") == 0 )
       {
           name1 = "KEYWORD";

@@ -5,6 +5,8 @@
 
 #define MAX_HASH 65521
 
+char* libs[12];
+
 typedef struct dataitem{
     char* name;
     char* type;
@@ -38,7 +40,7 @@ void expand();
 int hash_scope(int key);
 
 /* Insert a new DataItem in the hash table.*/
-void table_insert(char* name, char* type, int value, int scope, int funcscope, int line);
+DataItem* table_insert(char* name, char* type, int value, int scope, int funcscope, int line);
 
 /* Print table contents.*/
 void print_table();
