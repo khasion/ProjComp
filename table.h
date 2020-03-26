@@ -7,14 +7,14 @@
 
 char* libs[12];
 
-typedef struct dataitem{
+typedef struct dataitem {
     char* name;
     char* type;
     int value;
     int scope;
     int funcscope;
     int line;
-    bool hide;
+    bool hide; /* true if hidden, else false */
     struct dataitem* next;
     struct dataitem* scopenext;
 }DataItem;
@@ -47,7 +47,6 @@ void print_table();
 
 /* Unhide all DataItems with smaller scope and hide all DataItems with larger scope. */
 void hide(int scope);
-void unhide(int scope);
 
 /* Search for a DataItem in hash table. */
 DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line);

@@ -12,7 +12,6 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
   DataItem* tmp2;
 
   if(tmp->value == -1){
-    //printf("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n" );
     if(value == 0 && scope == 0){
       ret=table_insert(name, "[global variable]", 0, scope, funcscope, line);
     }else if (value == 1 && scope == 0){
@@ -99,7 +98,7 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
          break;
       }
       if((value==0 || value==2 || value == 1)  && cmp==0  && (tmp->value != 4 || tmp->value != 5 || tmp->value != 6) &&  tmp->funcscope < funcscope && tmp->scope != 0){
-        printf("ERROR:Cannot access '%s' inside function at Line: '%d'  \n",name , line);
+        printf("ERROR:Cannot access '%s' inside function  at Line: '%d'  \n",name  , line);
         insert_flag = 1;
         ret = tmp;
         break;
@@ -125,9 +124,6 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
 //printf("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE2\n" );
   return ret;
 }
-
-
-
 
 SymTable *create_new_symtable() {
     int i;
@@ -243,34 +239,18 @@ void print_table() {
     // }
     while(tmp != NULL){
       if(tmp->scope > i) printf("--------------------------Scope #%d -------------------------- \n" ,++i);
-      printf("\"%s\" %s (line %d) (scope %d)\n", tmp->name, tmp->type,tmp->line, tmp->scope);
+      printf("\"%s\" %s (line %d) (scope %d) (hide %d)\n", tmp->name, tmp->type,tmp->line, tmp->scope , tmp->hide);
       tmp = tmp->scopenext;
     }
 
 }
 
-
-
 void hide(int scope) {
-    int i;
-    for (i=scope+1; i<symtable->buckets; i++) {
-        DataItem *temp = symtable->table[i];
-        while(temp) {
-            temp->hide = false;
-            temp = temp->next;
-        }
-    }
-}
-
-void unhide(int scope) {
-    int i;
-    for (i=0; i<scope; i++) {
-        DataItem *temp = symtable->table[i];
-        while(temp) {
-            temp->hide = true;
-            temp = temp->next;
-        }
-    }
+  DataItem *temp1 = scope_head;
+  while (temp1) {
+    if (temp1->scope == scope ) temp1->hide = true;
+    temp1 = temp1->scopenext;
+  }
 }
 
 DataItem* create_item(char* name, char* type, int value, int scope, int funcscope, int line){

@@ -5,8 +5,6 @@
   #include <string.h>
   #include "table.h"
 
-
-
   #define  YY_DECL int alpha_yylex (void* yylval)
   void yyerror (char* yaccProovidedMessage);
   extern int yylineno;
@@ -51,7 +49,7 @@
 
 %type <strval> stmt
 %type <intval> expr  assignexpr
-%type <strval>  term  lvalue primary member call callsuffix normcall elist objectdef
+%type <strval>  term  lvalue primary member call callsuffix normcall elist objectdef 
 %type <strval>indexed indexedelem  rec_stmt block const idlist ifstmt whilestmt forstmt returnstmt
 
 
@@ -63,7 +61,7 @@ program: stmt program{;}
        ;
 
 stmt: expr SEMI{;}
-   | ifstmt{;}
+   | ifstmt
    | whilestmt{;}
    | forstmt{;}
    | returnstmt{;}
@@ -156,7 +154,7 @@ lvalue: ID{
         $$ = tmp->type;
 
       }
-      | member{;}
+      | member{$$ = "NoError";}
       ;
 
 member: lvalue DOT ID{;}
@@ -192,7 +190,7 @@ indexed: indexedelem{;}
        | indexed COMMA indexedelem{;}
        ;
 
-indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{ globalscope--;}
+indexedelem: LC_BRA  expr COLON expr RC_BRA
             ;
 
 
@@ -200,16 +198,16 @@ indexedelem: LC_BRA {globalscope++; } expr COLON expr RC_BRA{ globalscope--;}
           | {;}
           ;
 
- block: /*LC_BRA{globalscope++;} RC_BRA{printf("block1\n"); globalscope--;}
+ block: /*LC_BRA{globalscope++;} RC_BRA{ hide(globalscope);globalscope--; }
      | */
-     LC_BRA {globalscope++;} rec_stmt RC_BRA{ globalscope--;}
+     LC_BRA {globalscope++;} rec_stmt RC_BRA{ hide(globalscope); globalscope--;}
      ;
 
 funcdef: FUNC {  table_lookup( yytext , "", 3 , globalscope, funcscope, yylineno);}
-        L_PAR{funcscope++;}  idlist  R_PAR  block {hide(funcscope--);}
+        L_PAR{funcscope++;}  idlist  R_PAR  block {funcscope--;}
        | FUNC ID{ table_lookup(yytext, "", 4 , globalscope, funcscope, yylineno);}
-       L_PAR{funcscope++;} idlist R_PAR block {hide(funcscope--);}
-       ;
+       L_PAR{funcscope++;} idlist R_PAR  block {funcscope--;}
+       ; 
 
 const: INT{;}
      | REAL{;}
@@ -225,14 +223,16 @@ idlist: ID{table_lookup( yytext , "", 5 , funcscope, funcscope  , yylineno);}
       |{;}
       ;
 
-ifstmt: IF L_PAR expr R_PAR stmt
-        | IF L_PAR expr R_PAR  stmt ELSE stmt{;}
-        ;
 
-whilestmt: WHILE{gloop++;} L_PAR {funcscope++;} expr R_PAR {funcscope--;} stmt{gloop--; globalscope++;}
+
+ifstmt: IF L_PAR  expr R_PAR stmt
+      | IF L_PAR expr R_PAR stmt ELSE stmt 
+      ;
+
+whilestmt: WHILE{gloop++;} L_PAR  expr R_PAR  stmt{gloop--; }
          ;
 
-forstmt: FOR{gloop++;} L_PAR {funcscope++;} elist SEMI expr SEMI elist R_PAR {funcscope--;} stmt{gloop--; globalscope++;}
+forstmt: FOR{gloop++;} L_PAR  elist SEMI expr SEMI elist R_PAR  stmt{gloop--;}
        ;
 
 returnstmt: RETURN SEMI{if (funcscope == 0) printf("Use of 'return' while not in a function at line %d\n" , yylineno);}
@@ -260,7 +260,6 @@ int main(int argc, char** argv){
   table_insert("sqrt", "[library function]", 7, 0, 0, 0);
   table_insert("cos", "[library function]", 7, 0, 0, 0);
   table_insert("sin", "[library function]", 7, 0, 0, 0);
-  //print_table();
   if(argc > 1){
     if(!(yyin = fopen(argv[1], "r"))){
       fprintf(stderr, "Cannot read  file: %s\n", argv[1]);
