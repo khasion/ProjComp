@@ -7,34 +7,34 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
   int insert_flag = 0;
   int cmp;
   int cmp2;
-  DataItem* ret ;
+  DataItem* ret = NULL;
   DataItem* tmp = symtable->table[hash_function(name)];
   DataItem* tmp2;
 
   if(tmp->value == -1){
     if(value == 0 && scope == 0){
-      ret=table_insert(name, "[global variable]", 0, scope, funcscope, line);
+      ret=table_insert(name, strdup("[global variable]"), 0, scope, funcscope, line);
     }else if (value == 1 && scope == 0){
-      ret=table_insert(name, "[global variable]", 0, scope, funcscope, line);
+      ret=table_insert(name, strdup("[global variable]"), 0, scope, funcscope, line);
     } else if(value == 0  && scope > 0){
-       ret=table_insert(name, "[variable]", 0 , scope, funcscope, line);
+       ret=table_insert(name, strdup("[variable]"), 0 , scope, funcscope, line);
     } else if(value == 1){
-       ret=table_insert(name, "[local variable]", 1 , scope, funcscope, line);
+       ret=table_insert(name, strdup("[local variable]"), 1 , scope, funcscope, line);
     } else if (value == 2 ){
       printf("ERROR : No global variable '::%s' exists at Line:%d \n" ,name , line);
       insert_flag = 1;
       ret = tmp;
     } else if(value == 3){
-      char* func_name=malloc(30);
+      char* func_name= (char*)malloc(30);
       sprintf(func_name, "_f_%d", func_id);
-       ret=table_insert(func_name, "[userfunc noname]", 3, scope, funcscope, line);
+      ret=table_insert(func_name, strdup("[userfunc noname]"), 3, scope, funcscope, line);
       func_id= func_id + 1;
     }  else if (value == 4){
-       ret=table_insert(name, "[userfunc]", 4, scope, funcscope, line);
+       ret=table_insert(name, strdup("[userfunc]"), 4, scope, funcscope, line);
     }else if (value == 5){
-       ret=table_insert(name, "[formal argument]", 5, scope, funcscope, line);
+       ret=table_insert(name, strdup("[formal argument]"), 5, scope, funcscope, line);
     }else if (value == 6){
-       ret=table_insert(name, "[formal argument]", 6, scope, funcscope, line);
+       ret=table_insert(name, strdup("[formal argument]"), 6, scope, funcscope, line);
     }
   }
   else{
@@ -49,7 +49,7 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
       insert_flag = 1;
       ret = tmp;
     }else if (cmp == 0 && value == 1 && tmp->value !=7){
-      ret = table_insert(name, "[local variable]", 1, scope, funcscope, line);
+      ret = table_insert(name, strdup("[local variable]"), 1, scope, funcscope, line);
     }
     while(tmp->value != -1){
       if(cmp==0 && tmp->scope == 0 && scope == 0){
@@ -108,15 +108,15 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
     }
   if(insert_flag == 0){
     if(value == 0 && scope == 0){
-      ret=table_insert(name, "[global variable]", 0, scope, funcscope, line);
+      ret=table_insert(name, strdup("[global variable]"), 0, scope, funcscope, line);
     }else if(value == 0 && scope > 0){
-      ret= table_insert(name, "[variable]", 0, scope, funcscope, line);
+      ret= table_insert(name, strdup("[variable]"), 0, scope, funcscope, line);
     } else if (value == 4){
-      ret= table_insert(name, "[userfunc]", 4, scope, funcscope, line);
+      ret= table_insert(name, strdup("[userfunc]"), 4, scope, funcscope, line);
     }else if (value == 5){
-      ret= table_insert(name, "[formal argument]", 5, scope, funcscope, line);
+      ret= table_insert(name, strdup("[formal argument]"), 5, scope, funcscope, line);
     }else if (value == 6){
-      ret= table_insert(name, "[formal argument]", 6, scope, funcscope, line);
+      ret= table_insert(name, strdup("[formal argument]"), 6, scope, funcscope, line);
     }
   }
 
@@ -126,7 +126,7 @@ DataItem* table_lookup(char* name, char* type, int value, int scope, int funcsco
 }
 
 SymTable *create_new_symtable() {
-    int i;
+    unsigned int i;
     SymTable *new_sym = (SymTable*) malloc(sizeof(SymTable*));
     new_sym->table = (DataItem**) malloc(509*sizeof(DataItem));
     new_sym->size = 0;
@@ -170,7 +170,7 @@ int hash_function(char* name){
 void expand() {
     SymTable *new_sym = (SymTable*) malloc(sizeof(SymTable));
     SymTable *old_sym = symtable;
-    int i, new_size = get_next_size(symtable->size);
+    unsigned int i, new_size = get_next_size(symtable->size);
 
     new_sym->table = (DataItem**) malloc(new_size*sizeof(DataItem));
     for (i=0; i<new_size; i++) {
@@ -269,7 +269,7 @@ DataItem* create_item(char* name, char* type, int value, int scope, int funcscop
 }
 
 void free_table(SymTable *freetable) {
-    int i;
+unsigned int i;
     for (i=0; i<freetable->buckets; i++) {
         DataItem *tmp_curr = freetable->table[i];
         DataItem *tmp_next = tmp_curr;
