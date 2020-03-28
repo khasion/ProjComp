@@ -7,3 +7,4 @@ clean:
 	rm y.tab.c
 	rm lex.yy.c
 	rm y.tab.h
+	rm y.output 
