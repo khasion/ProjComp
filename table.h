@@ -6,24 +6,52 @@
 
 #define MAX_HASH 65521
 
+int gloop = 0;
+int globalscope = 0;
+int funcscope = 0;
+int open_func =0;
+extern int yylineno;
+
 char* libs[12];
 
+typedef enum scopespace_t {
+	programvar,
+	functionlocal,
+	formalarg
+}Scopespace_t;
+
+typedef enum symbol_t {
+	var_s,
+	programfunc_s,
+	libraryfunc_s
+}Symbol_t;
+
+typedef struct symbol {
+	Symbol_t 	type;
+	char* 		name;
+	Scopespace_t 	space;
+	unsigned 	offset;
+	unsigned 	scope;
+	unsigned 	line;
+}Symbol;
+
 typedef struct dataitem {
-    char* name;
-    char* type;
-    int value;
-    int scope;
-    int funcscope;
-    int line;
-    bool hide; /* true if hidden, else false */
-    struct dataitem* next;
-    struct dataitem* scopenext;
+	char* name;
+    	char* type;
+    	int value;
+    	int scope;
+    	int funcscope;
+    	int line;
+    	Symbol sym;
+    	bool hide; /* true if hidden, else false */
+    	struct dataitem* next;
+    	struct dataitem* scopenext;
 }DataItem;
 
 typedef struct symtable {
-    struct dataitem** table;
-    unsigned int buckets;
-    unsigned int size;
+    	struct dataitem** table;
+    	unsigned int buckets;
+    	unsigned int size;
 }SymTable;
 
 SymTable* symtable;
@@ -41,7 +69,7 @@ void expand();
 int hash_scope(int key);
 
 /* Insert a new DataItem in the hash table.*/
-DataItem* table_insert(char* name, char* type, int value, int scope, int funcscope, int line);
+DataItem* table_insert(char* name, const char* type, int value, int scope, int funcscope, int line);
 
 /* Print table contents.*/
 void print_table();
@@ -53,6 +81,8 @@ void hide(int scope);
 DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line);
 
 /* Create new DataItem. */
-DataItem* create_item(char* name, char* type, int value, int scope, int funcscope, int line);
+DataItem* create_item(char* name, const char* type, int value, int scope, int funcscope, int line);
 
 void free_table(SymTable *freetable);
+
+DataItem* table_get(char* name, unsigned int scope);
