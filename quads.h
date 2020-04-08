@@ -1,9 +1,9 @@
 #include "table.h"
 
 typedef enum iopcode {
-	assign,		op_add,		op_sub,
-	op_mul,		op_div,		op_mod,
-	uminus,		con_and,		con_or,
+	assign,	op_add,	op_sub,
+	op_mul,	op_div,	op_mod,
+	uminus,	con_and, con_or,
 	con_not,		if_eq,		if_noteq,
 	if_lesseq,	if_greatereq,	if_less,
 	if_greater,	call,		param,
@@ -33,7 +33,7 @@ typedef enum expr_t {
 
 typedef struct expr {
 	Expr_t type;
-	Symbol* item;	
+	Symbol* sym;	
 	struct expr* index;
 	double numConst;
 	char* strConst;
@@ -56,12 +56,6 @@ unsigned int currQuad = 0;
 
 unsigned int tempcounter = 0;
 
-unsigned scopespacecounter = 1;
-
-unsigned formalargoffset = 0;
-unsigned functionlocaloffset = 0;
-unsigned programvaroffset = 0;
-
 #define EXPAND_SIZE 1024
 #define CURR_SIZE (total*sizeof(Quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(Quad)+CURR_SIZE)
@@ -73,15 +67,11 @@ void emit();
 
 char* newtempname();
 void resettemp();
-DataItem* newtemp();
+Symbol* newtemp(); 
+Expr* newexpr(Expr_t type);
+Expr* newexpr_constbool(unsigned char boolean);
 
 int currscope();
-
-Scopespace_t currscopespace();
-
-void resetformalargsoffset(void);
-void resetfunctionlocaloffset(void);
-void restorecurrscopeoffset(unsigned n);
 
 unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label);

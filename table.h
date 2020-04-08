@@ -6,12 +6,6 @@
 
 #define MAX_HASH 65521
 
-int gloop = 0;
-int globalscope = 0;
-int funcscope = 0;
-int open_func =0;
-extern int yylineno;
-
 char* libs[12];
 
 typedef enum scopespace_t {
@@ -27,22 +21,19 @@ typedef enum symbol_t {
 }Symbol_t;
 
 typedef struct symbol {
-	Symbol_t 	type;
+	Symbol_t 		type;
 	char* 		name;
 	Scopespace_t 	space;
-	unsigned 	offset;
-	unsigned 	scope;
-	unsigned 	line;
+	unsigned 		offset;
+	unsigned 		scope;
+	unsigned 		line;
 }Symbol;
 
 typedef struct dataitem {
-	char* name;
+	Symbol* sym;
     	char* type;
     	int value;
-    	int scope;
     	int funcscope;
-    	int line;
-    	Symbol sym;
     	bool hide; /* true if hidden, else false */
     	struct dataitem* next;
     	struct dataitem* scopenext;
@@ -56,6 +47,24 @@ typedef struct symtable {
 
 SymTable* symtable;
 DataItem* scope_head;
+
+unsigned scopespacecounter = 1;
+unsigned formalargoffset = 0;
+unsigned functionlocaloffset = 0;
+unsigned programvaroffset = 0;
+
+
+void enterscopespace();
+void exitscopespace();
+
+Scopespace_t currscopespace();
+
+void resetformalargsoffset();
+void resetfunctionlocaloffset();
+void restortcurrscopeoffset();
+
+unsigned currscopespaceoffset();
+void incurrscopeoffset();
 
 SymTable* create_new_symtable();
 
@@ -79,6 +88,9 @@ void hide(int scope);
 
 /* Search for a DataItem in hash table. */
 DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line);
+
+/* Print errors.*/
+void Error(int i, int line);
 
 /* Create new DataItem. */
 DataItem* create_item(char* name, const char* type, int value, int scope, int funcscope, int line);

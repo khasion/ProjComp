@@ -564,9 +564,6 @@ char *yytext;
   int string_count;
   int buffer_count;
   int tokens = 0;
-  /* typedef enum type{IF,ELSE,WHILE,FOR,FUNC,RETURN,BREAK,CONTINUE,AND,OR,LOCAL,TRUE,FALSE,NIL,ASSIGN,PLUS,
-    MINUS,MUL,DIV,MOD,EQ,NOT_EQ,D_PLUS,D_MINUS,LESS,GREATER,LESS_EQ,GREATER_EQ,LC_BRA,RC_BRA,
-    L_BRA,R_BRA,L_PAR,R_PAR,SEMI,COMMA,COLON,D_COLON,DOT,D_DOT,INT,REAL,ID}types; */
 
   char Enum_array[44][10]= {"IF","ELSE","WHILE","FOR","FUNC","RETURN","BREAK","CONTINUE","AND","OR","NOT","LOCAL","TRUE","FALSE","NIL","ASSIGN","PLUS",
     "MINUS","MUL","DIV","MOD","EQ","NOT_EQ","D_PLUS","D_MINUS","LESS","GREATER","LESS_EQ","GREATER_EQ","LC_BRA","RC_BRA",
@@ -588,8 +585,8 @@ node *head = NULL;
 void insert_list(int numline, int numtoken, char* content, char* type, char* charvalue, float numbervalue);
 void print_list(node *head);
 char* search_name(char* name);
-#line 591 "lex.yy.c"
-#line 592 "lex.yy.c"
+#line 588 "lex.yy.c"
+#line 589 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -806,10 +803,10 @@ YY_DECL
 		}
 
 	{
-#line 44 "alpha_yylex.l"
+#line 41 "alpha_yylex.l"
 
 
-#line 812 "lex.yy.c"
+#line 809 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -878,212 +875,212 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 46 "alpha_yylex.l"
+#line 43 "alpha_yylex.l"
 {return IF;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 47 "alpha_yylex.l"
+#line 44 "alpha_yylex.l"
 {return ELSE;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 48 "alpha_yylex.l"
+#line 45 "alpha_yylex.l"
 {return WHILE;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 49 "alpha_yylex.l"
+#line 46 "alpha_yylex.l"
 {return FOR;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 50 "alpha_yylex.l"
+#line 47 "alpha_yylex.l"
 {return FUNC;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 51 "alpha_yylex.l"
+#line 48 "alpha_yylex.l"
 {return RETURN;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 52 "alpha_yylex.l"
+#line 49 "alpha_yylex.l"
 {return BREAK;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 53 "alpha_yylex.l"
+#line 50 "alpha_yylex.l"
 {return CONTINUE;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 54 "alpha_yylex.l"
+#line 51 "alpha_yylex.l"
 {return AND;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 55 "alpha_yylex.l"
+#line 52 "alpha_yylex.l"
 {return OR;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 56 "alpha_yylex.l"
+#line 53 "alpha_yylex.l"
 {return NOT;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 57 "alpha_yylex.l"
+#line 54 "alpha_yylex.l"
 {return LOCAL;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 58 "alpha_yylex.l"
+#line 55 "alpha_yylex.l"
 {return TRUE;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 59 "alpha_yylex.l"
+#line 56 "alpha_yylex.l"
 {return FALSE;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 60 "alpha_yylex.l"
+#line 57 "alpha_yylex.l"
 {return NIL;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 62 "alpha_yylex.l"
+#line 59 "alpha_yylex.l"
 {return ASSIGN;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 63 "alpha_yylex.l"
+#line 60 "alpha_yylex.l"
 {return PLUS;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 64 "alpha_yylex.l"
+#line 61 "alpha_yylex.l"
 {return MINUS;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 65 "alpha_yylex.l"
+#line 62 "alpha_yylex.l"
 {return MUL;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 66 "alpha_yylex.l"
+#line 63 "alpha_yylex.l"
 {return DIV;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 67 "alpha_yylex.l"
+#line 64 "alpha_yylex.l"
 {return MOD;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 68 "alpha_yylex.l"
+#line 65 "alpha_yylex.l"
 {return EQ;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 69 "alpha_yylex.l"
+#line 66 "alpha_yylex.l"
 {return NOT_EQ;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 70 "alpha_yylex.l"
+#line 67 "alpha_yylex.l"
 {return D_PLUS;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 71 "alpha_yylex.l"
+#line 68 "alpha_yylex.l"
 {return D_MINUS;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 72 "alpha_yylex.l"
+#line 69 "alpha_yylex.l"
 {return LESS;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 73 "alpha_yylex.l"
+#line 70 "alpha_yylex.l"
 {return GREATER;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 74 "alpha_yylex.l"
+#line 71 "alpha_yylex.l"
 {return LESS_EQ;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 75 "alpha_yylex.l"
+#line 72 "alpha_yylex.l"
 {return GREATER_EQ;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 77 "alpha_yylex.l"
+#line 74 "alpha_yylex.l"
 {return LC_BRA;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 78 "alpha_yylex.l"
+#line 75 "alpha_yylex.l"
 {return RC_BRA;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 79 "alpha_yylex.l"
+#line 76 "alpha_yylex.l"
 {return L_BRA;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 80 "alpha_yylex.l"
+#line 77 "alpha_yylex.l"
 {return R_BRA;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 81 "alpha_yylex.l"
+#line 78 "alpha_yylex.l"
 {return L_PAR;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 82 "alpha_yylex.l"
+#line 79 "alpha_yylex.l"
 {return R_PAR;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 83 "alpha_yylex.l"
+#line 80 "alpha_yylex.l"
 {return SEMI;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 84 "alpha_yylex.l"
+#line 81 "alpha_yylex.l"
 {return COMMA;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 85 "alpha_yylex.l"
+#line 82 "alpha_yylex.l"
 {return COLON;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 86 "alpha_yylex.l"
+#line 83 "alpha_yylex.l"
 {return D_COLON;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 87 "alpha_yylex.l"
+#line 84 "alpha_yylex.l"
 {return DOT;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 88 "alpha_yylex.l"
+#line 85 "alpha_yylex.l"
 {return D_DOT;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 90 "alpha_yylex.l"
+#line 87 "alpha_yylex.l"
 {
   yylval.intval = atoi(yytext);
   return INT;
@@ -1091,7 +1088,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 94 "alpha_yylex.l"
+#line 91 "alpha_yylex.l"
 {
   yylval.floatval = atof(yytext);
   return REAL;
@@ -1099,7 +1096,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 98 "alpha_yylex.l"
+#line 95 "alpha_yylex.l"
 {
   yylval.strval = strdup(yytext);
   return ID;
@@ -1108,12 +1105,12 @@ YY_RULE_SETUP
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 102 "alpha_yylex.l"
+#line 99 "alpha_yylex.l"
 {;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 104 "alpha_yylex.l"
+#line 101 "alpha_yylex.l"
 {
 
     int c;
@@ -1236,7 +1233,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 225 "alpha_yylex.l"
+#line 222 "alpha_yylex.l"
 {
   int c;
   int comm_counter = 1;
@@ -1269,7 +1266,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 255 "alpha_yylex.l"
+#line 252 "alpha_yylex.l"
 {
   int c;
   while ((c = input()) != '\n' && c != EOF);
@@ -1278,20 +1275,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 261 "alpha_yylex.l"
+#line 258 "alpha_yylex.l"
 {insert_list(yylineno,tokens++, yytext, "ILLIGAL CHAR","", atoi(yytext));
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 263 "alpha_yylex.l"
+#line 260 "alpha_yylex.l"
 { return -1;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 265 "alpha_yylex.l"
+#line 262 "alpha_yylex.l"
 ECHO;
 	YY_BREAK
-#line 1294 "lex.yy.c"
+#line 1291 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2306,7 +2303,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 265 "alpha_yylex.l"
+#line 262 "alpha_yylex.l"
 
 
  char* search_name(char* name){

@@ -18,7 +18,6 @@ void expand_quad() {
 
 void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned line) {
 	if (currQuad == total) expand();
-
 	Quad* p = quads + currQuad++;
 	p->op = op;
 	p->arg1 = arg1;
@@ -28,11 +27,19 @@ void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned
 	p->line = line;
 }
 
+Expr* emit_iftableitem(Expr* e) {
+     if (e->type != tableitem_e) {
+          return e;
+     }
+     Expr* result   = newexpr(var_e);
+     result->sym    = newtemp();
+     emit(tablegetelem, e, e->index, result, 0, 0);
+     return result;
+}
+
 char* newtempname() {
 	char* name = (char*) malloc(sizeof(char)*3);
-	name[0] = '$';
-	name[1] = 48 + tempcounter++;
-	name[2] = '\0';
+     sprintf(name, "$%d", tempcounter++);
 	return name;
 }
 
@@ -40,72 +47,33 @@ void resettemp() {
 	tempcounter = 0;
 }
 
-DataItem* newtemp() {
+Symbol* newtemp() {
 	char* name = newtempname();
-	DataItem* temp = table_get(name, currscope());
+	Symbol* temp = table_get(name, currscope())->sym;
 	if (temp) {
 		return temp;
 	}
-	table_insert(name, "[Temporary var]", 1, globalscope, funcscope, yylineno);
-	return table_get(name, currscope());
+	table_insert(name, "[Temporary var]", -1, currscope(), 0, 0);
+	return table_get(name, currscope())->sym;
 }
 
-int currscope() {
-	return globalscope;
+Expr* newexpr(Expr_t t) {
+     Expr* e = (Expr*) malloc(sizeof(Expr));
+     memset(e, 0, sizeof(Expr));
+     e->type = t;
+     return e;
 }
 
-Scopespace_t currscopespace(void) {
-	if (scopespacecounter == 1) {
-		return programvar;
-	}
-	else if (scopespacecounter % 2 == 0) {
-		return formalarg;
-	}
-	return functionlocal;
+Expr* newexpr_constbool(unsigned char boolean){
+	Expr* tmp = malloc(sizeof(Expr));
+	tmp->boolConst = boolean;
+	return tmp;
 }
 
-unsigned currscopespaceoffset(void) {
-	switch (currscopespace()) {
-		case programvar		:	return programvaroffset;
-		case functionlocal	:	return functionlocaloffset;
-		case formalarg		:	return formalargoffset;
-		default 		: 	assert(0);
-	}
-}
-
-void incurrscopeoffset(void) {
-	switch (currscopespace()) {
-		case programvar 	:	++programvaroffset; break;
-		case functionlocal 	:	++functionlocaloffset; break;
-		case formalarg 		:	++formalargoffset; break;
-		default 		: 	assert(0);
-	}
-}
-
-void enterscopespace() {
-	scopespacecounter++;
-}
-
-void exitscopespace() {
-	assert(scopespacecounter > 1);
-	scopespacecounter--;
-}
-
-void resetformalargsoffset(void){
-	formalargoffset = 0;
-}
-
-void resetfunctionlocaloffset(void){
-	functionlocaloffset = 0;
-}
-
-void restorecurrscopeoffset(unsigned n){
-	switch (currscopespace()){
-		case programvar: programvaroffset = n; break;
-		case functionlocal: functionlocaloffset = n; break;
-		case formalarg: formalargoffset = n; break;
-		default: assert(0);
-	}
+Expr* newexpr_conststring(char* s) {
+     Expr* e = newexpr(conststring_e);
+     e->strConst = strdup(s);
+     return e;
 }
 
 unsigned nextquadlabel(void){
@@ -122,11 +90,11 @@ Expr* lvalue_expr(Symbol* sym){
 	Expr* e = (Expr*) malloc(sizeof(Expr));
 	memset(e, 0, sizeof(Expr));
 	e->next = (Expr*) 0;
-	e->index = sym;
+	e->sym = sym;
 	switch(sym->type){
-		case var_s : e->type = var_e; break;
-		case programfunc_s : e->type = programfunc_e; break;
-		case libraryfunc_s : e->type = libraryfunc_e; break;
+		case var_s          : e->type = var_e; break;
+		case programfunc_s  : e->type = programfunc_e; break;
+		case libraryfunc_s  : e->type = libraryfunc_e; break;
 		default: assert(0);
 	}
 	return e;
