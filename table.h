@@ -4,6 +4,9 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#ifndef TABLE_H
+#define TABLE_H
+
 #define MAX_HASH 65521
 
 char* libs[12];
@@ -15,8 +18,11 @@ typedef enum scopespace_t {
 }Scopespace_t;
 
 typedef enum symbol_t {
+	localvar_s,
+	globalvar_s,
 	var_s,
 	programfunc_s,
+	nonameprogramfunc_s,
 	libraryfunc_s
 }Symbol_t;
 
@@ -30,11 +36,10 @@ typedef struct symbol {
 }Symbol;
 
 typedef struct dataitem {
-	Symbol* sym;
-    	char* type;
-    	int value;
-    	int funcscope;
-    	bool hide; /* true if hidden, else false */
+	Symbol* 	sym;
+    	char* 	type;
+    	int 		funcscope;
+    	bool 	hide; /* true if hidden, else false */
     	struct dataitem* next;
     	struct dataitem* scopenext;
 }DataItem;
@@ -48,11 +53,21 @@ typedef struct symtable {
 SymTable* symtable;
 DataItem* scope_head;
 
-unsigned scopespacecounter = 1;
-unsigned formalargoffset = 0;
-unsigned functionlocaloffset = 0;
-unsigned programvaroffset = 0;
+DataItem* lvalue_id(char* yytext, unsigned yylineno);
+DataItem* lvalue_localid(char* yytext, unsigned yylineno);
+DataItem* lvalue_dcolonid(char* yytext, unsigned yylineno);
+DataItem* funcname_noname(char* yytext, unsigned yylineno);
+DataItem* funcname_id(char* yytext, unsigned yylineno);
+DataItem* idlist_id(char* yytext, unsigned yylineno);
+DataItem* idlist_commaid(char* yytext, unsigned yylineno);
 
+unsigned currfuncscope();
+void enterfuncscope();
+void exitfuncscope();
+
+void exitscope();
+void nextscope();
+unsigned currscope();
 
 void enterscopespace();
 void exitscopespace();
@@ -70,7 +85,7 @@ SymTable* create_new_symtable();
 
 int get_next_size(int n);
 
-int hash_function(char* name);
+int hash_function(const char* name);
 
 void expand();
 
@@ -78,7 +93,7 @@ void expand();
 int hash_scope(int key);
 
 /* Insert a new DataItem in the hash table.*/
-DataItem* table_insert(char* name, const char* type, int value, int scope, int funcscope, int line);
+DataItem* table_insert(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line);
 
 /* Print table contents.*/
 void print_table();
@@ -87,14 +102,18 @@ void print_table();
 void hide(int scope);
 
 /* Search for a DataItem in hash table. */
-DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line);
+DataItem* table_lookup(const char* name, unsigned scope);
+/* Search for collisions with library functions.*/
+DataItem* table_libcollision(const char* name);
 
 /* Print errors.*/
-void Error(int i, int line);
+void Error(int i, char* name, int line);
 
 /* Create new DataItem. */
-DataItem* create_item(char* name, const char* type, int value, int scope, int funcscope, int line);
+DataItem* create_item(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line);
 
 void free_table(SymTable *freetable);
 
 DataItem* table_get(char* name, unsigned int scope);
+
+#endif

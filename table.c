@@ -2,12 +2,39 @@
 
 int func_id = 0;
 
-int currscope() {
-	return currscopespace()-1;
+unsigned globalscope 		= 0;
+unsigned funcscope 			= 0;
+unsigned scopespacecounter 	= 1;
+unsigned formalargoffset 	= 0;
+unsigned functionlocaloffset 	= 0;
+unsigned programvaroffset 	= 0;
+
+unsigned currfuncscope() {
+	return funcscope;
+}
+
+void enterfuncscope() {
+	++funcscope;
+}
+
+void exitfuncscope() {
+	--funcscope;
+}
+
+unsigned currscope() {
+	return globalscope;
+}
+
+void exitscope() {
+	--globalscope;
+}
+
+void nextscope() {
+	++globalscope;
 }
 
 void enterscopespace() {
-	scopespacecounter++;
+	++scopespacecounter;
 }
 
 void exitscopespace() {
@@ -35,19 +62,19 @@ void resetfunctionlocaloffset(void){
 
 void restorecurrscopeoffset(unsigned n){
 	switch (currscopespace()){
-		case programvar: programvaroffset = n; break;
-		case functionlocal: functionlocaloffset = n; break;
-		case formalarg: formalargoffset = n; break;
+		case programvar	: programvaroffset = n; break;
+		case functionlocal	: functionlocaloffset = n; break;
+		case formalarg		: formalargoffset = n; break;
 		default: assert(0);
 	}
 }
 
 unsigned currscopespaceoffset(void) {
 	switch (currscopespace()) {
-		case programvar		:	return programvaroffset;
+		case programvar	:	return programvaroffset;
 		case functionlocal	:	return functionlocaloffset;
 		case formalarg		:	return formalargoffset;
-		default 		: 	assert(0);
+		default 			: 	assert(0);
 	}
 }
 
@@ -55,167 +82,154 @@ void incurrscopeoffset(void) {
 	switch (currscopespace()) {
 		case programvar 	:	++programvaroffset; break;
 		case functionlocal 	:	++functionlocaloffset; break;
-		case formalarg 		:	++formalargoffset; break;
-		default 		: 	assert(0);
+		case formalarg 	:	++formalargoffset; break;
+		default: assert(0);
 	}
 }
 
 /* ------------------------------------------------------------------------------------------------------------ */
 
-DataItem* table_lookup(char* name, char* type, int value, int scope, int funcscope, int line){
-  	int insert_flag = 0;
-  	int cmp;
-  	int cmp2;
-  	DataItem* ret = NULL;
-  	DataItem* tmp = symtable->table[hash_function(name)];
-  	DataItem* tmp2;
-  	if(tmp->value == -1){
-    		if(value == 0 && scope == 0) {
-      		ret=table_insert(name, strdup("[global variable]"), 0, scope, funcscope, line);
-    		}
-		else if (value == 1 && scope == 0) {
-      		ret=table_insert(name, strdup("[global variable]"), 0, scope, funcscope, line);
-    		} 
-		else if(value == 0  && scope > 0) {
-       		ret=table_insert(name, strdup("[variable]"), 0 , scope, funcscope, line);
-    		} 
-		else if(value == 1) {
-       		ret=table_insert(name, strdup("[local variable]"), 1 , scope, funcscope, line);
-		} 
-		else if (value == 2 ) {
-      		printf("ERROR : No global variable '::%s' exists at Line:%d \n" ,name , line);
-      		insert_flag = 1;
-      		ret = tmp;
-    		} else if(value == 3) {
-      		char* func_name= (char*)malloc(30);
-      		sprintf(func_name, "_f_%d", func_id);
-      		ret=table_insert(func_name, strdup("[userfunc noname]"), 3, scope, funcscope, line);
-      		func_id= func_id + 1;
-    		}
-		else if (value == 4) {
-       		ret=table_insert(name, strdup("[userfunc]"), 4, scope, funcscope, line);
-    		}
-		else if (value == 5) {
-       		ret=table_insert(name, strdup("[formal argument]"), 5, scope, funcscope, line);
-    		}
-		else if (value == 6) {
-       		ret=table_insert(name, strdup("[formal argument]"), 6, scope, funcscope, line);
-    		}
-  	} else {
-    		cmp = strcmp(tmp->sym->name, name);
-    		insert_flag=0;
-    		if(cmp== 0 && (value == 5 || value == 6 || value == 1) && tmp->value== 7 ) {
-      		printf("Collision with '%s' library function at line: %d\n", name , line);
-      		insert_flag = 1;
-      		ret = tmp;
-    		}
-		else if(cmp ==  0 && value == 4 && tmp->value == 7) {
-      		printf("User function '%s',Collision with '%s' library function at line: %d\n", tmp->sym->name , name , line);
-      		insert_flag = 1;
-      		ret = tmp;
-    		}
-		else if (cmp == 0 && value == 1 && tmp->value !=7) {
-      			ret = table_insert(name, strdup("[local variable]"), 1, scope, funcscope, line);
-    		}
-    		while(tmp->value != -1) {
-      		if(cmp==0 && tmp->sym->scope == 0 && scope == 0) {
-        		insert_flag = 1;
-        		ret = tmp;
-          }	
-			else if(value ==  1 && cmp==0 && tmp->sym->scope == scope) {
-        			insert_flag = 1;
-        			ret = tmp;
-      			}
-			else if(value == 2 && cmp==0 && tmp->sym->scope == 0) {
-        			insert_flag = 1;
-        			ret = tmp;
-      			}
-			else if(scope > 0 && value == 0 ) {
-        			tmp2 = symtable->table[hash_function(name)];
-        			cmp2 = strcmp(tmp2->sym->name, name);
-        			int tmp_scope = scope;
-        			while(tmp_scope != -1) {
-          				while(tmp2->value != -1) {
-             					if(cmp2==0 && tmp_scope == tmp2->sym->scope) {
-              						insert_flag = 1;
-              						ret = tmp2;
-              						break;
-            					}
-            					tmp2=tmp2->next;
-          				}
-          				tmp2 = symtable->table[hash_function(name)];
-          				tmp_scope--;
-        			}
-      			}
-      			if (value == 4 && cmp==0 && tmp->sym->scope == scope && tmp->value != 4 && tmp->value !=7) {
-        			printf("Error: Variable '%s' already defined at Line: %d \n" ,name , tmp->sym->line );
-        			insert_flag = 1;
-        			ret = tmp;
-        			break;
-      			}
-      			if (value == 4 && cmp==0 && tmp->sym->scope == scope && tmp->value == 4 ) {
-        			printf("Error: Collision with function named '%s' defined at line %d \n" , name , tmp->sym->line );
-        			insert_flag = 1;
-        			ret = tmp;
-        			break;
-      			}
-      			if (value == 6 && cmp==0 && tmp->sym->scope == scope) {
-         			insert_flag = 1;
-         			printf("ERROR: Variable '%s' already defined at Line: %d \n" , name , tmp->sym->line);
-         			insert_flag = 1;
-         			ret = tmp;
-         			break;
-      			}
-      			if((value==0 || value==2 || value == 1)  && cmp==0  && (tmp->value != 4 || tmp->value != 5 || tmp->value != 6) &&  tmp->funcscope < funcscope && tmp->sym->scope != 0) {
-        			printf("ERROR:Cannot access '%s' inside function  at Line: '%d'  \n",name  , line);
-        			insert_flag = 1;
-        			ret = tmp;
-        			break;
-      			}
-      			tmp = tmp->next;
-    		}
-  		if(insert_flag == 0) {
-    			if(value == 0 && scope == 0){
-      				ret=table_insert(name, strdup("[global variable]"), 0, scope, funcscope, line);
-    			}
-			else if(value == 0 && scope > 0) {
-      				ret= table_insert(name, strdup("[variable]"), 0, scope, funcscope, line);
-    			} 
-			else if (value == 4) {
-      				ret= table_insert(name, strdup("[userfunc]"), 4, scope, funcscope, line);
-    			}else if (value == 5) {
-      				ret= table_insert(name, strdup("[formal argument]"), 5, scope, funcscope, line);
-    			}else if (value == 6) {
-      				ret= table_insert(name, strdup("[formal argument]"), 6, scope, funcscope, line);
-    			}
-  		}
+
+void Error(int i , char* name, int line)
+{
+	switch(i) {
+		case 0: 	printf("ERROR: Using ProgramFunc as an lvalue at line: %d\n", line); break;
+		case 1: 	printf("ERROR:Using LibFunc as an lvalue at line: %d\n", line); break;
+		case 2: 	printf("Use of 'return' while not in a function at line %d\n", line); break; 
+		case 3:	printf("Use of 'break' while not in a loop at line %d\n", line); break;
+		case 4:	printf("Use of 'continue' while not in a loop at line %d\n", line); break;
+		case 5:	printf("ERROR : No global variable '::%s' exists at Line:%d \n", name, line); break;
+		case 6:	printf("Collision with '%s' library function at line: %d\n", name, line); break;
+		case 7:	printf("User function '%s',Collision with '%s' library function at line: %d\n", name , name , line); break;
+		case 8:	printf("Error: Variable '%s' already defined at Line: %d \n", name, line ); break;
+		case 9:	printf("Error: Collision with function named '%s' defined at line %d \n", name , line ); break;
+		case 10:	printf("ERROR: Variable '%s' already defined at Line: %d \n", name, line); break;
+		case 11:	printf("ERROR:Cannot access '%s' inside function  at Line: '%d'  \n", name, line); break;
 	}
-  	return ret;
 }
 
-void Error(int i , int line)
-{
-	if (i==0) printf("ERROR: Using ProgramFunc as an lvalue at line: %d\n" , line);
-	else if(i==1) printf("ERROR:Using LibFunc as an lvalue at line: %d\n" , line);
-	else if (i==2) printf("Use of 'return' while not in a function at line %d\n" , line);
-	else if (i==3) printf("Use of 'break' while not in a loop at line %d\n" , line);
-	else if (i==4) printf("Use of 'continue' while not in a loop at line %d\n" , line);
+DataItem* lvalue_id (char* yytext, unsigned yylineno) {
+	DataItem* temp;
+	int tempscope = currscope();
+	int flag = 0;
+	while (tempscope >= 0) {
+		temp = table_lookup(yytext, tempscope--);
+		if (temp && ( temp->sym->type == programfunc_s || ( temp->hide || ( !temp->hide && (funcscope == temp->funcscope || temp->sym->scope == 0)) )) ) {
+			flag = 1;
+			break;
+		}
+		else if (temp) {
+			Error(11, yytext, yylineno);
+			flag = 1;
+			break;
+		}
+	}
+	if (temp && (temp->sym->type == libraryfunc_s || temp->sym->type == programfunc_s)) {
+		flag = 1;
+	}
+	if (!flag) {
+		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+	}
+	return temp;
+}
+
+DataItem* lvalue_localid(char* yytext, unsigned yylineno) {
+	DataItem* temp;
+	temp = table_lookup(yytext, currscope());
+	if ( !temp || temp->hide) {
+		if (currscope() >= 0) {
+			temp = table_insert(localvar_s, yytext, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+		}
+		else {
+			temp = table_insert(globalvar_s, yytext, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+		}
+	}
+	return temp;
+}
+
+DataItem* lvalue_dcolonid(char* yytext, unsigned yylineno) {
+	DataItem* temp;
+	temp = table_lookup(yytext, 0);
+	if (!temp) {
+		Error(5, yytext, yylineno);
+		temp = create_item(globalvar_s, yytext, currscopespace(), currscope(), currscopespaceoffset(), currfuncscope(), yylineno);
+	}
+	return temp;
+}
+
+DataItem* funcname_noname(char* yytext, unsigned yylineno) {
+	char* name;
+	name = (char*) malloc(sizeof(char)* 3);
+	sprintf(name, "_f%d", func_id++);
+	DataItem* temp = table_insert(nonameprogramfunc_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+	return temp;
+}
+
+DataItem* funcname_id(char* yytext, unsigned yylineno) {
+	DataItem* temp;
+	int flag = 0;
+	if ( (temp = table_lookup(yytext, currscope()))) {
+		Error(9, yytext, yylineno);
+		flag = 1;
+	}
+	if ( (temp = table_libcollision(yytext))) {
+		Error(7, yytext, yylineno);
+		flag = 1;
+	}
+	if (!flag) {
+		temp = table_insert(programfunc_s, yytext, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+	}
+	return temp;
+}
+
+DataItem* idlist_id(char* yytext, unsigned yylineno) {
+	DataItem* temp;
+	int flag = 0; 
+	temp = table_lookup(yytext, currscope()+1);
+	if (temp && !temp->hide) {
+		Error(8, yytext, yylineno);
+		flag = 1;
+	}
+	if ( (temp = table_libcollision(yytext)) ) {
+		Error(6, yytext, yylineno);
+		flag = 1;
+	}
+	if (!flag) {
+		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope()+1, currfuncscope(), yylineno);
+	}
+	return temp;
+}
+
+DataItem* idlist_commaid(char* yytext, unsigned yylineno) {
+	DataItem* temp;
+	int flag = 0;
+	if ( (temp = table_lookup(yytext, currscope()+1))) {
+		Error(8, yytext, yylineno);
+		flag = 1;
+	}
+	if ( (temp = table_libcollision(yytext))) {
+		Error(6, yytext, yylineno);
+		flag = 1;
+	}
+	if (!flag) {
+		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope()+1, currfuncscope(), yylineno);
+	}
+	return temp;
 }
 
 SymTable *create_new_symtable() {
-    	unsigned int i;
+    	int i;
     	SymTable *new_sym = (SymTable*) malloc(sizeof(SymTable*));
     	new_sym->table = (DataItem**) malloc(509*sizeof(DataItem));
     	new_sym->size = 0;
     	new_sym->buckets = 509;
-    	for (i=0; i<new_sym->buckets; i++) {
-        	new_sym->table[i] = (DataItem*) malloc(sizeof(DataItem));
-        	new_sym->table[i]->value = -1;
-        	new_sym->table[i]->next = NULL;
-    	}
+
+	for (i=0; i<new_sym->buckets; i++) {
+		new_sym->table[i] = (DataItem*) malloc(sizeof(DataItem));
+		new_sym->table[i] = NULL;
+	}
     	return new_sym;
 }
-
 int get_next_size(int n) {
     	switch(n) {
         	case 509: return 1021;
@@ -229,7 +243,7 @@ int get_next_size(int n) {
     	return 0;
 }
 
-int hash_function(char* name){
+int hash_function(const char* name){
   	size_t ui;
   	unsigned int uiHash = 0U;
   	for (ui = 0U; name[ui] != '\0'; ui++){
@@ -262,8 +276,32 @@ void expand() {
     	free_table(old_sym);
 }
 
-DataItem* table_insert(char* name, const char* type, int value, int scope, int funcscope, int line){
-    	DataItem *new_item = create_item(name, type, value, scope, funcscope, line);
+DataItem* table_lookup(const char* name, unsigned scope) {
+	DataItem* temp;
+	temp = symtable->table[hash_function(name)];
+	while (temp) {
+		if ( strcmp(temp->sym->name, name) == 0 && temp->sym->scope == scope) {
+			return temp;
+		}
+		temp = temp->next;
+	}
+	return NULL;
+}
+
+DataItem* table_libcollision(const char* name) {
+	DataItem* temp;
+	temp = symtable->table[hash_function(name)];
+	while (temp) {
+		if ( strcmp(temp->sym->name, name) == 0 && temp->sym->type == libraryfunc_s) {
+			return temp;
+		}
+		temp = temp->next;
+	}
+	return NULL;
+}
+
+DataItem* table_insert(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line){
+    	DataItem *new_item = create_item(type, name, space, offset, scope, funcscope, line);
     	DataItem* tmp;
     	int hash;
     	if (symtable->size == symtable->buckets-1) {
@@ -278,13 +316,13 @@ DataItem* table_insert(char* name, const char* type, int value, int scope, int f
         	new_item->next = symtable->table[hash];
         	symtable->table[hash]= new_item;
     	}
-    	if(scope_head == NULL || (scope_head->sym->scope >= new_item->sym->scope && new_item->value == 7)){
+    	if(scope_head == NULL || (scope_head->sym->scope >= new_item->sym->scope)){
       		new_item->scopenext = scope_head;
       		scope_head = new_item;
     	} else{
       		tmp = scope_head;
-      		while(tmp->scopenext != NULL && (tmp->sym->scope < new_item->sym->scope  || tmp->value == 7)){
-        		tmp = tmp->scopenext;
+      		while(tmp->scopenext != NULL && (tmp->sym->scope < new_item->sym->scope) ){
+        			tmp = tmp->scopenext;
       		}
       		new_item->scopenext = tmp->scopenext;
       		tmp->scopenext = new_item;
@@ -295,6 +333,7 @@ DataItem* table_insert(char* name, const char* type, int value, int scope, int f
 void print_table() {
    	int i=-1 ;
     	DataItem* tmp = scope_head;
+	printf("--------------------------Scope #%d -------------------------- \n" ,++i);
     	while(tmp != NULL){
       		if(tmp->sym->scope > i) printf("--------------------------Scope #%d -------------------------- \n" ,++i);
       		printf("\"%s\" %s (line %d) (scope %d) (hide %d)\n", tmp->sym->name, tmp->type,tmp->sym->line, tmp->sym->scope , tmp->hide);
@@ -310,33 +349,27 @@ void hide(int scope) {
   	}
 }
 
-DataItem* create_item(char* name, const char* type, int value, int scope, int funcscope, int line){
+DataItem* create_item(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line) {
     	DataItem* new_data;
-    	new_data = (DataItem*)malloc(sizeof(DataItem));
+    	new_data = (DataItem*) malloc(sizeof(DataItem));
+	new_data->sym = (Symbol*) malloc(sizeof(Symbol));
     	new_data->sym->name = strdup(name);
-    	new_data->type = strdup(type);
+	new_data->sym->type = type;
+	new_data->sym->space = space;
+	new_data->sym->offset = offset;
+	new_data->sym->scope = scope;
+	new_data->sym->line = line;
 
-     if ( strcmp(type, "[library function]") == 0) {
-          new_data->sym->type = libraryfunc_s;
-     }
-     else if ( strcmp(type, "[formal argument]") == 0) {
-          new_data->sym->type = var_s;
-     }
-     else if ( strcmp(type, "[userfunc]") == 0) {
-          new_data->sym->type = programfunc_s;
-     }
-     else if ( strcmp(type, "[userfunc noname]")) {
-          new_data->sym->type = programfunc_s;
-     }
-     else {
-          new_data->sym->type = var_s;
-     }
+	switch (type) {
+		case 0	:	new_data->type = strdup("[local variable]");		break;
+		case 1	:	new_data->type = strdup("[global variable]"); 	break;
+		case 2	:	new_data->type = strdup("[variable]");			break;
+		case 3	:	new_data->type = strdup("[userfunc]");			break;
+		case 4	:	new_data->type = strdup("[userfunc noname]"); 	break;
+		case 5	:	new_data->type = strdup("[library function]");	break;
+		default: assert(0);
+	}
 
-     new_data->sym->space = currscopespace();
-     new_data->sym->offset = currscopespaceoffset();
-    	new_data->sym->scope = scope;
-    	new_data->sym->line = line;
-    	new_data->value = value;
     	new_data->funcscope = funcscope;
     	new_data->hide = false;
     	new_data->next = NULL;
@@ -356,17 +389,4 @@ void free_table(SymTable *freetable) {
         	}
     	}
     	free(freetable);
-}
-
-DataItem* table_get(char* name, unsigned int scope) {
-  	assert(name);
-  	assert(scope >= 0);
-  	DataItem* temp = symtable->table[hash_function(name)];
-  	while(temp) {
-    		if (strcmp(temp->sym->name, name) == 0 && temp->sym->scope == scope) {
-      			return temp;
-    		}
-    		temp = temp->next;
-  	}
-  	return NULL;
 }

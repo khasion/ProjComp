@@ -1,5 +1,45 @@
 #include "quads.h"
 
+Quad* quads = (Quad*) 0;
+unsigned total = 0;
+unsigned int currQuad = 0;
+
+unsigned int tempcounter = 0;
+
+void make_stmt(Stmt_t* s) {
+	s->breaklist = s->contlist = 0;
+}
+
+int newlist(int i) {
+	quads[i].label = 0;
+	return i;
+}
+
+int mergelist (int l1, int l2) {
+	if (!l1) {
+		return l2;
+	}
+	else	if (!l2) {
+		return l1;
+	}
+	else {
+		int i = l1;
+		while (quads[i].label) {
+			i = quads[i].label;
+		}
+		quads[i].label = l2;
+		return l1;
+	}
+}
+
+void patchlist (int list, int label) {
+	while (list) {
+		int next = quads[list].label;
+		quads[list].label = label;
+		list = next;
+	}
+}
+
 void init_quad() {
 	quads = (Quad*) malloc(NEW_SIZE);
 	currQuad = 0;
@@ -49,12 +89,12 @@ void resettemp() {
 
 Symbol* newtemp() {
 	char* name = newtempname();
-	Symbol* temp = table_get(name, currscope())->sym;
+	Symbol* temp = table_lookup(name, currscope())->sym;
 	if (temp) {
 		return temp;
 	}
-	table_insert(name, "[Temporary var]", -1, currscope(), 0, 0);
-	return table_get(name, currscope())->sym;
+	table_insert(var_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+	return table_lookup(name, currscope())->sym;
 }
 
 Expr* newexpr(Expr_t t) {
@@ -74,6 +114,10 @@ Expr* newexpr_conststring(char* s) {
      Expr* e = newexpr(conststring_e);
      e->strConst = strdup(s);
      return e;
+}
+
+Quad* nextquad() {
+	return &quads[nextquadlabel()];
 }
 
 unsigned nextquadlabel(void){

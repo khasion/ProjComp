@@ -1,14 +1,22 @@
 #include "table.h"
 
+#ifndef QUADS_H
+#define QUADS_H
+
+typedef struct stmt_t {
+	int breaklist;
+	int contlist;
+}Stmt_t;
+
 typedef enum iopcode {
-	assign,	op_add,	op_sub,
-	op_mul,	op_div,	op_mod,
-	uminus,	con_and, con_or,
+	assign,		op_add,		op_sub,
+	op_mul,		op_div,		op_mod,
+	uminus,		con_and, 		con_or,
 	con_not,		if_eq,		if_noteq,
 	if_lesseq,	if_greatereq,	if_less,
 	if_greater,	call,		param,
 	ret,			getretval,	funcstart,
-	funcend,		tablecreate,	
+	funcend,		tablecreate,	jump,	
 	tablegetelem,	tablesetelem
 }Opcode;
 
@@ -50,15 +58,16 @@ typedef struct quad {
 	unsigned line;
 }Quad;
 
-Quad* quads = (Quad*) 0;
-unsigned total = 0;
-unsigned int currQuad = 0;
-
-unsigned int tempcounter = 0;
 
 #define EXPAND_SIZE 1024
 #define CURR_SIZE (total*sizeof(Quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(Quad)+CURR_SIZE)
+
+void make_stmt(Stmt_t* s);
+int newlist(int i);
+
+int mergelist(int l1, int l2);
+void patchlist(int list, int label);
 
 void init_quad();
 void expand_quad();
@@ -71,9 +80,10 @@ Symbol* newtemp();
 Expr* newexpr(Expr_t type);
 Expr* newexpr_constbool(unsigned char boolean);
 
-int currscope();
-
 unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label);
 
 Expr* lvalue_expr(Symbol* sym);
+Quad* nextquad();
+
+#endif
