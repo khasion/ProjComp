@@ -71,12 +71,12 @@ stmt: 		expr SEMI {;}
 			| returnstmt {;}
 			| BREAK SEMI {
 					//$$.breaklist = newlist(nextquad()); 
-					emit(jump, NULL, NULL, NULL, NULL, yylineno);  
+					//emit(jump, NULL, NULL, NULL, NULL, yylineno);  
 					if (gloop == 0) Error(3, yytext, yylineno);
 			}
 			| CONTINUE SEMI {
 					//$$.contlist = newlist(nextquad()); 
-					emit(jump, NULL, NULL, NULL, NULL, yylineno); 
+					//emit(jump, NULL, NULL, NULL, NULL, yylineno); 
 					if (gloop == 0) Error(4, yytext, yylineno);
 			}
 			| block {;}
@@ -266,7 +266,7 @@ indexedelem: 	LC_BRA  expr COLON expr RC_BRA
             	;
 
 
- rec_stmt: 	rec_stmt stmt{;}
+rec_stmt: 	rec_stmt stmt{;}
           	| {;}
           	;
 
@@ -281,7 +281,7 @@ funcname:		ID {
 				funcname_noname(yytext, yylineno);
       			//$$ = newtempname();
     			}
-          ;
+          	;
 funcprefix: 	FUNC funcname { 
 				/*
     				$$ = create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno)->sym->name; 
@@ -294,16 +294,18 @@ funcprefix: 	FUNC funcname {
 			}
       		;
 funcargs: 	L_PAR idlist R_PAR {
+				enterfuncscope();
   				enterscopespace();
   				resetfunctionlocaloffset();
 			}
-      ;
+      		;
 funcbody: 	block {
+				exitfuncscope();
 				currscopespaceoffset();
   				/*$$ = currscopespaceoffset();*/
   				exitscopespace();
 			}
-      ;
+      		;
        
 funcblockstart:{ /*push(loopcounterstack, loopcounter); loopcounter=0; */}; 
 funcblockend:	{ /*loopcounter = pop(loopcounterstack);*/ }
@@ -325,7 +327,7 @@ const: 	INT{;}
 		| FALSE{;}
 		;
 
-idlist:	ID{ idlist_id(yytext, yylineno);}
+idlist:	ID{idlist_id(yytext, yylineno);}
 		|idlist COMMA ID {idlist_commaid(yytext, yylineno);}
 		| {;}
 		;

@@ -114,7 +114,7 @@ DataItem* lvalue_id (char* yytext, unsigned yylineno) {
 	int flag = 0;
 	while (tempscope >= 0) {
 		temp = table_lookup(yytext, tempscope--);
-		if (temp && ( temp->sym->type == programfunc_s || ( temp->hide || ( !temp->hide && (funcscope == temp->funcscope || temp->sym->scope == 0)) )) ) {
+		if (temp && ( temp->sym->type == programfunc_s || ( temp->hide || ( !temp->hide && (currfuncscope() == temp->funcscope || temp->sym->scope == 0)) )) ) {
 			flag = 1;
 			break;
 		}
