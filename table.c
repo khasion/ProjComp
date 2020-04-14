@@ -93,18 +93,18 @@ void incurrscopeoffset(void) {
 void Error(int i , char* name, int line)
 {
 	switch(i) {
-		case 0: 	printf("ERROR: Using ProgramFunc as an lvalue at line: %d\n", line); break;
-		case 1: 	printf("ERROR:Using LibFunc as an lvalue at line: %d\n", line); break;
-		case 2: 	printf("Use of 'return' while not in a function at line %d\n", line); break; 
-		case 3:	printf("Use of 'break' while not in a loop at line %d\n", line); break;
-		case 4:	printf("Use of 'continue' while not in a loop at line %d\n", line); break;
-		case 5:	printf("ERROR : No global variable '::%s' exists at Line:%d \n", name, line); break;
-		case 6:	printf("Collision with '%s' library function at line: %d\n", name, line); break;
-		case 7:	printf("User function '%s',Collision with '%s' library function at line: %d\n", name , name , line); break;
-		case 8:	printf("Error: Variable '%s' already defined at Line: %d \n", name, line ); break;
-		case 9:	printf("Error: Collision with function named '%s' defined at line %d \n", name , line ); break;
-		case 10:	printf("ERROR: Variable '%s' already defined at Line: %d \n", name, line); break;
-		case 11:	printf("ERROR:Cannot access '%s' inside function  at Line: '%d'  \n", name, line); break;
+		case 0: 	printf("Error  :  Using ProgramFunc as an lvalue at line: %d\n", line); break;
+		case 1: 	printf("Error  :  Using LibFunc as an lvalue at line: %d\n", line); break;
+		case 2: 	printf("Error  :  Use of 'return' while not in a function at line: %d\n", line); break; 
+		case 3:	printf("Error  :  Use of 'break' while not in a loop at line: %d\n", line); break;
+		case 4:	printf("Error  :  Use of 'continue' while not in a loop at line: %d\n", line); break;
+		case 5:	printf("Error  :  No global variable '::%s' exists at Line: %d\n", name, line); break;
+		case 6:	printf("Error  :  Collision with '%s' library function at line: %d\n", name, line); break;
+		case 7:	printf("Error  :  User function '%s',Collision with '%s' library function at line: %d\n", name , name , line); break;
+		case 8:	printf("Error  :  Variable '%s' already defined at Line: %d \n", name, line ); break;
+		case 9:	printf("Error  :  Collision with function named '%s' defined at line: %d \n", name , line ); break;
+		case 10:	printf("Error  :  Variable '%s' already defined at Line: %d \n", name, line); break;
+		case 11:	printf("Error  :  Cannot access '%s' inside function  at Line: '%d'  \n", name, line); break;
 	}
 }
 
@@ -195,7 +195,7 @@ DataItem* idlist_id(char* yytext, unsigned yylineno) {
 		flag = 1;
 	}
 	if (!flag) {
-		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope()+1, currfuncscope(), yylineno);
+		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope()+1, currfuncscope()+1, yylineno);
 	}
 	return temp;
 }
@@ -212,7 +212,7 @@ DataItem* idlist_commaid(char* yytext, unsigned yylineno) {
 		flag = 1;
 	}
 	if (!flag) {
-		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope()+1, currfuncscope(), yylineno);
+		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope()+1, currfuncscope()+1, yylineno);
 	}
 	return temp;
 }
