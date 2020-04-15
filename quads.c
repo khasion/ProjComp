@@ -15,6 +15,15 @@ int newlist(int i) {
 	return i;
 }
 
+
+Expr* member_item (Expr* lv, char* name) { 
+	lv = emit_iftableitem(lv); // Emit code if r-value use of table item 
+	Expr* ti = newexpr(tableitem_e); // Make a new expression 
+	ti->sym = lv->sym; 
+	ti->index = newexpr_conststring(name);// Const string index 
+	return ti; 
+}
+
 int mergelist (int l1, int l2) {
 	if (!l1) {
 		return l2;
@@ -65,6 +74,19 @@ void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned
 	p->result = res;
 	p->label = label;
 	p->line = line;
+}
+
+Expr* make_call(Expr* lv, Expr* reversed_elist) {
+	Expr* func = emit_iftableitem(lv);
+	while (reversed_elist) {
+		emit(param, reversed_elist, NULL, NULL);
+		reversed_elist = reversed_elist->next;
+	}
+	emit (call, func, NULL, NULL);
+	Expr* result = newexpr(var_e);
+	result->sym = newtemp();
+	emit(getretval, NULL, NULL, result);
+	return result;
 }
 
 Expr* emit_iftableitem(Expr* e) {
@@ -142,4 +164,16 @@ Expr* lvalue_expr(Symbol* sym){
 		default: assert(0);
 	}
 	return e;
+}
+
+void check_arith(Expr* e, const char* context) {
+	if ( e->type == constbool_e ||
+		e->type == conststring_e ||
+		e->type == nil_e ||
+		e->type == newtable_e ||
+		e->type == programfunc_e ||
+		e->type == libraryfunc_e ||
+		e->type == boolexpr_e) {
+			comperror("Illegal expr used in %s!", context);
+		}
 }

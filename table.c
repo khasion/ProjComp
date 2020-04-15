@@ -118,7 +118,7 @@ DataItem* lvalue_id (char* yytext, unsigned yylineno) {
 			flag = 1;
 			break;
 		}
-		else if (temp) {
+		else if (temp && !(temp = table_libcollision(yytext)) ) {
 			Error(11, yytext, yylineno);
 			flag = 1;
 			break;
@@ -135,6 +135,10 @@ DataItem* lvalue_id (char* yytext, unsigned yylineno) {
 
 DataItem* lvalue_localid(char* yytext, unsigned yylineno) {
 	DataItem* temp;
+	if ( (temp = table_libcollision(yytext))) {
+		Error(6, yytext, yylineno);
+		return temp;
+	}
 	temp = table_lookup(yytext, currscope());
 	if ( !temp || temp->hide) {
 		if (currscope() >= 0) {
@@ -169,7 +173,8 @@ DataItem* funcname_id(char* yytext, unsigned yylineno) {
 	DataItem* temp;
 	int flag = 0;
 	if ( (temp = table_lookup(yytext, currscope()))) {
-		Error(9, yytext, yylineno);
+		if (temp->sym->type <= 2) Error(8, yytext, temp->sym->line);
+		else Error(9, yytext, temp->sym->line);
 		flag = 1;
 	}
 	if ( (temp = table_libcollision(yytext))) {

@@ -63,6 +63,9 @@ typedef struct quad {
 #define CURR_SIZE (total*sizeof(Quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(Quad)+CURR_SIZE)
 
+Expr* member_item (Expr* lv, char* name);
+Expr* emit_iftableitem(Expr* e);
+
 void make_stmt(Stmt_t* s);
 int newlist(int i);
 
@@ -79,6 +82,7 @@ void resettemp();
 Symbol* newtemp(); 
 Expr* newexpr(Expr_t type);
 Expr* newexpr_constbool(unsigned char boolean);
+Expr* newexpr_conststring(char* s);
 
 unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label);

@@ -346,31 +346,3 @@ void insert_list(int line_num, int token_num, char* content, char* type, char* c
  }
  return;
 }
-
-/* int main(int argc, char *argv[]){
-
-  if(argc > 1){
-    if(!(yyin = fopen(argv[1], "r"))){
-      fprintf(stderr,"Cannot open %s\n", argv[1]);
-	return 1;
-    }
-  }else{
-    yyin = stdin;
-  }
-
-  int manos2;
-  char* name;
-
-  manos2 = alpha_yylex(NULL);
-  name = search_name(Enum_array[manos2]);
-  insert_list(yylineno, tokens++, yytext, name, yytext, atoi(yytext));
-    while(manos2 != -1){
-      int manos = alpha_yylex(NULL);
-      name = search_name(Enum_array[manos]);
-      insert_list(yylineno, tokens++, yytext, name, yytext, atoi(yytext));
-      manos2=manos;
-    }
-    print_list(head);
-
-  return 0;
-} */
