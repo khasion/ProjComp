@@ -238,7 +238,7 @@ lvalue: 	ID {
 				  	item->sym->offset = currscopespaceoffset(); 
 					incurrscopeoffset(); 
 				}else{…warningifsymisafunction…}*/ 
-				//$$.sval=lvalue_expr(item); */
+				//$$.sval=lvalue_expr(item);
         			$$ = item->type;
       		}
       		| D_COLON ID {
