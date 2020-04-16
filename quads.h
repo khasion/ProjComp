@@ -16,7 +16,7 @@ typedef enum iopcode {
 	if_lesseq,	if_greatereq,	if_less,
 	if_greater,	call,		param,
 	ret,			getretval,	funcstart,
-	funcend,		tablecreate,	jump,	
+	funcend,		tablecreate,	jump,
 	tablegetelem,	tablesetelem
 }Opcode;
 
@@ -30,9 +30,9 @@ typedef enum expr_t {
 	arithexpr_e,
 	boolexpr_e,
 	assignexpr_e,
-	nevtable_e,
+	newtable_e,
 
-	costnum_e,
+	constnum_e,
 	constbool_e,
 	conststring_e,
 
@@ -41,7 +41,7 @@ typedef enum expr_t {
 
 typedef struct expr {
 	Expr_t type;
-	Symbol* sym;	
+	Symbol* sym;
 	struct expr* index;
 	double numConst;
 	char* strConst;
@@ -79,15 +79,16 @@ void emit();
 
 char* newtempname();
 void resettemp();
-Symbol* newtemp(); 
+Symbol* newtemp();
 Expr* newexpr(Expr_t type);
 Expr* newexpr_constbool(unsigned char boolean);
 Expr* newexpr_conststring(char* s);
+Expr* newexpr_constnum(int i);
 
 unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label);
 
 Expr* lvalue_expr(Symbol* sym);
 Quad* nextquad();
-
+void check_arith(Expr* e);
 #endif

@@ -16,12 +16,12 @@ int newlist(int i) {
 }
 
 
-Expr* member_item (Expr* lv, char* name) { 
-	lv = emit_iftableitem(lv); // Emit code if r-value use of table item 
-	Expr* ti = newexpr(tableitem_e); // Make a new expression 
-	ti->sym = lv->sym; 
-	ti->index = newexpr_conststring(name);// Const string index 
-	return ti; 
+Expr* member_item (Expr* lv, char* name) {
+	lv = emit_iftableitem(lv); // Emit code if r-value use of table item
+	Expr* ti = newexpr(tableitem_e); // Make a new expression
+	ti->sym = lv->sym;
+	ti->index = newexpr_conststring(name);// Const string index
+	return ti;
 }
 
 int mergelist (int l1, int l2) {
@@ -79,13 +79,13 @@ void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned
 Expr* make_call(Expr* lv, Expr* reversed_elist) {
 	Expr* func = emit_iftableitem(lv);
 	while (reversed_elist) {
-		emit(param, reversed_elist, NULL, NULL);
+		emit(param, reversed_elist, NULL, NULL, 69, 69);//lathos emit
 		reversed_elist = reversed_elist->next;
 	}
-	emit (call, func, NULL, NULL);
+	emit (call, func, NULL, NULL, 69, 69); //lathos emit
 	Expr* result = newexpr(var_e);
 	result->sym = newtemp();
-	emit(getretval, NULL, NULL, result);
+	emit(getretval, NULL, NULL, result, 69, 69);//lathos emit
 	return result;
 }
 
@@ -127,15 +127,21 @@ Expr* newexpr(Expr_t t) {
 }
 
 Expr* newexpr_constbool(unsigned char boolean){
-	Expr* tmp = malloc(sizeof(Expr));
+	Expr* tmp = newexpr(constbool_e);
 	tmp->boolConst = boolean;
 	return tmp;
 }
 
 Expr* newexpr_conststring(char* s) {
-     Expr* e = newexpr(conststring_e);
-     e->strConst = strdup(s);
-     return e;
+     Expr* tmp = newexpr(conststring_e);
+     tmp->strConst = strdup(s);
+     return tmp;
+}
+
+Expr* newexpr_constnum(int i){
+	Expr* tmp = newexpr(constnum_e);
+	tmp->numConst = i;
+	return tmp;
 }
 
 Quad* nextquad() {
@@ -166,7 +172,7 @@ Expr* lvalue_expr(Symbol* sym){
 	return e;
 }
 
-void check_arith(Expr* e, const char* context) {
+void check_arith(Expr* e) {
 	if ( e->type == constbool_e ||
 		e->type == conststring_e ||
 		e->type == nil_e ||
@@ -174,6 +180,6 @@ void check_arith(Expr* e, const char* context) {
 		e->type == programfunc_e ||
 		e->type == libraryfunc_e ||
 		e->type == boolexpr_e) {
-			comperror("Illegal expr used in %s!", context);
+			//comperror("Illegal expr used in %s!", context);
 		}
 }
