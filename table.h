@@ -7,7 +7,7 @@
 #ifndef TABLE_H
 #define TABLE_H
 
-#define MAX_HASH 65521
+#define HASH_MULTIPLIER 65599
 
 char* libs[12];
 
@@ -33,12 +33,14 @@ typedef struct symbol {
 	unsigned 		offset;
 	unsigned 		scope;
 	unsigned 		line;
+	unsigned 		iaddress;
+	unsigned		totalLocals;
 }Symbol;
 
 typedef struct dataitem {
 	Symbol* 	sym;
     	char* 	type;
-    	int 		funcscope;
+    	int 	funcscope;
     	bool 	hide; /* true if hidden, else false */
     	struct dataitem* next;
     	struct dataitem* scopenext;
@@ -76,7 +78,7 @@ Scopespace_t currscopespace();
 
 void resetformalargsoffset();
 void resetfunctionlocaloffset();
-void restortcurrscopeoffset();
+void restorecurrscopeoffset();
 
 unsigned currscopespaceoffset();
 void incurrscopeoffset();

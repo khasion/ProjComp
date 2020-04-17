@@ -15,7 +15,6 @@ int newlist(int i) {
 	return i;
 }
 
-
 Expr* member_item (Expr* lv, char* name) { 
 	lv = emit_iftableitem(lv); // Emit code if r-value use of table item 
 	Expr* ti = newexpr(tableitem_e); // Make a new expression 
@@ -79,13 +78,13 @@ void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned
 Expr* make_call(Expr* lv, Expr* reversed_elist) {
 	Expr* func = emit_iftableitem(lv);
 	while (reversed_elist) {
-		emit(param, reversed_elist, NULL, NULL);
+		emit(param, reversed_elist, NULL, NULL, 0, reversed_elist->sym->line);
 		reversed_elist = reversed_elist->next;
 	}
-	emit (call, func, NULL, NULL);
+	emit (call, func, NULL, NULL, 0, 0);
 	Expr* result = newexpr(var_e);
 	result->sym = newtemp();
-	emit(getretval, NULL, NULL, result);
+	emit(getretval, NULL, NULL, result, 0, 0);
 	return result;
 }
 
@@ -99,28 +98,33 @@ Expr* emit_iftableitem(Expr* e) {
      return result;
 }
 
-char* newtempname() {
-	char* name = (char*) malloc(sizeof(char)*3);
-     sprintf(name, "$%d", tempcounter++);
+char* newtempname(void) {
+	char* name = (char*) malloc(sizeof(char)*30);
+    	sprintf(name, "_t%d", ++tempcounter);
 	return name;
 }
 
-void resettemp() {
+void resettemp(void) {
 	tempcounter = 0;
 }
 
-Symbol* newtemp() {
+Symbol* newtemp(void) {
 	char* name = newtempname();
-	Symbol* temp = table_lookup(name, currscope())->sym;
-	if (temp) {
-		return temp;
+	DataItem* temp;
+	Symbol* sym = NULL;
+	if ( (temp = table_lookup(name, currscope()))) {
+		sym = temp->sym;
+	}
+	if (sym) {
+		return sym;
 	}
 	table_insert(var_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+	printf("HELOO\n");
 	return table_lookup(name, currscope())->sym;
 }
 
 unsigned int istempname(char* s) {
-	return *s == '$';
+	return *s == '_';
 }
 
 unsigned int istempexpr(Expr* e) {
@@ -152,11 +156,7 @@ Expr* newexpr_conststring(char* s) {
      return e;
 }
 
-Quad* nextquad() {
-	return &quads[nextquadlabel()];
-}
-
-unsigned nextquadlabel(void){
+unsigned nextquad() {
 	return currQuad;
 }
 

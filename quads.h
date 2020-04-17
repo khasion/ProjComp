@@ -3,6 +3,11 @@
 #ifndef QUADS_H
 #define QUADS_H
 
+typedef struct prefix {
+	int enter;
+	int test;
+}Prefix;
+
 typedef struct stmt_t {
 	int breaklist;
 	int contlist;
@@ -96,11 +101,10 @@ Expr* newexpr_constbool(unsigned char boolean);
 Expr* newexpr_conststring(char* s);
 Expr* newexpr_constnum(double i);
 
-unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label);
 
 Expr* lvalue_expr(Symbol* sym);
-Quad* nextquad();
+unsigned nextquad();
 
 void check_arith(Expr* e, const char* context);
 

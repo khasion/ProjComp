@@ -129,6 +129,7 @@ DataItem* lvalue_id (char* yytext, unsigned yylineno) {
 	}
 	if (!flag) {
 		temp = table_insert(var_s, yytext, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+		incurrscopeoffset();
 	}
 	return temp;
 }
@@ -143,9 +144,11 @@ DataItem* lvalue_localid(char* yytext, unsigned yylineno) {
 	if ( !temp || temp->hide) {
 		if (currscope() >= 0) {
 			temp = table_insert(localvar_s, yytext, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+			incurrscopeoffset();
 		}
 		else {
 			temp = table_insert(globalvar_s, yytext, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+			incurrscopeoffset();
 		}
 	}
 	return temp;
@@ -243,19 +246,18 @@ int get_next_size(int n) {
         	case 4093: return 8191;
         	case 8191: return 16381;
         	case 16381: return 32771;
-        	case 32771: return MAX_HASH;
+        	case 32771: return HASH_MULTIPLIER;
     	}
     	return 0;
 }
 
 int hash_function(const char* name){
   	size_t ui;
-  	unsigned int uiHash = 0U;
+  	unsigned int uiHash = 0;
   	for (ui = 0U; name[ui] != '\0'; ui++){
-  		uiHash = uiHash * MAX_HASH + name[ui];
+  		uiHash = uiHash * HASH_MULTIPLIER + name[ui];
   	}
-
-  	return uiHash%symtable->buckets;
+  	return uiHash%509;
 }
 
 void expand() {
@@ -283,14 +285,19 @@ void expand() {
 
 DataItem* table_lookup(const char* name, unsigned scope) {
 	DataItem* temp;
+	printf("%s\n", name);
+	printf("GIANNIS\n");
 	temp = symtable->table[hash_function(name)];
+	int name1;
 	while (temp) {
-		if ( strcmp(temp->sym->name, name) == 0 && temp->sym->scope == scope) {
+		name1=strcmp(temp->sym->name, name);
+		if ( name1 == 0 && temp->sym->scope == scope) {
 			return temp;
 		}
 		temp = temp->next;
 	}
-	return NULL;
+	printf("BDAJKSD\n");
+	return temp;
 }
 
 DataItem* table_libcollision(const char* name) {
@@ -309,6 +316,11 @@ DataItem* table_insert(Symbol_t type, const char* name, unsigned space, unsigned
     	DataItem *new_item = create_item(type, name, space, offset, scope, funcscope, line);
     	DataItem* tmp;
     	int hash;
+
+	if (scope_head != NULL) {
+		printf("13ASDKJHAL %s %d\n",scope_head->sym->name,scope_head->sym->scope);
+	}
+
     	if (symtable->size == symtable->buckets-1) {
         	expand();
     	}
