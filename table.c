@@ -118,7 +118,7 @@ DataItem* lvalue_id (char* yytext, unsigned yylineno) {
 			flag = 1;
 			break;
 		}
-		else if (temp && !(temp = table_libcollision(yytext)) ) {
+		else if (temp) {
 			Error(11, yytext, yylineno);
 			flag = 1;
 			break;

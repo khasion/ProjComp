@@ -119,6 +119,14 @@ Symbol* newtemp() {
 	return table_lookup(name, currscope())->sym;
 }
 
+unsigned int istempname(char* s) {
+	return *s == '$';
+}
+
+unsigned int istempexpr(Expr* e) {
+	return e->sym && istempname(e->sym->name);
+}
+
 Expr* newexpr(Expr_t t) {
      Expr* e = (Expr*) malloc(sizeof(Expr));
      memset(e, 0, sizeof(Expr));
@@ -130,6 +138,12 @@ Expr* newexpr_constbool(unsigned char boolean){
 	Expr* tmp = malloc(sizeof(Expr));
 	tmp->boolConst = boolean;
 	return tmp;
+}
+
+Expr* newexpr_constnum(double i) {
+	Expr* e = newexpr(constnum_e);
+	e->numConst = i;
+	return e;
 }
 
 Expr* newexpr_conststring(char* s) {
@@ -174,6 +188,6 @@ void check_arith(Expr* e, const char* context) {
 		e->type == programfunc_e ||
 		e->type == libraryfunc_e ||
 		e->type == boolexpr_e) {
-			comperror("Illegal expr used in %s!", context);
+			printf("Illegal expr used in %s!", context);
 		}
 }
