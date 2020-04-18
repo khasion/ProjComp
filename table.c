@@ -108,13 +108,13 @@ void Error(int i , char* name, int line)
 	}
 }
 
-DataItem* lvalue_id (char* yytext, unsigned yylineno) {
-	DataItem* temp;
+Symbol* lvalue_id (char* yytext, unsigned yylineno) {
+	Symbol* temp;
 	int tempscope = currscope();
 	int flag = 0;
 	while (tempscope >= 0) {
 		temp = table_lookup(yytext, tempscope--);
-		if (temp && ( temp->sym->type == programfunc_s || ( temp->hide || ( !temp->hide && (currfuncscope() == temp->funcscope || temp->sym->scope == 0)) )) ) {
+		if (temp && ( temp->type == programfunc_s || ( temp->hide || ( !temp->hide && (currfuncscope() == temp->funcscope || temp->scope == 0)) )) ) {
 			flag = 1;
 			break;
 		}
@@ -124,7 +124,7 @@ DataItem* lvalue_id (char* yytext, unsigned yylineno) {
 			break;
 		}
 	}
-	if (temp && (temp->sym->type == libraryfunc_s || temp->sym->type == programfunc_s)) {
+	if (temp && (temp->type == libraryfunc_s || temp->type == programfunc_s)) {
 		flag = 1;
 	}
 	if (!flag) {
@@ -134,8 +134,8 @@ DataItem* lvalue_id (char* yytext, unsigned yylineno) {
 	return temp;
 }
 
-DataItem* lvalue_localid(char* yytext, unsigned yylineno) {
-	DataItem* temp;
+Symbol* lvalue_localid(char* yytext, unsigned yylineno) {
+	Symbol* temp;
 	if ( (temp = table_libcollision(yytext))) {
 		Error(6, yytext, yylineno);
 		return temp;
@@ -154,8 +154,8 @@ DataItem* lvalue_localid(char* yytext, unsigned yylineno) {
 	return temp;
 }
 
-DataItem* lvalue_dcolonid(char* yytext, unsigned yylineno) {
-	DataItem* temp;
+Symbol* lvalue_dcolonid(char* yytext, unsigned yylineno) {
+	Symbol* temp;
 	temp = table_lookup(yytext, 0);
 	if (!temp) {
 		Error(5, yytext, yylineno);
@@ -164,20 +164,20 @@ DataItem* lvalue_dcolonid(char* yytext, unsigned yylineno) {
 	return temp;
 }
 
-DataItem* funcname_noname(char* yytext, unsigned yylineno) {
+Symbol* funcname_noname(char* yytext, unsigned yylineno) {
 	char* name;
 	name = (char*) malloc(sizeof(char)* 3);
 	sprintf(name, "_f%d", func_id++);
-	DataItem* temp = table_insert(nonameprogramfunc_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+	Symbol* temp = table_insert(nonameprogramfunc_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
 	return temp;
 }
 
-DataItem* funcname_id(char* yytext, unsigned yylineno) {
-	DataItem* temp;
+Symbol* funcname_id(char* yytext, unsigned yylineno) {
+	Symbol* temp;
 	int flag = 0;
 	if ( (temp = table_lookup(yytext, currscope()))) {
-		if (temp->sym->type <= 2) Error(8, yytext, temp->sym->line);
-		else Error(9, yytext, temp->sym->line);
+		if (temp->type <= 2) Error(8, yytext, temp->line);
+		else Error(9, yytext, temp->line);
 		flag = 1;
 	}
 	if ( (temp = table_libcollision(yytext))) {
@@ -190,8 +190,8 @@ DataItem* funcname_id(char* yytext, unsigned yylineno) {
 	return temp;
 }
 
-DataItem* idlist_id(char* yytext, unsigned yylineno) {
-	DataItem* temp;
+Symbol* idlist_id(char* yytext, unsigned yylineno) {
+	Symbol* temp;
 	int flag = 0; 
 	temp = table_lookup(yytext, currscope()+1);
 	if (temp && !temp->hide) {
@@ -208,8 +208,8 @@ DataItem* idlist_id(char* yytext, unsigned yylineno) {
 	return temp;
 }
 
-DataItem* idlist_commaid(char* yytext, unsigned yylineno) {
-	DataItem* temp;
+Symbol* idlist_commaid(char* yytext, unsigned yylineno) {
+	Symbol* temp;
 	int flag = 0;
 	if ( (temp = table_lookup(yytext, currscope()+1))) {
 		Error(8, yytext, yylineno);
@@ -228,12 +228,12 @@ DataItem* idlist_commaid(char* yytext, unsigned yylineno) {
 SymTable *create_new_symtable() {
     	int i;
     	SymTable *new_sym = (SymTable*) malloc(sizeof(SymTable*));
-    	new_sym->table = (DataItem**) malloc(509*sizeof(DataItem));
+    	new_sym->table = (Symbol**) malloc(509*sizeof(Symbol));
     	new_sym->size = 0;
     	new_sym->buckets = 509;
 
 	for (i=0; i<new_sym->buckets; i++) {
-		new_sym->table[i] = (DataItem*) malloc(sizeof(DataItem));
+		new_sym->table[i] = (Symbol*) malloc(sizeof(Symbol));
 		new_sym->table[i] = NULL;
 	}
     	return new_sym;
@@ -258,7 +258,7 @@ int hash_function(const char* name){
   	for (ui = 0U; name[ui] != '\0'; ui++){
   		uiHash = uiHash * HASH_MULTIPLIER + name[ui];
   	}
-  	return uiHash%509;
+  	return uiHash%symtable->buckets;
 }
 
 void expand() {
@@ -266,9 +266,9 @@ void expand() {
     	SymTable *old_sym = symtable;
     	unsigned int i, new_size = get_next_size(symtable->size);
 
-    	new_sym->table = (DataItem**) malloc(new_size*sizeof(DataItem));
+    	new_sym->table = (Symbol**) malloc(new_size*sizeof(Symbol));
     	for (i=0; i<new_size; i++) {
-        	new_sym->table[i] = (DataItem*) malloc(sizeof(DataItem));
+        	new_sym->table[i] = (Symbol*) malloc(sizeof(Symbol));
     	}
 
     	new_sym->size = 0;
@@ -276,7 +276,7 @@ void expand() {
     	symtable = new_sym;
 
     	for (i=0; i<old_sym->size; i++) {
-        	DataItem* temp = old_sym->table[i];
+        	Symbol* temp = old_sym->table[i];
         	while (temp) {
             		temp = temp->next;
         	}
@@ -284,12 +284,12 @@ void expand() {
     	free_table(old_sym);
 }
 
-DataItem* table_lookup(const char* name, unsigned scope) {
-	DataItem* temp;
+Symbol* table_lookup(const char* name, unsigned scope) {
+	Symbol* temp;
 	temp = symtable->table[hash_function(name)];
 	while (temp) {
 		
-		if ( strcmp(temp->sym->name, name) == 0 && temp->sym->scope == scope) {
+		if ( strcmp(temp->name, name) == 0 && temp->scope == scope) {
 			return temp;
 		}
 		temp = temp->next;
@@ -297,11 +297,11 @@ DataItem* table_lookup(const char* name, unsigned scope) {
 	return temp;
 }
 
-DataItem* table_libcollision(const char* name) {
-	DataItem* temp;
+Symbol* table_libcollision(const char* name) {
+	Symbol* temp;
 	temp = symtable->table[hash_function(name)];
 	while (temp) {
-		if ( strcmp(temp->sym->name, name) == 0 && temp->sym->type == libraryfunc_s) {
+		if ( strcmp(temp->name, name) == 0 && temp->type == libraryfunc_s) {
 			return temp;
 		}
 		temp = temp->next;
@@ -309,9 +309,9 @@ DataItem* table_libcollision(const char* name) {
 	return NULL;
 }
 
-DataItem* table_insert(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line){
-    	DataItem *new_item = create_item(type, name, space, offset, scope, funcscope, line);
-    	DataItem* tmp;
+Symbol* table_insert(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line){
+    	Symbol *new_item = create_item(type, name, space, offset, scope, funcscope, line);
+    	Symbol* tmp;
     	int hash;
 
     	if (symtable->size == symtable->buckets-1) {
@@ -327,69 +327,59 @@ DataItem* table_insert(Symbol_t type, const char* name, unsigned space, unsigned
         	symtable->table[hash]= new_item;
     	}
 
-	if ( *name == '_') {
-		printf("name: %s scope : %d\n", new_item->sym->name, new_item->sym->scope);
-		return new_item;
-	}
-
-    	if(scope_head == NULL || (scope_head->sym->scope >= new_item->sym->scope)){
-		//printf("NAME: %s\n", new_item->sym->name);
+    	if(scope_head == NULL || (scope_head->scope >= new_item->scope)){
       	new_item->scopenext = scope_head;
       	scope_head = new_item;
     	} 
 	else {
       	tmp = scope_head;
-      	while(tmp->scopenext != NULL && (tmp->sym->scope < new_item->sym->scope) ){
+      	while(tmp->scopenext != NULL && (tmp->scope < new_item->scope) ){
         		tmp = tmp->scopenext;
       	}
       	new_item->scopenext = tmp->scopenext;
       	tmp->scopenext = new_item;
     	}
-	    
     	return new_item;
 }
 
 void print_table() {
    	int i=-1 ;
-    	DataItem* tmp = scope_head;
+    	Symbol* tmp = scope_head;
 	printf("--------------------------Scope #%d -------------------------- \n" ,++i);
     	while(tmp != NULL){
-      		if(tmp->sym->scope > i) printf("--------------------------Scope #%d -------------------------- \n" ,++i);
-      		printf("\"%s\" %s (line %d) (scope %d) (hide %d)\n", tmp->sym->name, tmp->type,tmp->sym->line, tmp->sym->scope , tmp->hide);
+      		if(tmp->scope > i) printf("--------------------------Scope #%d -------------------------- \n" ,++i);
+      		printf("\"%s\" %s (line %d) (scope %d) (hide %d)\n", tmp->name, tmp->desc, tmp->line, tmp->scope, tmp->hide);
       		tmp = tmp->scopenext;
     	}
 }
 
 void hide(int scope) {
-  	DataItem *temp = scope_head;
-	printf("MAKE\n");
+  	Symbol *temp = scope_head;
   	while (temp) {
-    		if (temp->sym->scope == scope ) temp->hide = true;
+    		if (temp->scope == scope ) temp->hide = true;
     		temp = temp->scopenext;
   	}
-	printf("UNMAW\n");
 }
 
-DataItem* create_item(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line) {
-    	DataItem* new_data;
-    	new_data = (DataItem*) malloc(sizeof(DataItem));
-	new_data->sym = (Symbol*) malloc(sizeof(Symbol));
-    	new_data->sym->name = strdup(name);
-	new_data->sym->type = type;
-	new_data->sym->space = space;
-	new_data->sym->offset = offset;
-	new_data->sym->scope = scope;
-	new_data->sym->line = line;
-	new_data->sym->iaddress = 0;
-	new_data->sym->totalLocals = 0;
+Symbol* create_item(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line) {
+    	Symbol* new_data;
+    	new_data = (Symbol*) malloc(sizeof(Symbol));
+    	new_data->name = strdup(name);
+	new_data->type = type;
+	new_data->space = space;
+	new_data->offset = offset;
+	new_data->scope = scope;
+	new_data->line = line;
+	new_data->iaddress = 0;
+	new_data->totalLocals = 0;
 
 	switch (type) {
-		case 0	:	new_data->type = strdup("[local variable]");		break;
-		case 1	:	new_data->type = strdup("[global variable]"); 	break;
-		case 2	:	new_data->type = strdup("[variable]");			break;
-		case 3	:	new_data->type = strdup("[userfunc]");			break;
-		case 4	:	new_data->type = strdup("[userfunc noname]"); 	break;
-		case 5	:	new_data->type = strdup("[library function]");	break;
+		case 0	:	new_data->desc = strdup("[local variable]");		break;
+		case 1	:	new_data->desc = strdup("[global variable]"); 	break;
+		case 2	:	new_data->desc = strdup("[variable]");			break;
+		case 3	:	new_data->desc = strdup("[userfunc]");			break;
+		case 4	:	new_data->desc = strdup("[userfunc noname]"); 	break;
+		case 5	:	new_data->desc = strdup("[library function]");	break;
 		default: assert(0);
 	}
 
@@ -403,8 +393,8 @@ DataItem* create_item(Symbol_t type, const char* name, unsigned space, unsigned 
 void free_table(SymTable *freetable) {
     	unsigned int i;
     	for (i=0; i<freetable->buckets; i++) {
-        	DataItem *tmp_curr = freetable->table[i];
-        	DataItem *tmp_next = tmp_curr;
+        	Symbol *tmp_curr = freetable->table[i];
+        	Symbol *tmp_next = tmp_curr;
         	while(tmp_next) {
             		tmp_next = tmp_next->next;
             		free(tmp_curr);

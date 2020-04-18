@@ -2034,8 +2034,8 @@ yyreduce:
   case 43:
 #line 294 "parser.y"
                    {
-         		DataItem* item = lvalue_id(yytext, yylineno);
-			(yyval.exprval) = lvalue_expr(item->sym);
+         		Symbol* item = lvalue_id(yytext, yylineno);
+			(yyval.exprval) = lvalue_expr(item);
    	     }
 #line 2041 "y.tab.c"
     break;
@@ -2043,11 +2043,11 @@ yyreduce:
   case 44:
 #line 298 "parser.y"
                    {
-        		DataItem* item = lvalue_localid(yytext, yylineno);
-			if ( item && item->sym->type == programfunc_s) {
+        		Symbol* item = lvalue_localid(yytext, yylineno);
+			if ( item && item->type == programfunc_s) {
 				fprintf(stderr, "Warning  :  %s is a function.", yytext);
 			}
-			(yyval.exprval) = lvalue_expr(item->sym);
+			(yyval.exprval) = lvalue_expr(item);
       	}
 #line 2053 "y.tab.c"
     break;
@@ -2055,8 +2055,8 @@ yyreduce:
   case 45:
 #line 305 "parser.y"
                      {
-        		DataItem* item = lvalue_dcolonid(yytext, yylineno);
-        		(yyval.exprval) = lvalue_expr(item->sym);
+        		Symbol* item = lvalue_dcolonid(yytext, yylineno);
+        		(yyval.exprval) = lvalue_expr(item);
       	}
 #line 2062 "y.tab.c"
     break;
@@ -2262,7 +2262,7 @@ yyreduce:
   case 72:
 #line 406 "parser.y"
                               { 
-    				(yyval.symval) = *create_item(programfunc_s, (yyvsp[0].strval), currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno)->sym; 
+    				(yyval.symval) = *create_item(programfunc_s, (yyvsp[0].strval), currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno); 
     				(yyval.symval).iaddress = nextquad(); 
     				emit(funcstart, (yyval.symval), NULL, NULL, 0 , yylineno); 
     				/*push(scopeoffsetstack, currscopeoffset());  */

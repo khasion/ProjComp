@@ -65,7 +65,7 @@ void expand_quad() {
 }
 
 void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned line) {
-	if (currQuad == total) expand();
+	if (currQuad == total) expand_quad();
 	Quad* p = quads + currQuad++;
 	p->op = op;
 	p->arg1 = arg1;
@@ -111,12 +111,12 @@ void resettemp(void) {
 
 Symbol* newtemp(void) {
 	char* name = newtempname();
-	DataItem* temp;
+	Symbol* temp;
 	temp = table_lookup(name, currscope());
 	if (!temp) {
-		return table_insert(var_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0)->sym;
+		return table_insert(var_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
 	}
-	return temp->sym;
+	return temp;
 }
 
 unsigned int istempname(char* s) {

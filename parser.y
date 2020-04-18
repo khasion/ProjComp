@@ -292,19 +292,19 @@ primary: 	lvalue { $$ = emit_iftableitem($1);}
        	;
 
 lvalue: 	ID {
-         		DataItem* item = lvalue_id(yytext, yylineno);
-			$$ = lvalue_expr(item->sym);
+         		Symbol* item = lvalue_id(yytext, yylineno);
+			$$ = lvalue_expr(item);
    	     }
       	| LOCAL ID {
-        		DataItem* item = lvalue_localid(yytext, yylineno);
-			if ( item && item->sym->type == programfunc_s) {
+        		Symbol* item = lvalue_localid(yytext, yylineno);
+			if ( item && item->type == programfunc_s) {
 				fprintf(stderr, "Warning  :  %s is a function.", yytext);
 			}
-			$$ = lvalue_expr(item->sym);
+			$$ = lvalue_expr(item);
       	}
       	| D_COLON ID {
-        		DataItem* item = lvalue_dcolonid(yytext, yylineno);
-        		$$ = lvalue_expr(item->sym);
+        		Symbol* item = lvalue_dcolonid(yytext, yylineno);
+        		$$ = lvalue_expr(item);
       	}
       	| member {$$ = $1;}
       	;
@@ -404,7 +404,7 @@ funcname:		ID {
     			}
           	;
 funcprefix: 	FUNC funcname { 
-    				$$ = *create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno)->sym; 
+    				$$ = *create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno); 
     				$$.iaddress = nextquad(); 
     				emit(funcstart, $$, NULL, NULL, 0 , yylineno); 
     				/*push(scopeoffsetstack, currscopeoffset());  */
