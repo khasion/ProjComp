@@ -1,4 +1,5 @@
 %{
+  #include "quads.h"
   #include "y.tab.h"
   #define MAX 100
 

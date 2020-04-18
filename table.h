@@ -40,7 +40,7 @@ typedef struct symbol {
 typedef struct dataitem {
 	Symbol* 	sym;
     	char* 	type;
-    	int 	funcscope;
+    	int 		funcscope;
     	bool 	hide; /* true if hidden, else false */
     	struct dataitem* next;
     	struct dataitem* scopenext;
@@ -52,8 +52,8 @@ typedef struct symtable {
     	unsigned int size;
 }SymTable;
 
-SymTable* symtable;
 DataItem* scope_head;
+SymTable* symtable;
 
 DataItem* lvalue_id(char* yytext, unsigned yylineno);
 DataItem* lvalue_localid(char* yytext, unsigned yylineno);

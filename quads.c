@@ -1,6 +1,6 @@
 #include "quads.h"
 
-Quad* quads = (Quad*) 0;
+Quad* quads = NULL;
 unsigned total = 0;
 unsigned int currQuad = 0;
 
@@ -89,6 +89,7 @@ Expr* make_call(Expr* lv, Expr* reversed_elist) {
 }
 
 Expr* emit_iftableitem(Expr* e) {
+	assert(e);
      if (e->type != tableitem_e) {
           return e;
      }
@@ -99,7 +100,7 @@ Expr* emit_iftableitem(Expr* e) {
 }
 
 char* newtempname(void) {
-	char* name = (char*) malloc(sizeof(char)*30);
+	char* name = (char*) malloc(sizeof(char)*3);
     	sprintf(name, "_t%d", ++tempcounter);
 	return name;
 }
@@ -111,16 +112,11 @@ void resettemp(void) {
 Symbol* newtemp(void) {
 	char* name = newtempname();
 	DataItem* temp;
-	Symbol* sym = NULL;
-	if ( (temp = table_lookup(name, currscope()))) {
-		sym = temp->sym;
+	temp = table_lookup(name, currscope());
+	if (!temp) {
+		return table_insert(var_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0)->sym;
 	}
-	if (sym) {
-		return sym;
-	}
-	table_insert(var_s, name, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-	printf("HELOO\n");
-	return table_lookup(name, currscope())->sym;
+	return temp->sym;
 }
 
 unsigned int istempname(char* s) {
@@ -169,12 +165,25 @@ Expr* lvalue_expr(Symbol* sym){
 	assert(sym);
 	Expr* e = (Expr*) malloc(sizeof(Expr));
 	memset(e, 0, sizeof(Expr));
-	e->next = (Expr*) 0;
-	e->sym = sym;
+	e->next = NULL;
+	e->index = NULL;
+	e->sym = (Symbol*) malloc(sizeof(Symbol));
+	e->sym->name = strdup(sym->name);
+	e->sym->type = sym->type;
+	e->sym->space = sym->space;
+	e->sym->offset = sym->offset;
+	e->sym->scope = sym->scope;
+	e->sym->line = sym->line;
+	e->sym->iaddress = sym->iaddress;
+	e->sym->totalLocals = sym->totalLocals;
+
 	switch(sym->type){
-		case var_s          : e->type = var_e; break;
-		case programfunc_s  : e->type = programfunc_e; break;
-		case libraryfunc_s  : e->type = libraryfunc_e; break;
+		case localvar_s		: e->type = var_e; break;
+		case globalvar_s		: e->type = var_e; break;
+		case var_s          	: e->type = var_e; break;
+		case programfunc_s  	: e->type = programfunc_e; break;
+		case nonameprogramfunc_s	: e->type = programfunc_e; break;
+		case libraryfunc_s  	: e->type = libraryfunc_e; break;
 		default: assert(0);
 	}
 	return e;
