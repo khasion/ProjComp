@@ -197,6 +197,6 @@ void check_arith(Expr* e, const char* context) {
 		e->type == programfunc_e ||
 		e->type == libraryfunc_e ||
 		e->type == boolexpr_e) {
-			printf("Illegal expr used in %s!", context);
+			printf("Illegal expr used in %s!\n", context);
 		}
 }

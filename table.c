@@ -177,7 +177,7 @@ Symbol* funcname_id(char* yytext, unsigned yylineno) {
 	int flag = 0;
 	if ( (temp = table_lookup(yytext, currscope()))) {
 		if (temp->type <= 2) Error(8, yytext, temp->line);
-		else Error(9, yytext, temp->line);
+		else if (temp->type != 5) Error(9, yytext, temp->line);
 		flag = 1;
 	}
 	if ( (temp = table_libcollision(yytext))) {
@@ -339,6 +339,7 @@ Symbol* table_insert(Symbol_t type, const char* name, unsigned space, unsigned o
       	new_item->scopenext = tmp->scopenext;
       	tmp->scopenext = new_item;
     	}
+	symtable->size++;
     	return new_item;
 }
 

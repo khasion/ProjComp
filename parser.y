@@ -186,7 +186,7 @@ expr: 	assignexpr {;}
 
 term: 	L_PAR expr R_PAR {$$ = $2;}
 		| UMINUS expr %prec UMINUS {
-			check_arith($2, yytext);   
+			check_arith($2, $2->sym->name);   
 			$$ = newexpr(arithexpr_e);   
 			$$->sym = istempexpr($2) ? $2->sym : newtemp();
 			emit(uminus, $2, $$,NULL,0,yylineno); }
@@ -198,7 +198,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
 		| D_PLUS lvalue {
 			if($2 != NULL && $2->type == programfunc_e) Error(0, yytext, yylineno);
 			else if($2 != NULL && $2->type == libraryfunc_e) Error(1, yytext, yylineno);
-			check_arith($2, yytext); 
+			check_arith($2, $2->sym->name); 
 			if ($2->type == tableitem_e) { 
 				$$ = emit_iftableitem($2); 
 				emit(op_add, $$, newexpr_constnum(1), $$,0,yylineno); 
@@ -214,7 +214,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
 		| lvalue D_PLUS {
 			if($1 != NULL && $1->type == programfunc_e) Error(0, yytext, yylineno);
 			else if($1 != NULL && $1->type == libraryfunc_e) Error(1,yytext, yylineno);
-			check_arith($$, yytext);
+			check_arith($$, $1->sym->name);
 			$$ = newexpr(var_e); 
 			$$->sym= newtemp();
 			if ($1->type == tableitem_e){ 
@@ -231,7 +231,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
 		| D_MINUS lvalue {
 			if($2 != NULL && $2->type == programfunc_e) Error(0, yytext, yylineno);
 			else if($2 != NULL && $2->type == libraryfunc_e) Error(1, yytext, yylineno);
-			check_arith($2, yytext); 
+			check_arith($2, $2->sym->name); 
 			if ($2->type == tableitem_e) { 
 				$$ = emit_iftableitem($2); 
 				emit(op_sub, $$, newexpr_constnum(1), $$,0,yylineno); 
@@ -247,7 +247,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
 		| lvalue D_MINUS {
 			if($1 != NULL && $1->type == programfunc_e) Error(0, yytext, yylineno);
 			else if($1 != NULL && $1->type == libraryfunc_e) Error(1, yytext, yylineno);
-			check_arith($$, yytext);
+			check_arith($$, $1->sym->name);
 			$$ = newexpr(var_e); 
 			$$->sym= newtemp();
 			if ($1->type == tableitem_e){ 
@@ -292,10 +292,12 @@ primary: 	lvalue { $$ = emit_iftableitem($1);}
        	;
 
 lvalue: 	ID {
+			//printf("lvalue_id:\t%s\n", yytext);
          		Symbol* item = lvalue_id(yytext, yylineno);
 			$$ = lvalue_expr(item);
    	     }
       	| LOCAL ID {
+			//printf("lvalue_localid:\t%s\n", yytext);
         		Symbol* item = lvalue_localid(yytext, yylineno);
 			if ( item && item->type == programfunc_s) {
 				fprintf(stderr, "Warning  :  %s is a function.", yytext);
@@ -303,6 +305,7 @@ lvalue: 	ID {
 			$$ = lvalue_expr(item);
       	}
       	| D_COLON ID {
+			//printf("lvalue_dcolonid:\t%s\n", yytext);
         		Symbol* item = lvalue_dcolonid(yytext, yylineno);
         		$$ = lvalue_expr(item);
       	}
@@ -343,19 +346,19 @@ callsuffix: 	normcall { $$ = $1; }
 
 normcall: 	L_PAR elist R_PAR {
 				$$.elist = $2; 
-				$$.method = false; 
+				$$.method = 0; 
 				$$.name = NULL;
 			};
 
 methodcall: D_DOT ID L_PAR elist R_PAR {
 			$$.elist = $4; 
-			$$.method = true;
+			$$.method = 1;
 			$$.name = $2;
 		};
 
 elist: 		expr {;}
       		| elist COMMA expr {;}
-      		|{;}
+      		|{$$ = NULL;}
       		;
 
 objectdef: 	L_BRA elist R_BRA {
@@ -391,28 +394,31 @@ rec_stmt: 	rec_stmt stmt{;}
           	| {;}
           	;
 
-block:  	LC_BRA {nextscope();} rec_stmt RC_BRA{ hide(currscope()); exitscope();}
+block:  	LC_BRA { nextscope();} rec_stmt RC_BRA{ hide(currscope()); exitscope();}
      	;
 
 funcname:		ID {
+				//printf("funcname_id:\t%s\n", yytext);
 				funcname_id(yytext, yylineno);
-    				//$<exprval>$ = $<exprval>1.value;
+    				$$ = $1;
     			}
     			| {
+				//printf("funcname_noname:\t%s\n", yytext);
 				funcname_noname(yytext, yylineno);
-      			//$<exprval>$ = newtempname();
+      			$$ = newtempname();
     			}
           	;
-funcprefix: 	FUNC funcname { 
+funcprefix: 	FUNC funcname {
     				$$ = *create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno); 
     				$$.iaddress = nextquad(); 
     				emit(funcstart, $$, NULL, NULL, 0 , yylineno); 
-    				/*push(scopeoffsetstack, currscopeoffset());  */
+    				/*push(scopeoffsetstack, currscopeoffset());*/
     				enterscopespace();
     				resetformalargsoffset();
 				
 			}
       		;
+
 funcargs: 	L_PAR idlist R_PAR {
 				enterfuncscope();
   				enterscopespace();
