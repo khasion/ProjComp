@@ -22,10 +22,10 @@
   	char* strval;
   	float floatval;
 	struct expr* exprval;
-	struct stmt_t* stmtval;
-	struct call* callval;
-	struct symbol* symval;
-	struct prefix* prefval;
+	struct stmt_t stmtval;
+	struct call callval;
+	struct symbol symval;
+	struct prefix prefval;
 }
 
 %right ASSIGN
@@ -59,6 +59,7 @@
 %type <prefval> forprefix  
 
 %type <intval> N M funcbody whilestart ifprefix elseprefix whilecond
+
 %type <strval>	indexedelem  rec_stmt block idlist 
 %type <strval> funcname funcargs  
 %type <strval> funcblockend funcblockstart
@@ -80,14 +81,14 @@ stmt: 	expr SEMI {;}
 		| forstmt {;}
 		| returnstmt {;}
 		| break SEMI {
-			make_stmt($1);
-			$$->breaklist = newlist(nextquad()); 
+			make_stmt(&$1);
+			$$.breaklist = newlist(nextquad()); 
 			emit(jump, NULL, NULL, NULL, 0, yylineno);  
 			if (gloop == 0) Error(3, yytext, yylineno);
 		}
 		| continue SEMI {
-			make_stmt($1); 
-			$$->contlist = newlist(nextquad()); 
+			make_stmt(&$1); 
+			$$.contlist = newlist(nextquad()); 
 			emit(jump, NULL, NULL, NULL, NULL, yylineno); 
 			if (gloop == 0) Error(4, yytext, yylineno);
 		}
@@ -98,86 +99,86 @@ stmt: 	expr SEMI {;}
 
 expr: 	assignexpr {;}
 		| expr PLUS expr { 
-        		$<exprval>$ = newexpr(arithexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(arithexpr_e);
+        		$$->sym = newtemp();
         		emit(op_add, $<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
 		}
 		| expr MINUS expr { 
-        		$<exprval>$ = newexpr(arithexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(arithexpr_e);
+        		$$->sym = newtemp();
         		emit(op_sub, $<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
 		}
 		| expr MUL expr { 
-        		$<exprval>$ = newexpr(arithexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(arithexpr_e);
+        		$$->sym = newtemp();
         		emit(op_mul, $<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
 		}
 		| expr DIV expr { 
-        		$<exprval>$ = newexpr(arithexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(arithexpr_e);
+        		$$->sym = newtemp();
         		emit(op_div, $<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
 		}
 		| expr MOD expr { 
-        		$<exprval>$ = newexpr(arithexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(arithexpr_e);
+        		$$->sym = newtemp();
         		emit(op_mod, $<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
 		}
 		| expr GREATER expr { 
-        		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(if_greater, $<exprval>1, $<exprval>3, NULL, nextquad()+3, yylineno);
         		emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
         		emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
         		emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
         	}
 		| expr GREATER_EQ expr {
-        		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(if_greater, $<exprval>1, $<exprval>3, NULL, nextquad()+3, yylineno);
         		emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
         		emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
         		emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
         	}
 		| expr LESS expr { 
-        		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(if_greater, $<exprval>1, $<exprval>3, NULL, nextquad()+3, yylineno);
         		emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
         		emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
         		emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
       	}
 		| expr LESS_EQ expr {
-        		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(if_greater, $<exprval>1, $<exprval>3, NULL, nextquad()+3, yylineno);
         		emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
         		emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
         		emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
       	}
 		| expr EQ expr {
-        		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(if_greater, $<exprval>1, $<exprval>3, NULL, nextquad()+3, yylineno);
         		emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
         		emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
         		emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
       	}
 		| expr NOT_EQ expr {
-        		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(if_greater, $<exprval>1, $<exprval>3, NULL, nextquad()+3, yylineno);
         		emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
         		emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
         		emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
       	}
 		| expr AND expr {
-       		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+       		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(op_and,$<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
       	}
 		| expr OR expr {
-        		$<exprval>$ = newexpr(boolexpr_e);
-        		$<exprval>$->sym = newtemp();
+        		$$ = newexpr(boolexpr_e);
+        		$$->sym = newtemp();
         		emit(op_or ,$<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
       	}
 		| term {;}
@@ -205,7 +206,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
 			} 
 			else { 
 				emit(op_add, $2, newexpr_constnum(1), $2,0,yylineno); 
-				$$ = newexpr(arithexpr_e); 
+				$$ = newexpr(arithexpr_e);
 				$$->sym = newtemp(); 
 				emit(assign, $2, NULL, $$,0,yylineno); 
 			}
@@ -277,11 +278,11 @@ assignexpr:	lvalue ASSIGN expr {
       			if($1 != NULL && $1->type == programfunc_e) Error(0, yytext, yylineno);
 				else if($1 != NULL && $1->type == libraryfunc_e) Error(1, yytext, yylineno);
 				if ($1->type == tableitem_e)  {   
-				emit(tablesetelem, $lvalue, $1->index, $3, 0, yylineno);
-				$$ = emit_iftableitem ($1); 
-				$$->type = assignexpr_e; 
+					emit(tablesetelem, $lvalue, $1->index, $3, 0, yylineno);
+					$$ = emit_iftableitem ($1); 
+					$$->type = assignexpr_e; 
 				}     
-				else {  
+				else {
 					emit(assign, $3,(Expr*) 0, $1, 0, yylineno);  
 					$$ = newexpr(assignexpr_e);
 					$$->sym = newtemp();
@@ -290,12 +291,12 @@ assignexpr:	lvalue ASSIGN expr {
 			}
 			;
 
-primary: lvalue { $<exprval>$ = emit_iftableitem($<exprval>1);}
+primary: 	lvalue { $$ = emit_iftableitem($1);}
        	| call {;}
        	| objectdef {;}
        	| L_PAR funcdef R_PAR {
 			$$ = newexpr(programfunc_e); 
-			$$->sym = $2;
+			$$->sym = &$2;
 		}
        	| const {;}
        	;
@@ -312,8 +313,8 @@ lvalue: 	ID {
 			$$ = lvalue_expr(item->sym);
       	}
       	| D_COLON ID {
-        		DataItem* tmp = lvalue_dcolonid(yytext, yylineno);
-        		$$ = lvalue_expr(tmp->sym);
+        		DataItem* item = lvalue_dcolonid(yytext, yylineno);
+        		$$ = lvalue_expr(item->sym);
       	}
       	| member {$$ = $1;}
       	;
@@ -322,8 +323,8 @@ member: 	lvalue DOT ID {$$ = member_item($1, yytext);}
       	| lvalue L_BRA expr R_BRA {
 			$1 = emit_iftableitem($1); 
 			$$ = newexpr(tableitem_e); 
-			$$->sym = $1->sym; 
-			$$->index = $3; 
+			$$->sym = $1->sym;
+			$$->index = $3;
 		}
       	| call DOT ID {;}
       	| call L_BRA expr R_BRA {;}
@@ -332,34 +333,34 @@ member: 	lvalue DOT ID {$$ = member_item($1, yytext);}
 call: 	call L_PAR elist R_PAR { $$ = make_call($$, $3);} 
     		| lvalue callsuffix {
 			$1 = emit_iftableitem($1); 
-			if ($2->method){ 
+			if ($2.method){ 
 				Expr* t = $1; 
-				$1 = emit_iftableitem(member_item(t, $2->name)); 
-				$2->elist->next = t;
+				$1 = emit_iftableitem(member_item(t, $2.name)); 
+				$2.elist->next = t;
 			} 
-			$$ = make_call($1, $2->elist);
+			$$ = make_call($1, $2.elist);
 		}
     		| L_PAR funcdef R_PAR L_PAR elist R_PAR {
-				Expr* func = newexpr(programfunc_e); 
-				func->sym = $2; 
-				$$ = make_call(func, $elist);
+			Expr* func = newexpr(programfunc_e); 
+			func->sym = &$2; 
+			$$ = make_call(func, $elist);
 		}
     		;
 
-callsuffix: normcall { $$ = $1; }
+callsuffix: 	normcall { $$ = $1; }
           	| methodcall {$$ = $1;}
           	;
 
 normcall: 	L_PAR elist R_PAR {
-			$$->elist = $2; 
-			$$->method = false; 
-			$$->name = NULL;
+				$$.elist = $2; 
+				$$.method = false; 
+				$$.name = NULL;
 			};
 
 methodcall: D_DOT ID L_PAR elist R_PAR {
-			$$->elist = $4; 
-			$$->method = true;
-			$$->name = $2;
+			$$.elist = $4; 
+			$$.method = true;
+			$$.name = $2;
 		};
 
 elist: 		expr {;}
@@ -413,8 +414,8 @@ funcname:		ID {
     			}
           	;
 funcprefix: 	FUNC funcname { 
-    				$$ = create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno)->sym; 
-    				$$->iaddress = nextquad(); 
+    				$$ = *create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno)->sym; 
+    				$$.iaddress = nextquad(); 
     				emit(funcstart, $$, NULL, NULL, 0 , yylineno); 
     				/*push(scopeoffsetstack, currscopeoffset());  */
     				enterscopespace();
@@ -441,7 +442,7 @@ funcblockend:	{ /*loopcounter = pop(loopcounterstack);*/ }
 funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend{
 			//int offset;
   			exitscopespace();
-  			$1->totalLocals = $4;
+  			$1.totalLocals = $4;
   			//offset = pop_and_top(scopeoffsetStack);
 			//restorecurrscopeoffset(offset); 
 			$$ = $1;
@@ -462,9 +463,9 @@ idlist:	ID { idlist_id(yytext, yylineno);}
 		;
 
 ifprefix:	IF L_PAR expr R_PAR {  
-		      	emit(if_eq, $3, newexpr_constbool(1), nextquad()+2, 0, yylineno); 
-		     	$$ = nextquad();   
-	      		emit(jump, NULL , NULL, NULL, 0, yylineno);
+		     emit(if_eq, $3, newexpr_constbool(1), nextquad()+2, 0, yylineno); 
+		     $$ = nextquad();   
+	      	emit(jump, NULL , NULL, NULL, 0, yylineno);
 		} 
 	     ;
 
@@ -501,8 +502,8 @@ whilestmt: 	whilestart whilecond stmt loopstmt{
             		gloop--;
       			emit(jump,NULL, NULL, $1, 0, yylineno);   
       			patchlabel($2, nextquad());   
-      			patchlist($3->breaklist, nextquad());   
-      			patchlist($3->contlist, $1);
+      			patchlist($3.breaklist, nextquad());   
+      			patchlist($3.contlist, $1);
 			} 
       		;
 loopstart:	{ ++loopcounter;};
@@ -519,20 +520,20 @@ M:   {$$ = nextquad();}
      ;
 
 forprefix:	FOR {gloop++;} L_PAR  elist SEMI M expr SEMI {   
-      			$$->test = $M;
-      			$$->enter = nextquad();
+      			$$.test = $M;
+      			$$.enter = nextquad();
       			emit(if_eq, $6, newexpr_constbool(1), 0, 0, yylineno);
 			} 
       		;
 
 forstmt:	forprefix N elist R_PAR N stmt {gloop--;} N loopstmt {
-        		patchlabel($1->enter, $5+1);   
+        		patchlabel($1.enter, $5+1);   
         		patchlabel($2, nextquad());   
-        		patchlabel($5, $1->test);   
+        		patchlabel($5, $1.test);   
         		patchlabel($<intval>7, $2+1); 
 
-		     patchlist($6->breaklist, nextquad());   
-		     patchlist($6->contlist, $2+1);
+		     patchlist($6.breaklist, nextquad());   
+		     patchlist($6.contlist, $2+1);
 		}
     		;
 
@@ -548,7 +549,7 @@ returnstmt: 	RETURN SEMI { if (currfuncscope() == 0) Error(2, yytext, yylineno);
 				if (currfuncscope() == 0) Error(2, yytext, yylineno);
 				emit(ret, NULL, NULL, $2, 69, yylineno);
 	   		}
-        	;
+        		;
 
 %%
 

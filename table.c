@@ -238,6 +238,7 @@ SymTable *create_new_symtable() {
 	}
     	return new_sym;
 }
+
 int get_next_size(int n) {
     	switch(n) {
         	case 509: return 1021;
@@ -285,18 +286,14 @@ void expand() {
 
 DataItem* table_lookup(const char* name, unsigned scope) {
 	DataItem* temp;
-	printf("%s\n", name);
-	printf("GIANNIS\n");
 	temp = symtable->table[hash_function(name)];
-	int name1;
 	while (temp) {
-		name1=strcmp(temp->sym->name, name);
-		if ( name1 == 0 && temp->sym->scope == scope) {
+		
+		if ( strcmp(temp->sym->name, name) == 0 && temp->sym->scope == scope) {
 			return temp;
 		}
 		temp = temp->next;
 	}
-	printf("BDAJKSD\n");
 	return temp;
 }
 
@@ -317,10 +314,6 @@ DataItem* table_insert(Symbol_t type, const char* name, unsigned space, unsigned
     	DataItem* tmp;
     	int hash;
 
-	if (scope_head != NULL) {
-		printf("13ASDKJHAL %s %d\n",scope_head->sym->name,scope_head->sym->scope);
-	}
-
     	if (symtable->size == symtable->buckets-1) {
         	expand();
     	}
@@ -333,17 +326,26 @@ DataItem* table_insert(Symbol_t type, const char* name, unsigned space, unsigned
         	new_item->next = symtable->table[hash];
         	symtable->table[hash]= new_item;
     	}
+
+	if ( *name == '_') {
+		printf("name: %s scope : %d\n", new_item->sym->name, new_item->sym->scope);
+		return new_item;
+	}
+
     	if(scope_head == NULL || (scope_head->sym->scope >= new_item->sym->scope)){
-      		new_item->scopenext = scope_head;
-      		scope_head = new_item;
-    	} else{
-      		tmp = scope_head;
-      		while(tmp->scopenext != NULL && (tmp->sym->scope < new_item->sym->scope) ){
-        			tmp = tmp->scopenext;
-      		}
-      		new_item->scopenext = tmp->scopenext;
-      		tmp->scopenext = new_item;
+		//printf("NAME: %s\n", new_item->sym->name);
+      	new_item->scopenext = scope_head;
+      	scope_head = new_item;
+    	} 
+	else {
+      	tmp = scope_head;
+      	while(tmp->scopenext != NULL && (tmp->sym->scope < new_item->sym->scope) ){
+        		tmp = tmp->scopenext;
+      	}
+      	new_item->scopenext = tmp->scopenext;
+      	tmp->scopenext = new_item;
     	}
+	    
     	return new_item;
 }
 
@@ -359,11 +361,13 @@ void print_table() {
 }
 
 void hide(int scope) {
-  	DataItem *temp1 = scope_head;
-  	while (temp1) {
-    		if (temp1->sym->scope == scope ) temp1->hide = true;
-    		temp1 = temp1->scopenext;
+  	DataItem *temp = scope_head;
+	printf("MAKE\n");
+  	while (temp) {
+    		if (temp->sym->scope == scope ) temp->hide = true;
+    		temp = temp->scopenext;
   	}
+	printf("UNMAW\n");
 }
 
 DataItem* create_item(Symbol_t type, const char* name, unsigned space, unsigned offset, unsigned scope, unsigned funcscope, unsigned line) {
@@ -376,6 +380,8 @@ DataItem* create_item(Symbol_t type, const char* name, unsigned space, unsigned 
 	new_data->sym->offset = offset;
 	new_data->sym->scope = scope;
 	new_data->sym->line = line;
+	new_data->sym->iaddress = 0;
+	new_data->sym->totalLocals = 0;
 
 	switch (type) {
 		case 0	:	new_data->type = strdup("[local variable]");		break;
