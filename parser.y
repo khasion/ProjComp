@@ -224,14 +224,9 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
 				emit( tablesetelem, $1, $1->index, value,0,yylineno); 
 			} 
 			else { 
-				emit(assign, $1, NULL ,$$,0,yylineno); 
-				emit(op_add, $1, newexpr_constnum(1), $1,0,yylineno); 
+				emit(assign, $1, NULL , $$, 0, yylineno); 
+				emit(op_add, $1, newexpr_constnum(1), $1, 0, yylineno); 
 			}
-			else {
-				emit(assign, $lvalue, $term,NULL, 0 , yylineno);
-				emit(op_add, $lvalue, newexpr_constnum(1), $lvalue, 0 , yylineno);
-			}
-
 		}
 		| D_MINUS lvalue {
 			if($2 != NULL && $2->type == programfunc_e) Error(0, yytext, yylineno);
@@ -265,11 +260,6 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
 				emit(assign, $1, NULL ,$$,0,yylineno); 
 				emit(op_sub, $1, newexpr_constnum(1), $1,0,yylineno); 
 			}
-			else {
-				emit(assign, $<exprval>1, $<exprval>$, NULL, 0 , yylineno);
-				emit(op_sub, $<exprval>1, newexpr_constnum(1), $<exprval>1, 0 , yylineno);
-			}
-
 		}
 		| primary {$<exprval>$=$<exprval>1;}
 		;

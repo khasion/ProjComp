@@ -189,7 +189,7 @@ Expr* lvalue_expr(Symbol* sym){
 	return e;
 }
 
-void check_arith(Expr* e) {
+void check_arith(Expr* e, const char* context) {
 	if ( e->type == constbool_e ||
 		e->type == conststring_e ||
 		e->type == nil_e ||
