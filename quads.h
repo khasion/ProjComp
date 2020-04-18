@@ -3,6 +3,11 @@
 #ifndef QUADS_H
 #define QUADS_H
 
+typedef struct prefix {
+	int enter;
+	int test;
+}Prefix;
+
 typedef struct stmt_t {
 	int breaklist;
 	int contlist;
@@ -11,8 +16,8 @@ typedef struct stmt_t {
 typedef enum iopcode {
 	assign,		op_add,		op_sub,
 	op_mul,		op_div,		op_mod,
-	uminus,		con_and, 		con_or,
-	con_not,		if_eq,		if_noteq,
+	uminus,		op_and, 		op_or,
+	op_not,		if_eq,		if_noteq,
 	if_lesseq,	if_greatereq,	if_less,
 	if_greater,	call,		param,
 	ret,			getretval,	funcstart,
@@ -58,12 +63,20 @@ typedef struct quad {
 	unsigned line;
 }Quad;
 
+typedef struct call {
+	Expr*			elist;
+	unsigned char 		method;
+	char* 			name;
+}Call;
 
 #define EXPAND_SIZE 1024
 #define CURR_SIZE (total*sizeof(Quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(Quad)+CURR_SIZE)
 
 Expr* member_item (Expr* lv, char* name);
+
+Expr* make_call(Expr* lv, Expr* reversed_elist);
+
 Expr* emit_iftableitem(Expr* e);
 
 void make_stmt(Stmt_t* s);
@@ -79,16 +92,20 @@ void emit();
 
 char* newtempname();
 void resettemp();
-Symbol* newtemp();
+Symbol* newtemp(); 
+unsigned int istempname(char* s);
+unsigned int istempexpr(Expr* e);
+
 Expr* newexpr(Expr_t type);
 Expr* newexpr_constbool(unsigned char boolean);
 Expr* newexpr_conststring(char* s);
-Expr* newexpr_constnum(int i);
+Expr* newexpr_constnum(double i);
 
-unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label);
 
 Expr* lvalue_expr(Symbol* sym);
-Quad* nextquad();
-void check_arith(Expr* e);
+unsigned nextquad();
+
+void check_arith(Expr* e, const char* context);
+
 #endif
