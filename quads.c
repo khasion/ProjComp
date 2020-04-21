@@ -15,15 +15,15 @@ int newlist(int i) {
 	return i;
 }
 
-Expr* member_item (Expr* lv, char* name) { 
-	lv = emit_iftableitem(lv); // Emit code if r-value use of table item 
-	Expr* ti = newexpr(tableitem_e); // Make a new expression 
-	ti->sym = lv->sym; 
-	ti->index = newexpr_conststring(name);// Const string index 
-	return ti; 
+Expr* member_item (Expr* lv, char* name) {
+	Expr* ti = newexpr(tableitem_e); // Make a new expression
+	lv = emit_iftableitem(lv); // Emit code if r-value use of table item
+	ti->sym = lv->sym;
+	ti->index = newexpr_conststring(name);// Const string index
+	return ti;
 }
 
-int mergelist (int l1, int l2) {
+X_list* mergelist(X_list* l1, X_list* l2) {
 	if (!l1) {
 		return l2;
 	}
@@ -31,11 +31,11 @@ int mergelist (int l1, int l2) {
 		return l1;
 	}
 	else {
-		int i = l1;
+		int i = l1->label;
 		while (quads[i].label) {
 			i = quads[i].label;
 		}
-		quads[i].label = l2;
+		quads[i].label = l2->label;
 		return l1;
 	}
 }
@@ -161,6 +161,22 @@ void patchlabel(unsigned quadNo, unsigned label){
 	quads[quadNo].label = label;
 }
 
+void backpatch (X_list* list, unsigned label){
+	X_list* tmp_head = list;
+	while(tmp_head != NULL){
+		quads[tmp_head->label].label = label;
+		tmp_head = tmp_head->next;
+	}
+}
+
+X_list* makelist(unsigned label){
+	X_list* new_node = malloc(sizeof(X_list));
+	new_node->label = label;
+	new_node->next = NULL;
+	return new_node;
+}
+
+
 Expr* lvalue_expr(Symbol* sym){
 	assert(sym);
 	Expr* e = (Expr*) malloc(sizeof(Expr));
@@ -199,4 +215,13 @@ void check_arith(Expr* e, const char* context) {
 		e->type == boolexpr_e) {
 			printf("Illegal expr used in %s!\n", context);
 		}
+}
+
+void print_intermadiate(){
+	int i;
+	char* iopcode_array[26] = {"assign", "op_add", "op_sub", "op_mul",	"op_div", "op_mod", "uminus",	"op_and", "op_or", "op_not", "if_eq", "if_noteq", "if_lesseq", "if_greatereq",	"if_less", "if_greater",	"call", "param", "ret", "getretval", "funcstart", "funcend", "tablecreate",	"jump", "tablegetelem",	"tablesetelem"};
+	for(i = 0; i < currQuad; i++){
+		printf("%d: ",i);
+		printf("%s \n", iopcode_array[quads[i].op]);
+	}
 }

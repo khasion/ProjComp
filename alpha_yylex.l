@@ -102,9 +102,9 @@ nil       {return NIL;}
 "\"" {
 
     int c;
+    int tasos = 0;
     string_count = -1;
     buffer_count = 1;
-    int tasos = 0;
     buffer = (char*)malloc(buffer_count*MAX*sizeof(char));
     if(buffer == NULL){
       printf("Error in allocating memory!!!\n");
@@ -122,8 +122,7 @@ nil       {return NIL;}
                 return -1;
           }
         }
-        //strcpy(buffer, '\0');
-        //printf("alekosssssssssss\n");
+
         buffer[string_count] = '\0';
         tasos = 1;
         insert_list(yylineno, tokens++, buffer, "STRING", buffer, atoi(yytext));
@@ -275,8 +274,7 @@ nil       {return NIL;}
        strcmp(name, "LESS") == 0 || strcmp(name, "GREATER") == 0 || strcmp(name, "LESS_EQ") == 0 || strcmp(name, "GREATER_EQ") == 0)
       {
          name1 = "OPERATOR";
-        // name1 = strcat(name1, " ");
-         //name1 = strcat(name1, name);
+
       }
 
      else if (strcmp(name , "LC_BRA") == 0 || strcmp(name , "RC_BRA") == 0 || strcmp(name , "L_BRA") == 0 || strcmp(name , "R_BRA") == 0 || strcmp(name , "L_PAR") == 0 ||
@@ -284,26 +282,22 @@ nil       {return NIL;}
         || strcmp(name , "DOT") == 0 || strcmp(name , "D_DOT") == 0)
        {
          name1 = "PUNCTUATION";
-        // name1 = strcat(name1, " ");
-         //name1 = strcat(name1, name);
+
        }
      else if (strcmp(name,"INT") == 0)
      {
        name1 = "INTEGER";
-       //name1 = strcat(name1, " ");
-       //name1 = strcat(name1, name);
+
      }
      else if (strcmp(name , "REAL") == 0 )
      {
        name1 = "REAL";
-       //name1 = strcat(name1, " ");
-       //name1 = strcat(name1, name);
+
      }
      else if (strcmp(name,"ID") == 0)
      {
        name1 = "ID";
-       //name1 = strcat(name1, " ");
-       //name1 = strcat(name1, name);
+
      }
      return name1;
 }
@@ -312,7 +306,7 @@ void print_list(node *head){
   node *tmp = head;
   printf("----------------------------------------------------- Lexical Analysis ----------------------------------------------------- \n");
   while(tmp){
-    //printf("%d: #%d \"%s\" %s %s\n",tmp->line_num, tmp->token_num, tmp->content, tmp->type, tmp->char, tmp->numbervalue);
+
     tmp = tmp->next;
   }
   return;

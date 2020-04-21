@@ -13,6 +13,11 @@ typedef struct stmt_t {
 	int contlist;
 }Stmt_t;
 
+typedef struct x_lists{
+	int label;
+	struct x_lists* next;
+}X_list;
+
 typedef enum iopcode {
 	assign,		op_add,		op_sub,
 	op_mul,		op_div,		op_mod,
@@ -41,8 +46,10 @@ typedef enum expr_t {
 	constbool_e,
 	conststring_e,
 
-	nil_e,
+	nil_e
 }Expr_t;
+
+
 
 typedef struct expr {
 	Expr_t type;
@@ -51,6 +58,8 @@ typedef struct expr {
 	double numConst;
 	char* strConst;
 	unsigned char boolConst;
+	X_list* truelist;
+	X_list* falselist;
 	struct expr* next;
 }Expr;
 
@@ -63,9 +72,10 @@ typedef struct quad {
 	unsigned line;
 }Quad;
 
+
 typedef struct call {
 	Expr*			elist;
-	unsigned char 		method;
+	unsigned char method;
 	char* 			name;
 }Call;
 
@@ -82,7 +92,9 @@ Expr* emit_iftableitem(Expr* e);
 void make_stmt(Stmt_t* s);
 int newlist(int i);
 
-int mergelist(int l1, int l2);
+X_list* mergelist(X_list* l1, X_list* l2);
+X_list* makelist(unsigned label);
+
 void patchlist(int list, int label);
 
 void init_quad();
@@ -92,7 +104,7 @@ void emit();
 
 char* newtempname();
 void resettemp();
-Symbol* newtemp(); 
+Symbol* newtemp();
 unsigned int istempname(char* s);
 unsigned int istempexpr(Expr* e);
 
@@ -107,5 +119,8 @@ Expr* lvalue_expr(Symbol* sym);
 unsigned nextquad();
 
 void check_arith(Expr* e, const char* context);
+void print_intermadiate();
+void backpatch(X_list* list, unsigned label);
+
 
 #endif
