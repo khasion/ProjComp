@@ -222,6 +222,10 @@ void print_intermadiate(){
 	char* iopcode_array[26] = {"assign", "op_add", "op_sub", "op_mul",	"op_div", "op_mod", "uminus",	"op_and", "op_or", "op_not", "if_eq", "if_noteq", "if_lesseq", "if_greatereq",	"if_less", "if_greater",	"call", "param", "ret", "getretval", "funcstart", "funcend", "tablecreate",	"jump", "tablegetelem",	"tablesetelem"};
 	for(i = 0; i < currQuad; i++){
 		printf("%d: ",i);
-		printf("%s \n", iopcode_array[quads[i].op]);
+		printf("%s ", iopcode_array[quads[i].op]);
+		printf("%s ", quads[i].result->sym->name);
+		//if(quads[i].arg1->truelist) printf("manos\n" );
+
+
 	}
 }

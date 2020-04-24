@@ -101,7 +101,7 @@ expr: 	assignexpr {;}
 		| expr PLUS expr {
         		$$ = newexpr(arithexpr_e);
         		$$->sym = newtemp();
-        		emit(op_add, $<exprval>1, $<exprval>3, $<exprval>$, 69, yylineno);
+        		emit(op_add, $1, $3, $$, 69, yylineno);
 		}
 		| expr MINUS expr {
         		$$ = newexpr(arithexpr_e);

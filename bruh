@@ -1,2 +1,1 @@
-print(expr1, expr2, expr3);
-
+x = 1+1;
