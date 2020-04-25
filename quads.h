@@ -13,11 +13,6 @@ typedef struct stmt_t {
 	int contlist;
 }Stmt_t;
 
-typedef struct x_lists{
-	int label;
-	struct x_lists* next;
-}X_list;
-
 typedef enum iopcode {
 	assign,		op_add,		op_sub,
 	op_mul,		op_div,		op_mod,
@@ -52,14 +47,15 @@ typedef enum expr_t {
 
 
 typedef struct expr {
+	int label;
 	Expr_t type;
 	Symbol* sym;
 	struct expr* index;
 	double numConst;
 	char* strConst;
 	unsigned char boolConst;
-	X_list* truelist;
-	X_list* falselist;
+	int truelist;
+	int falselist;
 	struct expr* next;
 }Expr;
 
@@ -72,11 +68,10 @@ typedef struct quad {
 	unsigned line;
 }Quad;
 
-
 typedef struct call {
-	Expr*			elist;
-	unsigned char method;
-	char* 			name;
+	Expr*		elist;
+	unsigned char 	method;
+	char* 		name;
 }Call;
 
 #define EXPAND_SIZE 1024
@@ -92,8 +87,8 @@ Expr* emit_iftableitem(Expr* e);
 void make_stmt(Stmt_t* s);
 int newlist(int i);
 
-X_list* mergelist(X_list* l1, X_list* l2);
-X_list* makelist(unsigned label);
+int mergelist(int l1, int l2);
+Expr* makelist(unsigned label);
 
 void patchlist(int list, int label);
 
@@ -119,8 +114,8 @@ Expr* lvalue_expr(Symbol* sym);
 unsigned nextquad();
 
 void check_arith(Expr* e, const char* context);
-void print_intermadiate();
-void backpatch(X_list* list, unsigned label);
+void print_intermediate();
+void backpatch(Expr* list, unsigned label);
 
 
 #endif

@@ -23,7 +23,7 @@ Expr* member_item (Expr* lv, char* name) {
 	return ti;
 }
 
-X_list* mergelist(X_list* l1, X_list* l2) {
+int mergelist(int l1, int l2) {
 	if (!l1) {
 		return l2;
 	}
@@ -31,11 +31,11 @@ X_list* mergelist(X_list* l1, X_list* l2) {
 		return l1;
 	}
 	else {
-		int i = l1->label;
+		int i = l1;
 		while (quads[i].label) {
 			i = quads[i].label;
 		}
-		quads[i].label = l2->label;
+		quads[i].label = l2;
 		return l1;
 	}
 }
@@ -161,20 +161,20 @@ void patchlabel(unsigned quadNo, unsigned label){
 	quads[quadNo].label = label;
 }
 
-void backpatch (X_list* list, unsigned label){
-	X_list* tmp_head = list;
+void backpatch (Expr* list, unsigned label){
+	Expr* tmp_head = list;
 	while(tmp_head != NULL){
 		quads[tmp_head->label].label = label;
 		tmp_head = tmp_head->next;
 	}
 }
 
-X_list* makelist(unsigned label){
-	X_list* new_node = malloc(sizeof(X_list));
+/*Expr* makelist(unsigned label){
+	Expr* new_node = malloc(sizeof(Expr));
 	new_node->label = label;
 	new_node->next = NULL;
 	return new_node;
-}
+}*/
 
 
 Expr* lvalue_expr(Symbol* sym){
@@ -217,15 +217,30 @@ void check_arith(Expr* e, const char* context) {
 		}
 }
 
-void print_intermadiate(){
+void print_content(Expr* e){
+	if(e->type >=0 || e->type <= 7){
+		printf("%s ",e->sym->name);
+	}else if(e->type == 8){
+		printf("%.2f ",e->numConst);
+	}else if(e->type == 9 && e->boolConst == '0'){
+		printf("FALSE");
+	}else if(e->type == 9 && e->boolConst == '1'){
+		printf("TRUE");
+	}else if(e->type == 10){
+		printf("%s ",e->strConst);
+	}
+}
+
+void print_intermediate(){
 	int i;
-	char* iopcode_array[26] = {"assign", "op_add", "op_sub", "op_mul",	"op_div", "op_mod", "uminus",	"op_and", "op_or", "op_not", "if_eq", "if_noteq", "if_lesseq", "if_greatereq",	"if_less", "if_greater",	"call", "param", "ret", "getretval", "funcstart", "funcend", "tablecreate",	"jump", "tablegetelem",	"tablesetelem"};
+	char* iopcode_array[26] = {"assign", "op_add", "op_sub", "op_mul", "op_div", "op_mod", "tablegetelem",	"tablesetelem", "uminus", "op_and", "op_or", "op_not", "if_eq", "if_noteq", "if_lesseq", "if_greatereq",	"if_less", "if_greater",	"call", "param", "ret", "getretval", "funcstart", "funcend", "tablecreate",	"jump"};
 	for(i = 0; i < currQuad; i++){
 		printf("%d: ",i);
 		printf("%s ", iopcode_array[quads[i].op]);
-		printf("%s ", quads[i].result->sym->name);
-		//if(quads[i].arg1->truelist) printf("manos\n" );
-
-
+		if(quads[i].op >= 1 || quads[i].op <= 7){
+			//if(!quads[i].arg1) print_content(quads[i].arg1);
+			//if(!quads[i].arg2) print_content(quads[i].arg2);
+			//if(!quads[i].result) print_content(quads[i].result);
+		}
 	}
 }
