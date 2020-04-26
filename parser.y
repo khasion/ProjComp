@@ -29,8 +29,8 @@
 }
 
 %right ASSIGN
-%left OR
 %left AND
+%left OR
 %nonassoc EQ NOT_EQ
 %nonassoc GREATER GREATER_EQ LESS LESS_EQ
 %left PLUS MINUS
@@ -219,7 +219,7 @@ expr: 	assignexpr { $$ = $1; }
 
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
-               emit(assign, newexpr_constbool(1), NULL, $$, nextquad(), yylineno);
+               emit(assign, newexpr_constbool(1), NULL, $$, nextquad() + 1, yylineno);
                emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
                emit(assign, newexpr_constbool(0), NULL, $$, nextquad() + 1, yylineno);
           }
@@ -321,10 +321,10 @@ assignexpr:	lvalue ASSIGN expr {
                          $$->type = assignexpr_e;
                     }
                     else {
-                         emit(assign, $1, (Expr*) 0, $3, nextquad() + 1, yylineno);
                          $$ = newexpr(assignexpr_e);
                          $$->sym = newtemp();
-                         emit(assign, $3, (Expr*) 0, $1, nextquad() + 1, yylineno);
+                         emit(assign, $3, (Expr*) 0, $$, nextquad() + 1, yylineno);
+                         emit(assign, $$, (Expr*) 0, $1, nextquad() + 1, yylineno);
                     }
                }
                ;
