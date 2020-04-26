@@ -158,9 +158,9 @@ Grammar
 
   100 forprefix: FOR $@2 L_PAR elist SEMI M expr SEMI
 
-  101 @3: %empty
+  101 $@3: %empty
 
-  102 forstmt: forprefix N elist R_PAR N stmt @3 N loopstmt
+  102 forstmt: forprefix N elist R_PAR N stmt $@3 N loopstmt
 
   103 break: BREAK
 
@@ -355,7 +355,7 @@ Nonterminals, with rules where they appear
     forstmt <stmtval> (92)
         on left: 102
         on right: 6
-    @3 (93)
+    $@3 (93)
         on left: 101
         on right: 102
     break <stmtval> (94)
@@ -1028,7 +1028,7 @@ State 42
 
 State 43
 
-  102 forstmt: forprefix . N elist R_PAR N stmt @3 N loopstmt
+  102 forstmt: forprefix . N elist R_PAR N stmt $@3 N loopstmt
 
     $default  reduce using rule 97 (N)
 
@@ -2125,7 +2125,7 @@ State 103
 
 State 104
 
-  102 forstmt: forprefix N . elist R_PAR N stmt @3 N loopstmt
+  102 forstmt: forprefix N . elist R_PAR N stmt $@3 N loopstmt
 
     NOT      shift, and go to state 1
     D_PLUS   shift, and go to state 2
@@ -3044,7 +3044,7 @@ State 147
 
 State 148
 
-  102 forstmt: forprefix N elist . R_PAR N stmt @3 N loopstmt
+  102 forstmt: forprefix N elist . R_PAR N stmt $@3 N loopstmt
 
     R_PAR  shift, and go to state 173
 
@@ -3426,7 +3426,7 @@ State 172
 
 State 173
 
-  102 forstmt: forprefix N elist R_PAR . N stmt @3 N loopstmt
+  102 forstmt: forprefix N elist R_PAR . N stmt $@3 N loopstmt
 
     $default  reduce using rule 97 (N)
 
@@ -3521,7 +3521,7 @@ State 181
 
 State 182
 
-  102 forstmt: forprefix N elist R_PAR N . stmt @3 N loopstmt
+  102 forstmt: forprefix N elist R_PAR N . stmt $@3 N loopstmt
 
     NOT       shift, and go to state 1
     D_PLUS    shift, and go to state 2
@@ -3633,11 +3633,11 @@ State 187
 
 State 188
 
-  102 forstmt: forprefix N elist R_PAR N stmt . @3 N loopstmt
+  102 forstmt: forprefix N elist R_PAR N stmt . $@3 N loopstmt
 
-    $default  reduce using rule 101 (@3)
+    $default  reduce using rule 101 ($@3)
 
-    @3  go to state 190
+    $@3  go to state 190
 
 
 State 189
@@ -3675,7 +3675,7 @@ State 189
 
 State 190
 
-  102 forstmt: forprefix N elist R_PAR N stmt @3 . N loopstmt
+  102 forstmt: forprefix N elist R_PAR N stmt $@3 . N loopstmt
 
     $default  reduce using rule 97 (N)
 
@@ -3691,7 +3691,7 @@ State 191
 
 State 192
 
-  102 forstmt: forprefix N elist R_PAR N stmt @3 N . loopstmt
+  102 forstmt: forprefix N elist R_PAR N stmt $@3 N . loopstmt
 
     $default  reduce using rule 94 (loopstart)
 
@@ -3701,6 +3701,6 @@ State 192
 
 State 193
 
-  102 forstmt: forprefix N elist R_PAR N stmt @3 N loopstmt .
+  102 forstmt: forprefix N elist R_PAR N stmt $@3 N loopstmt .
 
     $default  reduce using rule 102 (forstmt)

@@ -44,18 +44,15 @@ typedef enum expr_t {
 	nil_e
 }Expr_t;
 
-
-
 typedef struct expr {
-	int label;
 	Expr_t type;
 	Symbol* sym;
 	struct expr* index;
 	double numConst;
 	char* strConst;
 	unsigned char boolConst;
-	int truelist;
-	int falselist;
+	unsigned truelist;
+	unsigned falselist;
 	struct expr* next;
 }Expr;
 
@@ -77,6 +74,8 @@ typedef struct call {
 #define EXPAND_SIZE 1024
 #define CURR_SIZE (total*sizeof(Quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(Quad)+CURR_SIZE)
+
+unsigned get_currquad();
 
 Expr* member_item (Expr* lv, char* name);
 
@@ -115,7 +114,7 @@ unsigned nextquad();
 
 void check_arith(Expr* e, const char* context);
 void print_intermediate();
-void backpatch(Expr* list, unsigned label);
+void backpatch(int list, unsigned label);
 
 
 #endif
