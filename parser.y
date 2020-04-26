@@ -70,13 +70,22 @@ program:	stmt program {;}
           ;
 
 stmts: 	stmts stmt {
-               
+
                $$.breaklist = mergelist($1.breaklist, $2.breaklist);
                $$.contlist = mergelist($1.contlist, $2. contlist);
           }
           | stmt { $$ = $1; }
 
-stmt: 	expr SEMI {resettemp();}
+stmt: 	expr SEMI {
+          resettemp();
+          if($1->type == 5){
+            emit(assign, newexpr_constbool("1"), NULL, $$, 69,yylineno);
+            emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
+            emit(assign, newexpr_constbool("0"), NULL, $$, 69 , yylineno);
+            backpatch($1->truelist, nextquad()-3);
+            backpatch($1->falselist, nextquad()-1);
+          }
+        }
           | ifstmt
           | whilestmt {;}
           | forstmt {;}
@@ -125,79 +134,81 @@ expr: 	assignexpr { $$ = $1; }
                emit(op_mod, $1, $3, $$, nextquad() + 1, yylineno);
           }
           | expr GREATER expr {
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
+               $$ = newexpr(boolexpr_e);
+               $$->sym = newtemp();
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad() + 1);
-               emit(if_less, $1, $3, $$, nextquad() + 3, yylineno);
+               emit(if_greater, $1, $3, $$, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $$, nextquad() + 1, yylineno);
-               emit(jump, NULL, NULL, NULL , nextquad() + 2, yylineno);
+               emit(jump, NULL, NULL, NULL , 0, yylineno);
                //emit(assign, newexpr_constbool('1'), NULL, $$, nextquad() + 1, yylineno);
           }
           | expr GREATER_EQ expr {
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
+               $$ = newexpr(boolexpr_e);
+               $$->sym = newtemp();
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad()+1);
-               emit(if_lesseq, $1, $3, $$, nextquad() + 3, yylineno);
+               emit(if_lesseq, $1, $3, $$, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $$, 69, yylineno);
-               emit(jump, NULL, NULL, NULL , nextquad() + 2, yylineno);
+               emit(jump, NULL, NULL, NULL , 0, yylineno);
                //(assign, newexpr_constbool('1'), NULL, $$, 69 ,yylineno);
           }
           | expr LESS expr {
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
+               $$ = newexpr(boolexpr_e);
+               $$->sym = newtemp();
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad()+1);
-               emit(if_greater, $1, $3, $$, nextquad()+3, yylineno);
+               emit(if_less, $1, $3, $$, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
-               emit(jump, NULL, NULL, NULL , nextquad() + 2, yylineno);
+               emit(jump, NULL, NULL, NULL , 0, yylineno);
                //emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
            }
           | expr LESS_EQ expr {
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
+               $$ = newexpr(boolexpr_e);
+               $$->sym = newtemp();
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad()+1);
-               emit(if_greatereq, $1, $3, $$, nextquad() + 3, yylineno);
+               emit(if_greatereq, $1, $3, $$, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
-               emit(jump, NULL, NULL, NULL , nextquad() + 2, yylineno);
+               emit(jump, NULL, NULL, NULL , 0, yylineno);
                //emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
           }
           | expr EQ expr {
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
+               $$ = newexpr(boolexpr_e);
+               $$->sym = newtemp();
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad()+1);
-               emit(if_eq, $<exprval>1, $<exprval>3, $$, nextquad()+3, yylineno);
+               emit(if_eq, $<exprval>1, $<exprval>3, $$, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
-               emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
+               emit(jump, NULL, NULL, NULL , 0, yylineno);
                //emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
            }
           | expr NOT_EQ expr {
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
+               $$ = newexpr(boolexpr_e);
+               $$->sym = newtemp();
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad()+1);
-               emit(if_noteq, $<exprval>1, $<exprval>3, NULL, nextquad()+3, yylineno);
+               emit(if_noteq, $<exprval>1, $<exprval>3, NULL, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
-               emit(jump, NULL, NULL, NULL , nextquad()+2, yylineno);
+               emit(jump, NULL, NULL, NULL , 0, yylineno);
                //emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
            }
           | expr AND M expr {
+              $$ = newexpr(boolexpr_e);
+              $$->sym = newtemp();
+              printf("%d---------------\n",$3);
                backpatch($1->truelist, $3);
                $$->truelist = $4->truelist;
                $$->falselist = mergelist($1->falselist, $4->falselist);
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
                //emit(op_and,$1, $3, $$, 0, yylineno);
           }
           | expr OR M  expr {
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+                printf("%d---------------\n",$3);
                backpatch($1->falselist, $3);
                $$->truelist = mergelist($1->truelist, $4->falselist);
                $1->falselist = $4->falselist;
-               //$$ = newexpr(boolexpr_e);
-               //$$->sym = newtemp();
                //emit(op_or , $1, $3, $$, 0, yylineno);
           }
           | term {$$ = $1;}
@@ -210,7 +221,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                check_arith($2, $2->sym->name);
                $$ = newexpr(arithexpr_e);
                $$->sym = istempexpr($2) ? $2->sym : newtemp();
-               emit(uminus, $2, $$, NULL, nextquad() + 1,yylineno); }
+               emit(uminus, $2, $$, NULL, 0,yylineno); }
           | NOT expr {
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
@@ -255,7 +266,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                check_arith($2, $2->sym->name);
                if ($2->type == tableitem_e) {
                     $$ = emit_iftableitem($2);
-                    emit(op_sub, $$, newexpr_constnum(1), $$, nextquad() + 1,yylineno);
+                    emit(op_sub, $$, newexpr_constnum(1), $$, 0,yylineno);
                     emit(tablesetelem, $2, $2->index, $$);
                }
                else {
@@ -282,8 +293,8 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                     emit( tablesetelem, $1, $1->index, value,0,yylineno);
                }
                else {
-                    emit(assign, $1, NULL, $$, nextquad() + 1,yylineno);
-                    emit(op_sub, $1, newexpr_constnum(1), $1, nextquad() + 1,yylineno);
+                    emit(assign, $1, NULL, $$, 0,yylineno);
+                    emit(op_sub, $1, newexpr_constnum(1), $1, 0,yylineno);
                }
           }
           | primary {$<exprval>$=$<exprval>1;}
@@ -293,15 +304,15 @@ assignexpr:	lvalue ASSIGN expr {
                     if($1 != NULL && $1->type == programfunc_e) Error(0, yytext, yylineno);
                     else if($1 != NULL && $1->type == libraryfunc_e) Error(1, yytext, yylineno);
                     if ($1->type == tableitem_e)  {
-                         emit(tablesetelem, $lvalue, $1->index, $3, nextquad() + 1, yylineno);
+                         emit(tablesetelem, $lvalue, $1->index, $3, 0, yylineno);
                          $$ = emit_iftableitem ($1);
                          $$->type = assignexpr_e;
                     }
                     else {
-                         emit(assign, $3, (Expr*) 0, $1, nextquad() + 1, yylineno);
+                         emit(assign, $3, (Expr*) 0, $1, 0, yylineno);
                          $$ = newexpr(assignexpr_e);
                          $$->sym = newtemp();
-                         emit(assign, $1, (Expr*) 0, $$, nextquad() + 1, yylineno);
+                         emit(assign, $1, (Expr*) 0, $$, 0, yylineno);
                     }
                }
                ;
@@ -478,8 +489,8 @@ const: 	INT { $$ = newexpr_constnum($1);}
           | REAL { $$ = newexpr_constnum($1);}
           | STRING { $$ = newexpr_conststring($1);}
           | NIL { $$ = newexpr(nil_e);}
-          | TRUE { $$ = newexpr_constbool('1');}
-          | FALSE { $$ = newexpr_constbool('0');}
+          | TRUE { $$ = newexpr_constbool("1");}
+          | FALSE { $$ = newexpr_constbool("0");}
           ;
 
 idlist:	ID { idlist_id(yytext, yylineno);}
@@ -488,7 +499,7 @@ idlist:	ID { idlist_id(yytext, yylineno);}
           ;
 
 ifprefix:	IF L_PAR expr R_PAR {
-               emit(if_eq, $3, newexpr_constbool(1), NULL, nextquad() + 2, yylineno);
+               emit(if_eq, $3, newexpr_constbool("1"), NULL, nextquad() + 2, yylineno);
                $$ = nextquad();
                emit(jump, NULL , NULL, NULL, 0, yylineno);
           }
@@ -516,7 +527,7 @@ whilestart:	WHILE {
                ;
 
 whilecond: 	L_PAR  expr R_PAR{
-                    emit(if_eq, $2, newexpr_constbool(1), nextquad()+2, NULL, 0, yylineno);
+                    emit(if_eq, $2, newexpr_constbool("1"), nextquad()+2, NULL, 0, yylineno);
                     $$ = nextquad();
                     emit(jump, NULL, NULL, NULL, 0, yylineno);
                }
@@ -547,7 +558,7 @@ M:   {$$ = nextquad();}
 forprefix:	FOR {gloop++;} L_PAR  elist SEMI M expr SEMI {
                     $$.test = $M;
                     $$.enter = nextquad();
-                    emit(if_eq, $expr, newexpr_constbool(1), NULL, 0, yylineno);
+                    emit(if_eq, $expr, newexpr_constbool("1"), NULL, 0, yylineno);
                }
                ;
 
@@ -567,7 +578,7 @@ break: BREAK {};
 continue: CONTINUE {};
 
 
-returnstmt: 	RETURN SEMI { 
+returnstmt: 	RETURN SEMI {
                     if (currfuncscope() == 0) Error(2, yytext, yylineno);
                     else {
                          emit(ret, NULL, NULL, NULL, nextquad() + 1, yylineno);

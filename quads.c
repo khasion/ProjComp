@@ -134,9 +134,9 @@ Expr* newexpr(Expr_t t) {
      return e;
 }
 
-Expr* newexpr_constbool(unsigned char boolean){
+Expr* newexpr_constbool(char* boolean){
      Expr* tmp = newexpr(constbool_e);
-     tmp->boolConst = boolean;
+     tmp->boolConst = strdup(boolean);
      return tmp;
 }
 
@@ -208,31 +208,31 @@ void check_arith(Expr* e, const char* context) {
           }
 }
 
-void print_content(Expr* e){
-     if(e->type >=0 || e->type <= 7){
-          printf("%s ",e->sym->name);
-     }else if(e->type == 8){
-          printf("%.2f ",e->numConst);
-     }else if(e->type == 9 && e->boolConst == '0'){
-          printf("FALSE");
-     }else if(e->type == 9 && e->boolConst == '1'){
-          printf("TRUE");
-     }else if(e->type == 10){
-          printf("%s ",e->strConst);
-     }
-}
+// void print_content(Expr* e){
+//      if(e->type >=0 || e->type <= 7){
+//           printf("%s ",e->sym->name);
+//      }else if(e->type == 8){
+//           printf("%.2f ",e->numConst);
+//      }else if(e->type == 9 && e->boolConst == '0'){
+//           printf("FALSE");
+//      }else if(e->type == 9 && e->boolConst == '1'){
+//           printf("TRUE");
+//      }else if(e->type == 10){
+//           printf("%s ",e->strConst);
+//      }
+// }
 
 void print_intermediate(){
      int i;
      char* iopcode_array[26] = {
-          "assign",           "op_add",           "op_sub", 
-          "op_mul",           "op_div",           "op_mod", 
-          "uminus",           "op_and",           "op_or", 
-          "op_not",           "if_eq",            "if_noteq", 
-          "if_lesseq",        "if_greatereq",     "if_less", 
-          "if_greater",	     "call",             "param",	
-          "ret",              "getretval",        "funcstart", 
-          "funcend",          "tablecreate",      "jump", 
+          "assign",           "op_add",           "op_sub",
+          "op_mul",           "op_div",           "op_mod",
+          "uminus",           "op_and",           "op_or",
+          "op_not",           "if_eq",            "if_noteq",
+          "if_lesseq",        "if_greatereq",     "if_less",
+          "if_greater",	     "call",             "param",
+          "ret",              "getretval",        "funcstart",
+          "funcend",          "tablecreate",      "jump",
           "tablegetelem",     "tablesetelem"};
 
      printf("\033[1;32m");
@@ -248,6 +248,6 @@ void print_intermediate(){
           if(quads[i].result && quads[i].result->sym)  printf("\t|%s ", quads[i].result->sym->name);
           else printf("\t|");
           printf("\t|%d\n", quads[i].label);
-          
+
      }
-}     
+}
