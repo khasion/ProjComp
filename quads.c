@@ -137,6 +137,11 @@ Expr* newexpr(Expr_t t) {
 Expr* newexpr_constbool(unsigned char boolean){
      Expr* tmp = newexpr(constbool_e);
      tmp->boolConst = boolean;
+
+     tmp->sym = (Symbol*) malloc(sizeof(Symbol));
+     if (boolean) tmp->sym->name = strdup("'true'");
+     else tmp->sym->name = strdup("'false'");
+
      return tmp;
 }
 
@@ -158,13 +163,11 @@ unsigned nextquad() {
 
 void patchlabel(unsigned quadNo, unsigned label){
      assert(quadNo < currQuad);
-     if ( label > currQuad) {expand_quad();}
      quads[quadNo].label = label;
 }
 
 void backpatch (int list, unsigned label){
      assert(list < currQuad );
-     if ( label > currQuad) {expand_quad();}
      quads[list].label = label;
 }
 
@@ -236,18 +239,19 @@ void print_intermediate(){
           "tablegetelem",     "tablesetelem"};
 
      printf("\033[1;32m");
-     printf("N\t|op\t|arg1\t|arg2\t|result\t|label\n");
+     printf("N\t|%-15s|%-15s|%-15s|%-15s|%-15s\n", "op", "arg1", "arg2", "result", "label");
      printf("\033[0m");
      for(i = 0; i < currQuad; i++){
-          printf("%d:", i);
-          printf("\t|%s", iopcode_array[quads[i].op]);
-          if(quads[i].arg1 && quads[i].arg1->sym)      printf("\t|%s", quads[i].arg1->sym->name );
-          else printf("\t|");
-          if(quads[i].arg2 && quads[i].arg2->sym)      printf("\t|%s ", quads[i].arg2->sym->name);
-          else printf("\t|");
-          if(quads[i].result && quads[i].result->sym)  printf("\t|%s ", quads[i].result->sym->name);
-          else printf("\t|");
-          printf("\t|%d\n", quads[i].label);
+          printf("%d:", i+1);
+          printf("\t|%-15s", iopcode_array[quads[i].op]);
+
+          if( quads[i].arg1 && quads[i].arg1->sym)      printf("|%-15s", quads[i].arg1->sym->name );
+          else printf("|%-15s", "");
+          if(quads[i].arg2 && quads[i].arg2->sym)      printf("|%-15s", quads[i].arg2->sym->name);
+          else printf("|%-15s", "");
+          if(quads[i].result && quads[i].result->sym)  printf("|%-15s", quads[i].result->sym->name);
+          else printf("|%-15s", "");
+          printf("|%-15d\n", quads[i].label + 1);
           
      }
 }     

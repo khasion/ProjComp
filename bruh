@@ -1,3 +1,10 @@
-x=y=10;
+/*x=y=10;
 z=(x+y)*(x-y);
-a = x>=y or y>=z;
+a = x>=y or y>=z;*/
+a;
+b;
+c;
+d;
+e;
+f;
+x = a < b or c < d and e < f;
