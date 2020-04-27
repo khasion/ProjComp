@@ -2,7 +2,7 @@
 
 Quad* quads = NULL;
 unsigned total = 0;
-unsigned int currQuad = 0;
+unsigned int currQuad = 1;
 
 unsigned int tempcounter = 0;
 
@@ -50,11 +50,11 @@ void patchlist (int list, int label) {
 
 void init_quad() {
      quads = (Quad*) malloc(NEW_SIZE);
-     currQuad = 0;
+     currQuad = 1;
 }
 
 void expand_quad() {
-     assert(total == currQuad);
+     assert(total <= currQuad);
      Quad* p = (Quad*) malloc(NEW_SIZE);
      if (quads) {
           memcpy(p, quads, CURR_SIZE);
@@ -168,7 +168,11 @@ void patchlabel(unsigned quadNo, unsigned label){
 
 void backpatch (int list, unsigned label){
      assert(list < currQuad );
-     quads[list].label = label;
+     while (list) {
+          int next = quads[list].label;
+          quads[list].label = label;
+          list = next;
+     }
 }
 
 Expr* lvalue_expr(Symbol* sym){
@@ -241,17 +245,17 @@ void print_intermediate(){
      printf("\033[1;32m");
      printf("N\t|%-15s|%-15s|%-15s|%-15s|%-15s\n", "op", "arg1", "arg2", "result", "label");
      printf("\033[0m");
-     for(i = 0; i < currQuad; i++){
-          printf("%d:", i+1);
+     for(i = 1; i < currQuad; i++){
+          printf("%d:", i);
           printf("\t|%-15s", iopcode_array[quads[i].op]);
 
-          if( quads[i].arg1 && quads[i].arg1->sym)      printf("|%-15s", quads[i].arg1->sym->name );
+          if( quads[i].arg1 && quads[i].arg1->sym)     printf("|%-15s", quads[i].arg1->sym->name);
           else printf("|%-15s", "");
           if(quads[i].arg2 && quads[i].arg2->sym)      printf("|%-15s", quads[i].arg2->sym->name);
           else printf("|%-15s", "");
           if(quads[i].result && quads[i].result->sym)  printf("|%-15s", quads[i].result->sym->name);
           else printf("|%-15s", "");
-          printf("|%-15d\n", quads[i].label + 1);
+          printf("|%-15d\n", quads[i].label);
           
      }
 }     

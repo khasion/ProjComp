@@ -29,8 +29,8 @@
 }
 
 %right ASSIGN
-%left AND
 %left OR
+%left AND
 %nonassoc EQ NOT_EQ
 %nonassoc GREATER GREATER_EQ LESS LESS_EQ
 %left PLUS MINUS
@@ -70,15 +70,15 @@ program:	stmt program {;}
           ;
 
 stmts: 	stmts stmt {
-               
                $$.breaklist = mergelist($1.breaklist, $2.breaklist);
                $$.contlist = mergelist($1.contlist, $2. contlist);
           }
           | stmt { $$ = $1; }
 
-stmt: 	expr SEMI {
+stmt:     expr SEMI {
                resettemp();
                if ($1->type == 5) {
+                    printf("HEY%s\n", $1->sym->name);
                     emit(assign, newexpr_constbool(1), NULL, $$, nextquad(), yylineno);
                     emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
                     emit(assign, newexpr_constbool(0), NULL, $$, nextquad(), yylineno);
@@ -166,8 +166,10 @@ expr: 	assignexpr { $$ = $1; }
           | expr LESS_EQ expr {
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
+
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad()+1);
+
                emit(if_greatereq, $1, $3, $$, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $<exprval>$, 69,yylineno);
                emit(jump, NULL, NULL, NULL , 0, yylineno);
@@ -195,33 +197,30 @@ expr: 	assignexpr { $$ = $1; }
            }
           | expr AND M expr {
                backpatch($1->truelist, $3);
-               backpatch($1->falselist, nextquad() + 1);
 
-               backpatch($4->truelist, nextquad());
-               backpatch($4->falselist, nextquad() + 1);
-
-               //$$->truelist = $4->truelist;
-               //$$->falselist = mergelist($1->falselist, $4->falselist);
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
-               emit(assign, newexpr_constbool(1), NULL, $$, nextquad(), yylineno);
+
+
+               $$->truelist = $4->truelist;
+               $$->falselist = mergelist($1->falselist, $4->falselist);
+
+               /*emit(assign, newexpr_constbool(1), NULL, $$, nextquad(), yylineno);
                emit(jump, NULL, NULL, NULL, nextquad() + 1, yylineno);
-               emit(assign, newexpr_constbool(0), NULL, $$, nextquad() + 1, yylineno);
+               emit(assign, newexpr_constbool(0), NULL, $$, nextquad() + 1, yylineno);*/
           }
           | expr OR M expr {
                backpatch($1->falselist, $3);
-               backpatch($1->truelist, nextquad());
-
-               backpatch($4->falselist, nextquad() + 2);
-               backpatch($4->truelist, nextquad());
-               //$$->truelist = mergelist($1->truelist, $4->truelist);
-               //$1->falselist = $4->falselist;
 
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
-               emit(assign, newexpr_constbool(1), NULL, $$, nextquad() + 1, yylineno);
+
+               $$->truelist = mergelist($1->truelist, $4->truelist);
+               $$->falselist = $4->falselist;
+
+               /*emit(assign, newexpr_constbool(1), NULL, $$, nextquad() + 1, yylineno);
                emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
-               emit(assign, newexpr_constbool(0), NULL, $$, nextquad() + 1, yylineno);
+               emit(assign, newexpr_constbool(0), NULL, $$, nextquad() + 1, yylineno);*/
           }
           | term {$$ = $1;}
           ;
@@ -321,6 +320,17 @@ assignexpr:	lvalue ASSIGN expr {
                          $$->type = assignexpr_e;
                     }
                     else {
+                         if ( $3->type == 5) {
+                              $$ = newexpr(boolexpr_e);
+                              $$->sym = newtemp();
+
+                              backpatch($3->truelist, nextquad());
+                              backpatch($3->falselist, nextquad() + 2);
+
+                              emit(assign, newexpr_constbool(1), (Expr*) 0, $3, nextquad() + 1, yylineno);
+                              emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
+                              emit(assign, newexpr_constbool(0), (Expr*) 0, $3, nextquad() + 1, yylineno);
+                         }
                          $$ = newexpr(assignexpr_e);
                          $$->sym = newtemp();
                          emit(assign, $3, (Expr*) 0, $$, nextquad() + 1, yylineno);
