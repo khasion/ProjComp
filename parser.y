@@ -476,7 +476,7 @@ funcname:		ID {
 funcprefix: 	FUNC funcname {
                     $$ = *create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
                     $$.iaddress = nextquad();
-                    emit(funcstart, $$, NULL, NULL, nextquad(), yylineno);
+                    emit(funcstart, $$, NULL, NULL, nextquad() + 1, yylineno);
                     /*push(scopeoffsetstack, currscopeoffset());*/
                     enterscopespace();
                     resetformalargsoffset();
@@ -623,31 +623,31 @@ void yyerror(char* yaccProovidedMessage) {
 }
 
 int main(int argc, char** argv) {
-       symtable = create_new_symtable();
+     symtable = create_new_symtable();
      init_quad();
-       table_insert(libraryfunc_s, "print", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "input", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "objectmemberkyes", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "objectotslmembers", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "objectcopy", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "totalarguments", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "print", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "input", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "objectmemberkyes", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "objectotslmembers", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "objectcopy", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "totalarguments", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
      table_insert(libraryfunc_s, "argument", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
      table_insert(libraryfunc_s, "typeof", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
      table_insert(libraryfunc_s, "strtonum", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "sqrt", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "cos", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       table_insert(libraryfunc_s, "sin", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
-       if(argc > 1){
-         if(!(yyin = fopen(argv[1], "r"))){
-           fprintf(stderr, "Cannot read  file: %s\n", argv[1]);
-           return 1;
-         }
-       } else {
-              yyin = stdin;
-       }
-       yyparse();
-       //print_table();
+     table_insert(libraryfunc_s, "sqrt", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "cos", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     table_insert(libraryfunc_s, "sin", currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), 0);
+     if(argc > 1){
+          if(!(yyin = fopen(argv[1], "r"))){
+               fprintf(stderr, "Cannot read  file: %s\n", argv[1]);
+               return 1;
+          }
+     } else {
+          yyin = stdin;
+     }
+     yyparse();
+     //print_table();
      print_intermediate();
      free_table(symtable);
-       return 0;
+     return 0;
 }
