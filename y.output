@@ -172,54 +172,54 @@ Grammar
 
 Terminals, with rules where they appear
 
-$end (0) 0
-error (256)
-ASSIGN (258) 36
-OR (259) 26
-AND (260) 25
-EQ (261) 23
-NOT_EQ (262) 24
-GREATER (263) 19
-GREATER_EQ (264) 20
-LESS (265) 21
-LESS_EQ (266) 22
-PLUS (267) 14
-MINUS (268) 15
-MUL (269) 16
-DIV (270) 17
-MOD (271) 18
-NOT (272) 30
-D_PLUS (273) 31 32
-D_MINUS (274) 33 34
-UMINUS (275) 29
-DOT (276) 46 48
-D_DOT (277) 56
-L_BRA (278) 47 49 61 62
-R_BRA (279) 47 49 61 62
-L_PAR (280) 28 40 50 52 55 56 73 87 92 100
-R_PAR (281) 28 40 50 52 55 56 73 87 92 102
-INT (282) 78
-REAL (283) 79
-ID (284) 42 43 44 46 48 56 70 84 85
-STRING (285) 80
-IF (286) 87
-ELSE (287) 88
-WHILE (288) 91
-FOR (289) 100
-FUNC (290) 72
-RETURN (291) 105 106
-BREAK (292) 103
-CONTINUE (293) 104
-LOCAL (294) 43
-TRUE (295) 82
-FALSE (296) 83
-NIL (297) 81
-LC_BRA (298) 65 69
-RC_BRA (299) 65 69
-SEMI (300) 3 8 9 12 100 105 106
-COMMA (301) 59 64 85
-COLON (302) 65
-D_COLON (303) 44
+    $end (0) 0
+    error (256)
+    ASSIGN <strval> (258) 36
+    AND <strval> (259) 25
+    OR <strval> (260) 26
+    EQ <strval> (261) 23
+    NOT_EQ <strval> (262) 24
+    GREATER <strval> (263) 19
+    GREATER_EQ <strval> (264) 20
+    LESS <strval> (265) 21
+    LESS_EQ <strval> (266) 22
+    PLUS <strval> (267) 14
+    MINUS <strval> (268) 15
+    MUL <strval> (269) 16
+    DIV <strval> (270) 17
+    MOD <strval> (271) 18
+    NOT (272) 30
+    D_PLUS <strval> (273) 31 32
+    D_MINUS <strval> (274) 33 34
+    UMINUS <strval> (275) 29
+    DOT <strval> (276) 46 48
+    D_DOT <strval> (277) 56
+    L_BRA <strval> (278) 47 49 61 62
+    R_BRA <strval> (279) 47 49 61 62
+    L_PAR <strval> (280) 28 40 50 52 55 56 73 87 92 100
+    R_PAR <strval> (281) 28 40 50 52 55 56 73 87 92 102
+    INT <intval> (282) 78
+    REAL <floatval> (283) 79
+    ID <strval> (284) 42 43 44 46 48 56 70 84 85
+    STRING <strval> (285) 80
+    IF <strval> (286) 87
+    ELSE <strval> (287) 88
+    WHILE <strval> (288) 91
+    FOR <strval> (289) 100
+    FUNC <strval> (290) 72
+    RETURN <strval> (291) 105 106
+    BREAK <strval> (292) 103
+    CONTINUE <strval> (293) 104
+    LOCAL <strval> (294) 43
+    TRUE <strval> (295) 82
+    FALSE <strval> (296) 83
+    NIL <strval> (297) 81
+    LC_BRA <strval> (298) 65 69
+    RC_BRA <strval> (299) 65 69
+    SEMI <strval> (300) 3 8 9 12 100 105 106
+    COMMA <strval> (301) 59 64 85
+    COLON <strval> (302) 65
+    D_COLON <strval> (303) 44
 
 
 Nonterminals, with rules where they appear
@@ -784,8 +784,8 @@ State 27
    25     | expr . AND M expr
    26     | expr . OR M expr
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -1165,8 +1165,8 @@ State 55
    26     | expr . OR M expr
    57 elist: expr . comma_elist
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -1225,8 +1225,8 @@ State 59
    26     | expr . OR M expr
    28 term: L_PAR expr . R_PAR
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -1325,8 +1325,8 @@ State 66
    26     | expr . OR M expr
   106 returnstmt: RETURN expr . SEMI
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -1380,7 +1380,7 @@ State 71
 
 State 72
 
-   26 expr: expr OR . M expr
+   25 expr: expr AND . M expr
 
     $default  reduce using rule 98 (M)
 
@@ -1389,7 +1389,7 @@ State 72
 
 State 73
 
-   25 expr: expr AND . M expr
+   26 expr: expr OR . M expr
 
     $default  reduce using rule 98 (M)
 
@@ -2150,8 +2150,8 @@ State 108
    26     | expr . OR M expr
    65 indexedelem: LC_BRA expr . COLON expr RC_BRA
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -2261,8 +2261,8 @@ State 116
    26     | expr . OR M expr
    87 ifprefix: IF L_PAR expr . R_PAR
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -2375,7 +2375,7 @@ State 119
 
 State 120
 
-   26 expr: expr OR M . expr
+   25 expr: expr AND M . expr
 
     NOT      shift, and go to state 1
     D_PLUS   shift, and go to state 2
@@ -2406,7 +2406,7 @@ State 120
 
 State 121
 
-   25 expr: expr AND M . expr
+   26 expr: expr OR M . expr
 
     NOT      shift, and go to state 1
     D_PLUS   shift, and go to state 2
@@ -2750,8 +2750,8 @@ State 133
    26     | expr . OR M expr
    36 assignexpr: lvalue ASSIGN expr .
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -2798,8 +2798,8 @@ State 136
    26     | expr . OR M expr
    47 member: lvalue L_BRA expr . R_BRA
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -2845,8 +2845,8 @@ State 139
    26     | expr . OR M expr
    49 member: call L_BRA expr . R_BRA
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -2971,8 +2971,8 @@ State 146
    26     | expr . OR M expr
    92 whilecond: L_PAR expr . R_PAR
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -3059,8 +3059,8 @@ State 151
    26     | expr . OR M expr
    59 comma_elist: COMMA expr . comma_elist
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -3162,10 +3162,10 @@ State 158
    23     | expr . EQ expr
    24     | expr . NOT_EQ expr
    25     | expr . AND M expr
+   25     | expr AND M expr .
    26     | expr . OR M expr
-   26     | expr OR M expr .
 
-    AND         shift, and go to state 73
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -3178,7 +3178,7 @@ State 158
     DIV         shift, and go to state 83
     MOD         shift, and go to state 84
 
-    $default  reduce using rule 26 (expr)
+    $default  reduce using rule 25 (expr)
 
 
 State 159
@@ -3195,8 +3195,8 @@ State 159
    23     | expr . EQ expr
    24     | expr . NOT_EQ expr
    25     | expr . AND M expr
-   25     | expr AND M expr .
    26     | expr . OR M expr
+   26     | expr OR M expr .
 
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
@@ -3210,7 +3210,7 @@ State 159
     DIV         shift, and go to state 83
     MOD         shift, and go to state 84
 
-    $default  reduce using rule 25 (expr)
+    $default  reduce using rule 26 (expr)
 
 
 State 160
@@ -3405,8 +3405,8 @@ State 174
    26     | expr . OR M expr
    65 indexedelem: LC_BRA expr COLON expr . RC_BRA
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
@@ -3612,8 +3612,8 @@ State 189
    26     | expr . OR M expr
   100 forprefix: FOR $@2 L_PAR elist SEMI M expr . SEMI
 
-    OR          shift, and go to state 72
-    AND         shift, and go to state 73
+    AND         shift, and go to state 72
+    OR          shift, and go to state 73
     EQ          shift, and go to state 74
     NOT_EQ      shift, and go to state 75
     GREATER     shift, and go to state 76
