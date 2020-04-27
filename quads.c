@@ -147,7 +147,14 @@ Expr* newexpr_constbool(unsigned char boolean){
 
 Expr* newexpr_constnum(double i) {
      Expr* e = newexpr(constnum_e);
+     char* n;
      e->numConst = i;
+
+     n = (char*) malloc(sizeof(char)*4);
+     sprintf(n, "'%d'", (int)i);
+
+     e->sym = (Symbol*) malloc(sizeof(Symbol));
+     e->sym->name = strdup(n);
      return e;
 }
 
@@ -248,14 +255,15 @@ void print_intermediate(){
      for(i = 1; i < currQuad; i++){
           printf("%d:", i);
           printf("\t|%-15s", iopcode_array[quads[i].op]);
-
-          if( quads[i].arg1 && quads[i].arg1->sym)     printf("|%-15s", quads[i].arg1->sym->name);
-          else printf("|%-15s", "");
-          if(quads[i].arg2 && quads[i].arg2->sym)      printf("|%-15s", quads[i].arg2->sym->name);
-          else printf("|%-15s", "");
-          if(quads[i].result && quads[i].result->sym)  printf("|%-15s", quads[i].result->sym->name);
-          else printf("|%-15s", "");
-          printf("|%-15d\n", quads[i].label);
           
+          if ( (quads + i) != NULL) {
+               if( quads[i].arg1 && quads[i].arg1->sym)     printf("|%-15s", quads[i].arg1->sym->name);
+               else printf("|%-15s", "");
+               if(quads[i].arg2 && quads[i].arg2->sym)      printf("|%-15s", quads[i].arg2->sym->name);
+               else printf("|%-15s", "");
+               if(quads[i].result && quads[i].result->sym)  printf("|%-15s", quads[i].result->sym->name);
+               else printf("|%-15s", "");
+               printf("|%-15d\n", quads[i].label);
+          }
      }
 }     
