@@ -134,7 +134,7 @@ Expr* newexpr(Expr_t t) {
      return e;
 }
 
-Expr* newexpr_constbool(char* boolean){
+Expr* newexpr_constbool(unsigned char boolean){
      Expr* tmp = newexpr(constbool_e);
      tmp->boolConst = boolean;
 

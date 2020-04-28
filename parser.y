@@ -524,7 +524,7 @@ idlist:	ID { idlist_id(yytext, yylineno);}
           ;
 
 ifprefix:	IF L_PAR expr R_PAR {
-               emit(if_eq, $3, newexpr_constbool("1"), NULL, nextquad() + 2, yylineno);
+               emit(if_eq, $3, newexpr_constbool(1), NULL, nextquad() + 2, yylineno);
                $$ = nextquad();
                emit(jump, NULL , NULL, NULL, 0, yylineno);
           }
@@ -552,7 +552,7 @@ whilestart:	WHILE {
                ;
 
 whilecond: 	L_PAR  expr R_PAR{
-                    emit(if_eq, $2, newexpr_constbool("1"), nextquad()+2, NULL, 0, yylineno);
+                    emit(if_eq, $2, newexpr_constbool(1), nextquad()+2, NULL, 0, yylineno);
                     $$ = nextquad();
                     emit(jump, NULL, NULL, NULL, 0, yylineno);
                }
@@ -583,7 +583,7 @@ M:   {$$ = nextquad();}
 forprefix:	FOR {gloop++;} L_PAR  elist SEMI M expr SEMI {
                     $$.test = $M;
                     $$.enter = nextquad();
-                    emit(if_eq, $expr, newexpr_constbool("1"), NULL, 0, yylineno);
+                    emit(if_eq, $expr, newexpr_constbool(1), NULL, 0, yylineno);
                }
                ;
 

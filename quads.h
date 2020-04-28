@@ -50,7 +50,7 @@ typedef struct expr {
 	struct expr* index;
 	double numConst;
 	char* strConst;
-	char* boolConst;
+	unsigned char boolConst;
 	unsigned truelist;
 	unsigned falselist;
 	struct expr* next;
@@ -103,7 +103,7 @@ unsigned int istempname(char* s);
 unsigned int istempexpr(Expr* e);
 
 Expr* newexpr(Expr_t type);
-Expr* newexpr_constbool(char* boolean);
+Expr* newexpr_constbool(unsigned char boolean);
 Expr* newexpr_conststring(char* s);
 Expr* newexpr_constnum(double i);
 
