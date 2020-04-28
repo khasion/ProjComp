@@ -48,7 +48,7 @@
 %token <strval> ASSIGN PLUS MINUS MUL DIV MOD EQ NOT_EQ D_PLUS D_MINUS LESS GREATER LESS_EQ GREATER_EQ
 %token <strval> LC_BRA RC_BRA L_BRA R_BRA L_PAR R_PAR SEMI COMMA COLON D_COLON DOT D_DOT
 
-%type <stmtval> stmt stmts loopstmt ifstmt whilestmt forstmt returnstmt break continue
+%type <stmtval> stmt stmts loopstmt ifstmt whilestmt forstmt returnstmt break continue while_test
 
 %type <exprval> lvalue member primary assignexpr call term objectdef const expr elist comma_elist indexed
 
@@ -195,31 +195,59 @@ expr: 	assignexpr { $$ = $1; }
                emit(jump, NULL, NULL, NULL , 0, yylineno);
                //emit(assign, newexpr_constbool('1'), NULL, $<exprval>$, 69 , yylineno);
            }
-          | expr AND M expr {
+          | expr AND {
+            if($1->type != 5){
+              $1->truelist = newlist(nextquad());
+              $1->falselist = newlist(nextquad()+1);
+              emit(if_eq, $1, newexpr_constbool(1), NULL, 0, yylineno);
+              emit(jump, NULL, NULL, NULL , 0, yylineno);
+          }
+          } M expr {
+
+            if($5->type != 5){
+              $5->truelist = newlist(nextquad());
+              $5->falselist = newlist(nextquad()+1);
+              emit(if_eq, $5, newexpr_constbool(1), NULL, 0, yylineno);
+              emit(jump, NULL, NULL, NULL , 0, yylineno);
+            }
+
               $$ = newexpr(boolexpr_e);
               $$->sym = newtemp();
-              printf("%d---------------\n",$3);
-               backpatch($1->truelist, $3);
+              printf("%d---------------\n",$4);
+               backpatch($1->truelist, $4);
 
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
 
 
-               $$->truelist = $4->truelist;
-               $$->falselist = mergelist($1->falselist, $4->falselist);
+               $$->truelist = $5->truelist;
+               $$->falselist = mergelist($1->falselist, $5->falselist);
 
                /*emit(assign, newexpr_constbool(1), NULL, $$, nextquad(), yylineno);
                emit(jump, NULL, NULL, NULL, nextquad() + 1, yylineno);
                emit(assign, newexpr_constbool(0), NULL, $$, nextquad() + 1, yylineno);*/
           }
-          | expr OR M expr {
-               backpatch($1->falselist, $3);
+          | expr OR{
+              if($1->type != 5){
+                $1->truelist = newlist(nextquad());
+                $1->falselist = newlist(nextquad()+1);
+                emit(if_eq, $1, newexpr_constbool(1), NULL, 0, yylineno);
+                emit(jump, NULL, NULL, NULL , 0, yylineno);
+              }
+            } M expr {
+              if($5->type != 5){
+                  $5->truelist = newlist(nextquad());
+                  $5->falselist = newlist(nextquad()+1);
+                  emit(if_eq, $5, newexpr_constbool(1), NULL, 0, yylineno);
+                  emit(jump, NULL, NULL, NULL , 0, yylineno);
+               }
+               backpatch($1->falselist, $4);
 
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
 
-               $$->truelist = mergelist($1->truelist, $4->truelist);
-               $$->falselist = $4->falselist;
+               $$->truelist = mergelist($1->truelist, $5->truelist);
+               $$->falselist = $5->falselist;
 
                /*emit(assign, newexpr_constbool(1), NULL, $$, nextquad() + 1, yylineno);
                emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
@@ -237,9 +265,18 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                $$->sym = istempexpr($2) ? $2->sym : newtemp();
                emit(uminus, $2, $$, NULL, 0,yylineno); }
           | NOT expr {
-               $$ = newexpr(boolexpr_e);
-               $$->sym = newtemp();
-               emit(op_not, $2, $$, NULL, 0, yylineno);
+              if($2->type != 5){
+                $2->truelist = newlist(nextquad());
+                $2->falselist = newlist(nextquad()+1);
+                emit(if_eq, $2, newexpr_constbool(1), NULL, 0, yylineno);
+                emit(jump, NULL, NULL, NULL , 0, yylineno);
+              }
+              $$->truelist = $2->falselist;
+              $$->falselist = $2->truelist;
+              $$ = newexpr(boolexpr_e);
+              $$->sym = newtemp();
+              backpatch($2->truelist,nextquad()+2);
+              backpatch($2->falselist,nextquad());
           }
           | D_PLUS lvalue {
                if($2 != NULL && $2->type == programfunc_e) Error(0, yytext, yylineno);
@@ -507,7 +544,7 @@ funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend{
                /*offset = pop_and_top(scopeoffsetStack);
                /restorecurrscopeoffset(offset);*/
                $$ = $1;
-               emit(funcend, $1,  NULL ,  NULL, nextquad(), yylineno);
+               //emit(funcend, $1,  NULL ,  NULL, nextquad(), yylineno);
           }
           ;
 const: 	INT { $$ = newexpr_constnum($1);}
@@ -524,9 +561,20 @@ idlist:	ID { idlist_id(yytext, yylineno);}
           ;
 
 ifprefix:	IF L_PAR expr R_PAR {
+              if ( $3->type == 5) {
+
+
+                   backpatch($3->truelist, nextquad());
+                   backpatch($3->falselist, nextquad() + 2);
+
+                   emit(assign, newexpr_constbool(1), (Expr*) 0, $3, nextquad() + 1, yylineno);
+                   emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
+                   emit(assign, newexpr_constbool(0), (Expr*) 0, $3, nextquad() + 1, yylineno);
+              }
                emit(if_eq, $3, newexpr_constbool(1), NULL, nextquad() + 2, yylineno);
                $$ = nextquad();
                emit(jump, NULL , NULL, NULL, 0, yylineno);
+
           }
           ;
 
@@ -552,19 +600,27 @@ whilestart:	WHILE {
                ;
 
 whilecond: 	L_PAR  expr R_PAR{
-                    emit(if_eq, $2, newexpr_constbool(1), nextquad()+2, NULL, 0, yylineno);
+                    if ( $2->type == 5) {
+                         backpatch($2->truelist, nextquad());
+                         backpatch($2->falselist, nextquad() + 2);
+                         emit(assign, newexpr_constbool(1), (Expr*) 0, $2, nextquad() + 1, yylineno);
+                         emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
+                         emit(assign, newexpr_constbool(0), (Expr*) 0, $2, nextquad() + 1, yylineno);
+                    }
+                    emit(if_eq, $2, newexpr_constbool(1), NULL, nextquad()+2, yylineno);
                     $$ = nextquad();
                     emit(jump, NULL, NULL, NULL, 0, yylineno);
                }
 
 
 
-whilestmt: 	whilestart whilecond stmt loopstmt{
+whilestmt: 	whilestart whilecond stmt {//edw exw bgalei to loopstmt kai h print me periexomeno bgazei seg
                     gloop--;
-                    emit(jump, NULL, NULL, $1, 0, yylineno);
+                    emit(jump, NULL, NULL, NULL, $1, yylineno);
                     patchlabel($2, nextquad());
-                    patchlist($3.breaklist, nextquad());
-                    patchlist($3.contlist, $1);
+                    printf("manos---------------------------------------\n");
+                    //patchlist($3.breaklist, nextquad());
+                    //patchlist($3.contlist, $1);
                }
                 ;
 loopstart:	{ ++loopcounter;};
