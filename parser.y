@@ -85,7 +85,6 @@ stmt:     expr SEMI {
                     emit(assign, newexpr_constbool(1), NULL, $$, nextquad() + 1, yylineno);
                     emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
                     emit(assign, newexpr_constbool(0), NULL, $$, nextquad() + 1, yylineno);
-                    print_intermediate();
                     backpatch($1->truelist, nextquad() - 3);
                     backpatch($1->falselist, nextquad() - 1);
                }
@@ -265,13 +264,8 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                }
                $$ = newexpr(boolexpr_e);
                $$->sym = newtemp();
-               $$->truelist = newlist(nextquad());
-               $$->falselist = newlist(nextquad() + 1);
                $$->truelist = $2->falselist;
                $$->falselist = $2->truelist;
-               backpatch($2->truelist,nextquad()+1);
-               backpatch($2->falselist,nextquad());
-               
           }
           | D_PLUS lvalue {
                if($2 != NULL && $2->type == programfunc_e) Error(0, yytext, yylineno);
