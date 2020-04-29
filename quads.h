@@ -79,6 +79,8 @@ typedef struct call {
 
 unsigned get_currquad();
 
+void patchboolean(Expr* e, int line);
+
 Expr* member_item (Expr* lv, char* name);
 
 Expr* make_call(Expr* lv, Expr* reversed_elist);

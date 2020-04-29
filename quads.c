@@ -6,6 +6,14 @@ unsigned int currQuad = 1;
 
 unsigned int tempcounter = 0;
 
+void patchboolean(Expr* e, int line) {
+     backpatch(e->truelist, nextquad());
+     backpatch(e->falselist, nextquad() + 2);
+     emit(assign, newexpr_constbool(1), (Expr*) 0, e, nextquad() + 1, line);
+     emit(jump, NULL, NULL, NULL, nextquad() + 2, line);
+     emit(assign, newexpr_constbool(0), (Expr*) 0, e, nextquad() + 1, line);
+}
+
 void make_stmt(Stmt_t* s) {
      s->breaklist = s->contlist = 0;
 }
@@ -178,7 +186,6 @@ void backpatch (int list, unsigned label){
      assert(list < currQuad );
      while (list) {
           int next = quads[list].label;
-          //printf("%d %d\n", list, next);
           quads[list].label = label;
           list = next;
      }
