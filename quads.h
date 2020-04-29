@@ -53,6 +53,8 @@ typedef struct expr {
 	unsigned char boolConst;
 	unsigned truelist;
 	unsigned falselist;
+	unsigned iaddress;
+	unsigned totalLocals;
 	struct expr* next;
 }Expr;
 

@@ -33,8 +33,6 @@ typedef struct symbol {
 	unsigned 		offset;
 	unsigned 		scope;
 	unsigned 		line;
-	unsigned 		iaddress;
-	unsigned		totalLocals;
     	char* 		desc;
     	int 			funcscope;
     	bool 		hide; /* true if hidden, else false */

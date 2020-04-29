@@ -41,6 +41,7 @@ int mergelist(int l1, int l2) {
 }
 
 void patchlist (int list, int label) {
+     printf("%d, %d\n", list, label);
      while (list) {
           int next = quads[list].label;
           quads[list].label = label;
@@ -78,7 +79,7 @@ void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned
 Expr* make_call(Expr* lv, Expr* reversed_elist) {
      Expr* func = emit_iftableitem(lv);
      while (reversed_elist) {
-          emit(param, reversed_elist, NULL, NULL, nextquad() + 1, reversed_elist->sym->line);
+          emit(param, reversed_elist, NULL, NULL, nextquad() + 1, 0);
           reversed_elist = reversed_elist->next;
      }
      emit (call, func, NULL, NULL, nextquad() + 1, func->sym->line);
@@ -177,6 +178,7 @@ void backpatch (int list, unsigned label){
      assert(list < currQuad );
      while (list) {
           int next = quads[list].label;
+          //printf("%d %d\n", list, next);
           quads[list].label = label;
           list = next;
      }
@@ -195,8 +197,6 @@ Expr* lvalue_expr(Symbol* sym){
      e->sym->offset = sym->offset;
      e->sym->scope = sym->scope;
      e->sym->line = sym->line;
-     e->sym->iaddress = sym->iaddress;
-     e->sym->totalLocals = sym->totalLocals;
 
      switch(sym->type){
           case localvar_s		: e->type = var_e; break;
@@ -222,20 +222,6 @@ void check_arith(Expr* e, const char* context) {
           }
 }
 
-// void print_content(Expr* e){
-//      if(e->type >=0 || e->type <= 7){
-//           printf("%s ",e->sym->name);
-//      }else if(e->type == 8){
-//           printf("%.2f ",e->numConst);
-//      }else if(e->type == 9 && e->boolConst == '0'){
-//           printf("FALSE");
-//      }else if(e->type == 9 && e->boolConst == '1'){
-//           printf("TRUE");
-//      }else if(e->type == 10){
-//           printf("%s ",e->strConst);
-//      }
-// }
-
 void print_intermediate(){
      int i;
      char* iopcode_array[26] = {
@@ -255,15 +241,13 @@ void print_intermediate(){
      for(i = 1; i < currQuad; i++){
           printf("%d:", i);
           printf("\t|%-15s", iopcode_array[quads[i].op]);
-          
-          if ( (quads + i) != NULL) {
-               if( quads[i].arg1 && quads[i].arg1->sym)     printf("|%-15s", quads[i].arg1->sym->name);
-               else printf("|%-15s", "");
-               if(quads[i].arg2 && quads[i].arg2->sym)      printf("|%-15s", quads[i].arg2->sym->name);
-               else printf("|%-15s", "");
-               if(quads[i].result && quads[i].result->sym)  printf("|%-15s", quads[i].result->sym->name);
-               else printf("|%-15s", "");
-               printf("|%-15d\n", quads[i].label);
-          }
+ 
+          if( quads[i].arg1 && quads[i].arg1->sym)     printf("|%-15s", quads[i].arg1->sym->name);
+          else printf("|%-15s", "");
+          if(quads[i].arg2 && quads[i].arg2->sym)      printf("|%-15s", quads[i].arg2->sym->name);
+          else printf("|%-15s", "");
+          if(quads[i].result && quads[i].result->sym)  printf("|%-15s", quads[i].result->sym->name);
+          else printf("|%-15s", "");
+          printf("|%-15d\n", quads[i].label);
      }
 }

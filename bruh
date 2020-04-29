@@ -1,11 +1,6 @@
-// test 1
-x=y=10;
-z=(x+y)*(x-y);
-a = x>=y or y>=z;
-// test 2
-b;
-c;
-d;
-e;
-f;
-x = a < b or c < d and e < f;
+not y;
+/*while (not y) {
+		print(y);
+		break;
+	}*/
+
