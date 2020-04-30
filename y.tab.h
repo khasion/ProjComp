@@ -149,7 +149,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 20 "parser.y"
+#line 25 "parser.y"
 
      int intval;
      char* strval;
@@ -157,7 +157,7 @@ union YYSTYPE
      struct expr* exprval;
      struct stmt_t stmtval;
      struct call callval;
-     struct symbol symval;
+     struct symbol* symval;
      struct prefix prefval;
 
 #line 164 "y.tab.h"

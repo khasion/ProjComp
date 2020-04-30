@@ -44,7 +44,7 @@ Grammar
    30     | term
 
    31 term: L_PAR expr R_PAR
-   32     | UMINUS expr
+   32     | MINUS expr
    33     | NOT expr
    34     | D_PLUS lvalue
    35     | lvalue D_PLUS
@@ -175,14 +175,14 @@ Terminals, with rules where they appear
     LESS <strval> (265) 22
     LESS_EQ <strval> (266) 23
     PLUS <strval> (267) 15
-    MINUS <strval> (268) 16
+    MINUS <strval> (268) 16 32
     MUL <strval> (269) 17
     DIV <strval> (270) 18
     MOD <strval> (271) 19
     NOT (272) 33
     D_PLUS <strval> (273) 34 35
     D_MINUS <strval> (274) 36 37
-    UMINUS <strval> (275) 32
+    UMINUS <strval> (275)
     DOT <strval> (276) 49 51
     D_DOT <strval> (277) 59
     L_BRA <strval> (278) 50 52 64 65
@@ -289,7 +289,7 @@ Nonterminals, with rules where they appear
     funcname <strval> (73)
         on left: 73 74
         on right: 75
-    funcprefix <exprval> (74)
+    funcprefix <symval> (74)
         on left: 75
         on right: 80
     funcargs <strval> (75)
@@ -364,10 +364,10 @@ State 0
 
     0 $accept: . program $end
 
-    NOT       shift, and go to state 1
-    D_PLUS    shift, and go to state 2
-    D_MINUS   shift, and go to state 3
-    UMINUS    shift, and go to state 4
+    MINUS     shift, and go to state 1
+    NOT       shift, and go to state 2
+    D_PLUS    shift, and go to state 3
+    D_MINUS   shift, and go to state 4
     L_BRA     shift, and go to state 5
     L_PAR     shift, and go to state 6
     INT       shift, and go to state 7
@@ -417,12 +417,12 @@ State 0
 
 State 1
 
-   33 term: NOT . expr
+   32 term: MINUS . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -448,40 +448,12 @@ State 1
 
 State 2
 
-   34 term: D_PLUS . lvalue
+   33 term: NOT . expr
 
-    L_PAR    shift, and go to state 50
-    ID       shift, and go to state 9
-    LOCAL    shift, and go to state 18
-    D_COLON  shift, and go to state 24
-
-    lvalue  go to state 51
-    member  go to state 33
-    call    go to state 52
-
-
-State 3
-
-   36 term: D_MINUS . lvalue
-
-    L_PAR    shift, and go to state 50
-    ID       shift, and go to state 9
-    LOCAL    shift, and go to state 18
-    D_COLON  shift, and go to state 24
-
-    lvalue  go to state 53
-    member  go to state 33
-    call    go to state 52
-
-
-State 4
-
-   32 term: UMINUS . expr
-
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -494,7 +466,7 @@ State 4
     NIL      shift, and go to state 21
     D_COLON  shift, and go to state 24
 
-    expr        go to state 54
+    expr        go to state 50
     term        go to state 29
     assignexpr  go to state 30
     primary     go to state 31
@@ -505,15 +477,43 @@ State 4
     const       go to state 39
 
 
+State 3
+
+   34 term: D_PLUS . lvalue
+
+    L_PAR    shift, and go to state 51
+    ID       shift, and go to state 9
+    LOCAL    shift, and go to state 18
+    D_COLON  shift, and go to state 24
+
+    lvalue  go to state 52
+    member  go to state 33
+    call    go to state 53
+
+
+State 4
+
+   36 term: D_MINUS . lvalue
+
+    L_PAR    shift, and go to state 51
+    ID       shift, and go to state 9
+    LOCAL    shift, and go to state 18
+    D_COLON  shift, and go to state 24
+
+    lvalue  go to state 54
+    member  go to state 33
+    call    go to state 53
+
+
 State 5
 
    64 objectdef: L_BRA . elist R_BRA
    65          | L_BRA . indexed R_BRA
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -549,10 +549,10 @@ State 6
    43 primary: L_PAR . funcdef R_PAR
    55 call: L_PAR . funcdef R_PAR L_PAR elist R_PAR
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -646,10 +646,10 @@ State 15
   105 returnstmt: RETURN . SEMI
   106           | RETURN . expr SEMI
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -751,10 +751,10 @@ State 26
     1 program: stmts .
     3 stmts: stmts . stmt
 
-    NOT       shift, and go to state 1
-    D_PLUS    shift, and go to state 2
-    D_MINUS   shift, and go to state 3
-    UMINUS    shift, and go to state 4
+    MINUS     shift, and go to state 1
+    NOT       shift, and go to state 2
+    D_PLUS    shift, and go to state 3
+    D_MINUS   shift, and go to state 4
     L_BRA     shift, and go to state 5
     L_PAR     shift, and go to state 6
     INT       shift, and go to state 7
@@ -951,10 +951,10 @@ State 40
    92 ifstmt: ifprefix . stmt
    93       | ifprefix . stmt elseprefix stmt
 
-    NOT       shift, and go to state 1
-    D_PLUS    shift, and go to state 2
-    D_MINUS   shift, and go to state 3
-    UMINUS    shift, and go to state 4
+    MINUS     shift, and go to state 1
+    NOT       shift, and go to state 2
+    D_PLUS    shift, and go to state 3
+    D_MINUS   shift, and go to state 4
     L_BRA     shift, and go to state 5
     L_PAR     shift, and go to state 6
     INT       shift, and go to state 7
@@ -1075,12 +1075,32 @@ State 49
    25     | expr . NOT_EQ expr
    27     | expr . AND $@1 M expr
    29     | expr . OR $@2 M expr
+   32 term: MINUS expr .
+
+    $default  reduce using rule 32 (term)
+
+
+State 50
+
+   15 expr: expr . PLUS expr
+   16     | expr . MINUS expr
+   17     | expr . MUL expr
+   18     | expr . DIV expr
+   19     | expr . MOD expr
+   20     | expr . GREATER expr
+   21     | expr . GREATER_EQ expr
+   22     | expr . LESS expr
+   23     | expr . LESS_EQ expr
+   24     | expr . EQ expr
+   25     | expr . NOT_EQ expr
+   27     | expr . AND $@1 M expr
+   29     | expr . OR $@2 M expr
    33 term: NOT expr .
 
     $default  reduce using rule 33 (term)
 
 
-State 50
+State 51
 
    55 call: L_PAR . funcdef R_PAR L_PAR elist R_PAR
 
@@ -1090,7 +1110,7 @@ State 50
     funcdef     go to state 108
 
 
-State 51
+State 52
 
    34 term: D_PLUS lvalue .
    49 member: lvalue . DOT ID
@@ -1109,7 +1129,7 @@ State 51
     methodcall  go to state 96
 
 
-State 52
+State 53
 
    51 member: call . DOT ID
    52       | call . L_BRA expr R_BRA
@@ -1120,7 +1140,7 @@ State 52
     L_PAR  shift, and go to state 99
 
 
-State 53
+State 54
 
    36 term: D_MINUS lvalue .
    49 member: lvalue . DOT ID
@@ -1139,34 +1159,14 @@ State 53
     methodcall  go to state 96
 
 
-State 54
-
-   15 expr: expr . PLUS expr
-   16     | expr . MINUS expr
-   17     | expr . MUL expr
-   18     | expr . DIV expr
-   19     | expr . MOD expr
-   20     | expr . GREATER expr
-   21     | expr . GREATER_EQ expr
-   22     | expr . LESS expr
-   23     | expr . LESS_EQ expr
-   24     | expr . EQ expr
-   25     | expr . NOT_EQ expr
-   27     | expr . AND $@1 M expr
-   29     | expr . OR $@2 M expr
-   32 term: UMINUS expr .
-
-    $default  reduce using rule 32 (term)
-
-
 State 55
 
    68 indexedelem: LC_BRA . expr COLON expr RC_BRA
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1295,10 +1295,10 @@ State 62
 
    90 ifprefix: IF L_PAR . expr R_PAR
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1442,10 +1442,10 @@ State 75
 
    24 expr: expr EQ . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1473,10 +1473,10 @@ State 76
 
    25 expr: expr NOT_EQ . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1504,10 +1504,10 @@ State 77
 
    20 expr: expr GREATER . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1535,10 +1535,10 @@ State 78
 
    21 expr: expr GREATER_EQ . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1566,10 +1566,10 @@ State 79
 
    22 expr: expr LESS . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1597,10 +1597,10 @@ State 80
 
    23 expr: expr LESS_EQ . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1628,10 +1628,10 @@ State 81
 
    15 expr: expr PLUS . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1659,10 +1659,10 @@ State 82
 
    16 expr: expr MINUS . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1690,10 +1690,10 @@ State 83
 
    17 expr: expr MUL . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1721,10 +1721,10 @@ State 84
 
    18 expr: expr DIV . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1752,10 +1752,10 @@ State 85
 
    19 expr: expr MOD . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1790,10 +1790,10 @@ State 87
 
    39 assignexpr: lvalue ASSIGN . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1849,10 +1849,10 @@ State 92
 
    50 member: lvalue L_BRA . expr R_BRA
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1880,10 +1880,10 @@ State 93
 
    58 normcall: L_PAR . elist R_PAR
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1942,10 +1942,10 @@ State 98
 
    52 member: call L_BRA . expr R_BRA
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -1973,10 +1973,10 @@ State 99
 
    53 call: call L_PAR . elist R_PAR
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -2040,10 +2040,10 @@ State 103
 
    95 whilecond: L_PAR . expr R_PAR
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -2071,10 +2071,10 @@ State 104
 
    96 whilestmt: whilestart whilecond . stmt
 
-    NOT       shift, and go to state 1
-    D_PLUS    shift, and go to state 2
-    D_MINUS   shift, and go to state 3
-    UMINUS    shift, and go to state 4
+    MINUS     shift, and go to state 1
+    NOT       shift, and go to state 2
+    D_PLUS    shift, and go to state 3
+    D_MINUS   shift, and go to state 4
     L_BRA     shift, and go to state 5
     L_PAR     shift, and go to state 6
     INT       shift, and go to state 7
@@ -2124,10 +2124,10 @@ State 105
 
   102 forstmt: forprefix N . elist R_PAR N stmt $@5 N
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -2212,10 +2212,10 @@ State 110
 
    62 comma_elist: COMMA . expr comma_elist
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -2323,10 +2323,10 @@ State 118
 
   100 forprefix: FOR $@4 L_PAR . elist SEMI M expr SEMI
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -2365,10 +2365,10 @@ State 120
    69 rec_stmt: rec_stmt . stmt
    72 block: LC_BRA $@3 rec_stmt . RC_BRA
 
-    NOT       shift, and go to state 1
-    D_PLUS    shift, and go to state 2
-    D_MINUS   shift, and go to state 3
-    UMINUS    shift, and go to state 4
+    MINUS     shift, and go to state 1
+    NOT       shift, and go to state 2
+    D_PLUS    shift, and go to state 3
+    D_MINUS   shift, and go to state 4
     L_BRA     shift, and go to state 5
     L_PAR     shift, and go to state 6
     INT       shift, and go to state 7
@@ -2903,10 +2903,10 @@ State 146
 
    93 ifstmt: ifprefix stmt elseprefix . stmt
 
-    NOT       shift, and go to state 1
-    D_PLUS    shift, and go to state 2
-    D_MINUS   shift, and go to state 3
-    UMINUS    shift, and go to state 4
+    MINUS     shift, and go to state 1
+    NOT       shift, and go to state 2
+    D_PLUS    shift, and go to state 3
+    D_MINUS   shift, and go to state 4
     L_BRA     shift, and go to state 5
     L_PAR     shift, and go to state 6
     INT       shift, and go to state 7
@@ -3010,10 +3010,10 @@ State 151
 
    68 indexedelem: LC_BRA expr COLON . expr RC_BRA
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -3085,10 +3085,10 @@ State 154
 
    55 call: L_PAR funcdef R_PAR L_PAR . elist R_PAR
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -3147,10 +3147,10 @@ State 159
 
    29 expr: expr OR $@2 M . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -3178,10 +3178,10 @@ State 160
 
    27 expr: expr AND $@1 M . expr
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -3209,10 +3209,10 @@ State 161
 
    59 methodcall: D_DOT ID L_PAR . elist R_PAR
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7
@@ -3466,10 +3466,10 @@ State 182
 
   102 forstmt: forprefix N elist R_PAR N . stmt $@5 N
 
-    NOT       shift, and go to state 1
-    D_PLUS    shift, and go to state 2
-    D_MINUS   shift, and go to state 3
-    UMINUS    shift, and go to state 4
+    MINUS     shift, and go to state 1
+    NOT       shift, and go to state 2
+    D_PLUS    shift, and go to state 3
+    D_MINUS   shift, and go to state 4
     L_BRA     shift, and go to state 5
     L_PAR     shift, and go to state 6
     INT       shift, and go to state 7
@@ -3533,10 +3533,10 @@ State 185
 
   100 forprefix: FOR $@4 L_PAR elist SEMI M . expr SEMI
 
-    NOT      shift, and go to state 1
-    D_PLUS   shift, and go to state 2
-    D_MINUS  shift, and go to state 3
-    UMINUS   shift, and go to state 4
+    MINUS    shift, and go to state 1
+    NOT      shift, and go to state 2
+    D_PLUS   shift, and go to state 3
+    D_MINUS  shift, and go to state 4
     L_BRA    shift, and go to state 5
     L_PAR    shift, and go to state 6
     INT      shift, and go to state 7

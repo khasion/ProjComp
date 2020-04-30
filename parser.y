@@ -4,6 +4,7 @@
      #include <stdlib.h>
      #include <string.h>
      #include "quads.h"
+     #include "stack.h"
 
      #define  YY_DECL int alpha_yylex (void* yylval)
      void yyerror (char* yaccProovidedMessage);
@@ -13,6 +14,10 @@
      extern FILE* yyin;
      unsigned gloop = 0;
      unsigned loopcounter = 0;
+     Stack* breakstack;
+     Stack* contstack;
+     Stack* loopcounterstack;
+     Stack* scopeoffsetstack;
 %}
 
 %start program
@@ -24,7 +29,7 @@
      struct expr* exprval;
      struct stmt_t stmtval;
      struct call callval;
-     struct symbol symval;
+     struct symbol* symval;
      struct prefix prefval;
 }
 
@@ -51,11 +56,11 @@
 %type <stmtval> stmt stmts rec_stmt ifstmt whilestmt forstmt returnstmt break continue block 
 
 %type <exprval> lvalue member primary assignexpr call 
-%type <exprval> term objectdef const expr elist comma_elist indexed  funcprefix
+%type <exprval> term objectdef const expr elist comma_elist indexed  
 
 %type <callval> callsuffix normcall methodcall
 
-%type <symval> funcdef 
+%type <symval> funcdef funcprefix
 
 %type <prefval> forprefix
 
@@ -69,12 +74,12 @@
 program:	stmts {;}
           ;
 
-stmts: 	stmt{
+stmts: 	stmt {
                $$ = $1;
           }
-          |stmts stmt{
+          | stmts stmt{
                $$.breaklist = mergelist($1.breaklist, $2.breaklist); 
-               $$.contlist = mergelist($1.contlist, $2.contlist); 
+               $$.contlist = mergelist($1.contlist, $2.contlist);
           }
           ;
 
@@ -88,7 +93,7 @@ stmt:     expr SEMI {
           | ifstmt { make_stmt(&$$);}
           | whilestmt { make_stmt(&$$);}
           | forstmt { make_stmt(&$$);}
-          | returnstmt {make_stmt(&$$);}
+          | returnstmt { make_stmt(&$$);}
           | break SEMI {
                make_stmt(&$$);
                $$.breaklist = $break.breaklist;
@@ -139,7 +144,7 @@ expr: 	assignexpr { $$ = $1; }
                $$->sym = newtemp();
                $$->truelist = newlist(nextquad());
                $$->falselist = newlist(nextquad() + 1);
-               emit(if_less, $1, $3, NULL, 0, yylineno);
+               emit(if_greater, $1, $3, NULL, 0, yylineno);
                //emit(assign, newexpr_constbool('0'), NULL, $$, nextquad() + 1, yylineno);
                emit(jump, NULL, NULL, NULL , 0, yylineno);
                //emit(assign, newexpr_constbool('1'), NULL, $$, nextquad() + 1, yylineno);
@@ -205,7 +210,6 @@ expr: 	assignexpr { $$ = $1; }
               
                }
           } M expr {
-
                if($5 && $5->type != 5){
                     $5->truelist = newlist(nextquad());
                     $5->falselist = newlist(nextquad()+1);
@@ -246,16 +250,14 @@ expr: 	assignexpr { $$ = $1; }
           ;
 
 term: 	L_PAR expr R_PAR {$$ = $2;}
-          | UMINUS expr %prec UMINUS {
-               $$->truelist = $2->falselist;
-               $$->falselist = $2->truelist;
+          | MINUS expr %prec UMINUS {
                check_arith($2, $2->sym->name);
                $$ = newexpr(arithexpr_e);
                $$->sym = istempexpr($2) ? $2->sym : newtemp();
-               emit(uminus, $2, $$, NULL, 0,yylineno); }
+               emit(uminus, $2, NULL, $$, nextquad() + 1,yylineno); 
+          }
           | NOT expr {
                /*if($2->type != 5){
-                    printf("HELL\n");
                     $2->truelist = newlist(nextquad());
                     $2->falselist = newlist(nextquad()+1);
                     emit(if_eq, $2, newexpr_constbool(1), NULL, 0, yylineno);
@@ -277,11 +279,11 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                check_arith($2, $2->sym->name);
                if ($2->type == tableitem_e) {
                     $$ = emit_iftableitem($2);
-                    emit(op_add, $$, newexpr_constnum(1), $$, 0,yylineno);
-                    emit(tablesetelem, $2, $2->index, $$);
+                    emit(op_add, $$, newexpr_constnum(1), $$, nextquad() + 1,yylineno);
+                    emit(tablesetelem, $2, $2->index, $$, nextquad() + 1, yylineno);
                }
                else {
-                    emit(op_add, $2, newexpr_constnum(1), $2, nextquad() + 1,yylineno);
+                    emit(op_add, $2, newexpr_constnum(1), $2, nextquad() + 1, yylineno);
                     $$ = newexpr(arithexpr_e);
                     $$->sym = newtemp();
                     emit(assign, $2, NULL, $$, nextquad() + 1,yylineno);
@@ -297,11 +299,11 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                     Expr* value = emit_iftableitem($lvalue);
                     emit(assign, value, NULL,$$,0,yylineno);
                     emit(op_add, value, newexpr_constnum(1), value,0,yylineno);
-                    emit( tablesetelem, $1, $1->index, value,0,yylineno);
+                    emit( tablesetelem, $1, $1->index, value, nextquad() + 1,yylineno);
                }
                else {
                     emit(assign, $1, NULL , $$, nextquad() + 1, yylineno);
-                    emit(op_add, $1, newexpr_constnum(1), $1, 0, yylineno);
+                    emit(op_add, $1, newexpr_constnum(1), $1, nextquad() + 1, yylineno);
                }
           }
           | D_MINUS lvalue {
@@ -311,10 +313,10 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                if ($2->type == tableitem_e) {
                     $$ = emit_iftableitem($2);
                     emit(op_sub, $$, newexpr_constnum(1), $$, 0,yylineno);
-                    emit(tablesetelem, $2, $2->index, $$);
+                    emit(tablesetelem, $2, $2->index, $$, nextquad() + 1, yylineno);
                }
                else {
-                    emit(op_sub, $2, newexpr_constnum(1), $2,0,yylineno);
+                    emit(op_sub, $2, newexpr_constnum(1), $2, nextquad() + 1,yylineno);
                     $$ = newexpr(arithexpr_e);
                     $$->sym = newtemp();
                     emit(assign, $2, NULL, $$, nextquad() + 1,yylineno);
@@ -334,11 +336,11 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                     Expr* value = emit_iftableitem($lvalue);
                     emit(assign, value, NULL,$$,0,yylineno);
                     emit(op_sub, value, newexpr_constnum(1), value,0,yylineno);
-                    emit( tablesetelem, $1, $1->index, value,0,yylineno);
+                    emit( tablesetelem, $1, $1->index, value, nextquad() + 1,yylineno);
                }
                else {
                     emit(assign, $1, NULL, $$, nextquad() + 1,yylineno);
-                    emit(op_sub, $1, newexpr_constnum(1), $1, 0,yylineno);
+                    emit(op_sub, $1, newexpr_constnum(1), $1, nextquad() + 1,yylineno);
                }
           }
           | primary {$<exprval>$=$<exprval>1;}
@@ -348,7 +350,7 @@ assignexpr:	lvalue ASSIGN expr {
                     if($1 != NULL && $1->type == programfunc_e) Error(0, yytext, yylineno);
                     else if($1 != NULL && $1->type == libraryfunc_e) Error(1, yytext, yylineno);
                     if ($1->type == tableitem_e)  {
-                         emit(tablesetelem, $lvalue, $1->index, $3, 0, yylineno);
+                         emit(tablesetelem, $3, $1->index, $lvalue, nextquad() + 1, yylineno);
                          $$ = emit_iftableitem ($1);
                          $$->type = assignexpr_e;
                     }
@@ -369,7 +371,7 @@ primary: 	lvalue { $$ = emit_iftableitem($1);}
           | objectdef {;}
           | L_PAR funcdef R_PAR {
                $$ = newexpr(programfunc_e);
-               $$->sym = &$2;
+               $$->sym = $2;
           }
           | const {;}
           ;
@@ -415,7 +417,7 @@ call: 	call L_PAR elist R_PAR { $$ = make_call($$, $3);}
           }
           | L_PAR funcdef R_PAR L_PAR elist R_PAR {
                Expr* func = newexpr(programfunc_e);
-               func->sym = &$2;
+               func->sym = $2;
                $$ = make_call(func, $elist);
           }
           ;
@@ -455,14 +457,14 @@ objectdef: 	L_BRA elist R_BRA {
                     t->sym = newtemp();
                     emit(tablecreate, t, NULL, NULL,0,yylineno);
                     for (i = 0; $2; $2 = $2->next)  {
-                         emit(tablesetelem, t, newexpr_constnum(i++), $2,0,yylineno);
+                         emit(tablesetelem, t, newexpr_constnum(i++), $2, nextquad() + 1,yylineno);
                     }
                     $$ = t;
                }
                | L_BRA indexed R_BRA {
                     Expr* t = newexpr(newtable_e);
                     t->sym = newtemp();
-                    emit(tablecreate, t, NULL, NULL, nextquad() + 1,yylineno);
+                    emit(tablecreate, t, NULL, NULL, nextquad() + 1, yylineno);
                     while ($2) {
                          emit(tablesetelem, t, $2, $2->index, nextquad() + 1, yylineno);
                          $2 = $2->next;
@@ -491,19 +493,21 @@ funcname:		ID {
                     $$ = $1;
                 }
                | {
-                    funcname_noname(yytext, yylineno);
-                    $$ = newtempname();
+                    Symbol* temp;
+                    temp = funcname_noname(yytext, yylineno);
+                    $$ = temp->name;
                }
                ;
 funcprefix: 	FUNC funcname {
-                    $$ = newexpr(programfunc_e);
-                    $$->sym = create_item(programfunc_s, $2, currscopespace(), currscopespaceoffset(), currscope(), currfuncscope(), yylineno);
+                    $$ = table_lookup($2, currscope());
                     $$->iaddress = nextquad();
-                    emit(funcstart, $$, NULL, NULL, nextquad() + 1, yylineno);
-                    /*push(scopeoffsetstack, currscopeoffset());*/
+                    Expr* e = newexpr(programfunc_e);
+                    e->sym = $$;
+                    //emit(jump, NULL, NULL, NULL, 0, yylineno);
+                    emit(funcstart, e, NULL, NULL, nextquad() + 1, yylineno);
+                    push(scopeoffsetstack, currscopespaceoffset());
                     enterscopespace();
                     resetformalargsoffset();
-
                }
                 ;
 
@@ -520,17 +524,21 @@ funcbody: 	block {
                }
                ;
 
-funcblockstart:{ /*push(loopcounterstack, loopcounter); loopcounter=0; */};
-funcblockend:	{ /*loopcounter = pop(loopcounterstack);*/ }
+funcblockstart:{ push(loopcounterstack, loopcounter); loopcounter=0;};
+funcblockend:	{ loopcounter = pop(loopcounterstack);}
 
 funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend{
-               /*int offset;*/
-               exitscopespace();
+               int offset;
                $1->totalLocals = $4;
-               /*offset = pop_and_top(scopeoffsetStack);
-               /restorecurrscopeoffset(offset);*/
-               $$ = *$1->sym;
-               //emit(funcend, $1,  NULL ,  NULL, nextquad(), yylineno);
+               exitscopespace();
+               offset = pop_and_top(scopeoffsetstack);
+               restorecurrscopeoffset(offset);
+               $$ = $1;
+
+               Expr* e = newexpr(programfunc_e);
+               e->sym = $$;
+               emit(funcend, e,  NULL ,  NULL, nextquad() + 1, yylineno);
+               //backpatch($1->iaddress, nextquad());
           }
           ;
 const: 	INT { $$ = newexpr_constnum($1);}
@@ -557,13 +565,13 @@ ifprefix:	IF L_PAR expr R_PAR {
           ;
 
 elseprefix: 	ELSE {
-                     $$ = nextquad();
-                     emit(jump, NULL, NULL, NULL, 0, yylineno);
+                    $$ = nextquad();
+                    emit(jump, NULL, NULL, NULL, 0, yylineno);
                }
                ; 
 
 ifstmt: 		ifprefix stmt{
-                     patchlabel($1, nextquad());
+                    patchlabel($1, nextquad());
                }
                | ifprefix stmt elseprefix stmt {
                     patchlabel($1, ($3)+1);
@@ -586,14 +594,13 @@ whilecond: 	L_PAR  expr R_PAR{
                     emit(jump, NULL, NULL, NULL, 0, yylineno);
                }
 
-
 whilestmt: 	whilestart whilecond stmt {
                     gloop--;
                     emit(jump, NULL, NULL, NULL, $1, yylineno);
                     patchlabel($2, nextquad());
 
-                    patchlist($stmt.breaklist, nextquad());
-                    patchlist($stmt.contlist, $1);
+                    patchlist(pop(breakstack), nextquad());
+                    patchlist(pop(contstack), $1);
                }
                ;
 N: 	{
@@ -620,8 +627,8 @@ forstmt:	forprefix N elist R_PAR N stmt {gloop--;} N  {
                patchlabel($5, $1.test);
                patchlabel($8, $2+1);
 
-               patchlist($6.breaklist, nextquad());
-               patchlist($6.contlist, $2+1);
+               patchlist(pop(breakstack), nextquad());
+               patchlist(pop(contstack), $2+1);
           }
           ;
 
@@ -629,6 +636,7 @@ break:    BREAK {
                make_stmt(&$$);
                $$.breaklist = newlist(nextquad());
                emit(jump, NULL, NULL, NULL, 0, yylineno);
+               breakstack = push(breakstack, $$.breaklist);
           }
           ;    
 
@@ -636,6 +644,7 @@ continue: CONTINUE {
                make_stmt(&$$);
                $$.contlist = newlist(nextquad());
                emit(jump, NULL, NULL, NULL, 0, yylineno);
+               contstack = push(contstack, $$.contlist);
           }
           ;    
 

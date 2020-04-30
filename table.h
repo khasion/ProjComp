@@ -36,6 +36,8 @@ typedef struct symbol {
     	char* 		desc;
     	int 			funcscope;
     	bool 		hide; /* true if hidden, else false */
+	unsigned 		iaddress;
+	unsigned 		totalLocals;
     	struct symbol* next;
     	struct symbol* scopenext;
 }Symbol;
