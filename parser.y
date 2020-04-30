@@ -439,6 +439,9 @@ methodcall: D_DOT ID L_PAR elist R_PAR {
           };
 
 elist: 	expr comma_elist {
+               if ( $expr->type == boolexpr_e) {
+                    patchboolean($expr, yylineno);
+               }
                $$ = $1;
                $$->next = $2;
           }
@@ -491,7 +494,7 @@ block:  	LC_BRA { nextscope();} rec_stmt RC_BRA { $$ = $rec_stmt; hide(currscope
 funcname:		ID {
                     funcname_id(yytext, yylineno);
                     $$ = $1;
-                }
+               }
                | {
                     Symbol* temp;
                     temp = funcname_noname(yytext, yylineno);
