@@ -610,11 +610,7 @@ M:   {$$ = nextquad();}
 
 forprefix:	FOR {gloop++;} L_PAR  elist SEMI M expr SEMI {
                     if ( $7->type == 5) {
-                         backpatch($7->truelist, nextquad());
-                         backpatch($7->falselist, nextquad() + 2);
-                         emit(assign, newexpr_constbool(1), (Expr*) 0, $7, nextquad() + 1, yylineno);
-                         emit(jump, NULL, NULL, NULL, nextquad() + 2, yylineno);
-                         emit(assign, newexpr_constbool(0), (Expr*) 0, $7, nextquad() + 1, yylineno);
+                         patchboolean($7, yylineno);
                     }
                     $$.test = $M;
                     $$.enter = nextquad();
