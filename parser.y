@@ -87,7 +87,7 @@ stmt:     expr SEMI {
           }
           | ifstmt { make_stmt(&$$);}
           | whilestmt { make_stmt(&$$);}
-          | forstmt {make_stmt(&$$);}
+          | forstmt { make_stmt(&$$);}
           | returnstmt {make_stmt(&$$);}
           | break SEMI {
                make_stmt(&$$);
@@ -102,7 +102,7 @@ stmt:     expr SEMI {
                if (gloop == 0) Error(4, yytext, yylineno);
           }
           | block { $$ = $1;}
-          | funcdef {make_stmt(&$$);}
+          | funcdef { make_stmt(&$$);}
           | SEMI { make_stmt(&$$);}
           ;
 
@@ -483,7 +483,7 @@ rec_stmt: 	rec_stmt stmt{ $$ = $2;}
                | {;}
                ;
 
-block:  	LC_BRA { nextscope();} rec_stmt RC_BRA{ $$ = $rec_stmt; hide(currscope()); exitscope();}
+block:  	LC_BRA { nextscope();} rec_stmt RC_BRA { $$ = $rec_stmt; hide(currscope()); exitscope();}
           ;
 
 funcname:		ID {
@@ -592,12 +592,8 @@ whilestmt: 	whilestart whilecond stmt {
                     emit(jump, NULL, NULL, NULL, $1, yylineno);
                     patchlabel($2, nextquad());
 
-                    if ($stmt.breaklist > 0 && $stmt.breaklist < nextquad()) {
-                         patchlist($stmt.breaklist, nextquad());
-                    }
-                    if ($stmt.contlist > 0 && $stmt.contlist < nextquad()) {
-                         patchlist($stmt.contlist, $1);
-                    }
+                    patchlist($stmt.breaklist, nextquad());
+                    patchlist($stmt.contlist, $1);
                }
                ;
 N: 	{
