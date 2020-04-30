@@ -49,7 +49,6 @@ int mergelist(int l1, int l2) {
 }
 
 void patchlist (int list, int label) {
-     printf("%d, %d\n", list, label);
      while (list) {
           int next = quads[list].label;
           quads[list].label = label;
@@ -82,6 +81,10 @@ void emit(Opcode op, Expr* arg1, Expr* arg2, Expr* res, unsigned label, unsigned
      p->result = res;
      p->label = label;
      p->line = line;
+}
+
+unsigned get_quadlabel(unsigned list) {
+     return quads[list].label;
 }
 
 Expr* make_call(Expr* lv, Expr* reversed_elist) {

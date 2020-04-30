@@ -9,8 +9,8 @@ typedef struct prefix {
 }Prefix;
 
 typedef struct stmt_t {
-	int breaklist;
-	int contlist;
+	unsigned breaklist;
+	unsigned contlist;
 }Stmt_t;
 
 typedef enum iopcode {
@@ -77,7 +77,6 @@ typedef struct call {
 #define CURR_SIZE (total*sizeof(Quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(Quad)+CURR_SIZE)
 
-unsigned get_currquad();
 
 void patchboolean(Expr* e, int line);
 
@@ -99,6 +98,8 @@ void init_quad();
 void expand_quad();
 
 void emit();
+
+unsigned get_quadlabel(unsigned list);
 
 char* newtempname();
 void resettemp();

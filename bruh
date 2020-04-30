@@ -1,6 +1,6 @@
-not y;
+not y = 1;
 while (not y) {
-		//print(y);
-		//break;
+		print(y);
+		break;
 }
 

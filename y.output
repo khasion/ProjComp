@@ -277,10 +277,10 @@ Nonterminals, with rules where they appear
     indexedelem <strval> (69)
         on left: 68
         on right: 66 67
-    rec_stmt <strval> (70)
+    rec_stmt <stmtval> (70)
         on left: 69 70
         on right: 69 72
-    block <strval> (71)
+    block <stmtval> (71)
         on left: 72
         on right: 11 77
     $@3 (72)
