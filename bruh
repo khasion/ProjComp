@@ -1,5 +1,4 @@
-
-while (not y) {
-	print(not y);
-	break;
+for (local i = 1; i < 5; ++i) {
+	print("...");
+	continue;
 }

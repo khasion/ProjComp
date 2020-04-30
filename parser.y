@@ -508,7 +508,7 @@ funcprefix: 	FUNC funcname {
                     e->sym = $$;
                     //emit(jump, NULL, NULL, NULL, 0, yylineno);
                     emit(funcstart, e, NULL, NULL, nextquad() + 1, yylineno);
-                    push(scopeoffsetstack, currscopespaceoffset());
+                    push(&scopeoffsetstack, currscopespaceoffset());
                     enterscopespace();
                     resetformalargsoffset();
                }
@@ -527,14 +527,14 @@ funcbody: 	block {
                }
                ;
 
-funcblockstart:{ push(loopcounterstack, loopcounter); loopcounter=0;};
-funcblockend:	{ loopcounter = pop(loopcounterstack);}
+funcblockstart:{ push(&loopcounterstack, loopcounter); loopcounter=0;};
+funcblockend:	{ loopcounter = pop(&loopcounterstack);}
 
 funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend{
                int offset;
                $1->totalLocals = $4;
                exitscopespace();
-               offset = pop_and_top(scopeoffsetstack);
+               offset = pop_and_top(&scopeoffsetstack);
                restorecurrscopeoffset(offset);
                $$ = $1;
 
@@ -602,8 +602,8 @@ whilestmt: 	whilestart whilecond stmt {
                     emit(jump, NULL, NULL, NULL, $1, yylineno);
                     patchlabel($2, nextquad());
 
-                    patchlist(pop(breakstack), nextquad());
-                    patchlist(pop(contstack), $1);
+                    patchlist(pop(&breakstack), nextquad());
+                    patchlist(pop(&contstack), $1);
                }
                ;
 N: 	{
@@ -630,8 +630,8 @@ forstmt:	forprefix N elist R_PAR N stmt {gloop--;} N  {
                patchlabel($5, $1.test);
                patchlabel($8, $2+1);
 
-               patchlist(pop(breakstack), nextquad());
-               patchlist(pop(contstack), $2+1);
+               patchlist(pop(&breakstack), nextquad());
+               patchlist(pop(&contstack), $2+1);
           }
           ;
 
@@ -639,7 +639,7 @@ break:    BREAK {
                make_stmt(&$$);
                $$.breaklist = newlist(nextquad());
                emit(jump, NULL, NULL, NULL, 0, yylineno);
-               breakstack = push(breakstack, $$.breaklist);
+               breakstack = push(&breakstack, $$.breaklist);
           }
           ;    
 
@@ -647,7 +647,7 @@ continue: CONTINUE {
                make_stmt(&$$);
                $$.contlist = newlist(nextquad());
                emit(jump, NULL, NULL, NULL, 0, yylineno);
-               contstack = push(contstack, $$.contlist);
+               contstack = push(&contstack, $$.contlist);
           }
           ;    
 
