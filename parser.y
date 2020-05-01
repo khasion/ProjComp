@@ -14,10 +14,6 @@
      extern FILE* yyin;
      unsigned gloop = 0;
      unsigned loopcounter = 0;
-     Stack* breakstack;
-     Stack* contstack;
-     Stack* loopcounterstack;
-     Stack* scopeoffsetstack;
 %}
 
 %start program
@@ -528,7 +524,7 @@ funcbody: 	block {
                ;
 
 funcblockstart:{ push(&loopcounterstack, loopcounter); loopcounter=0;};
-funcblockend:	{ loopcounter = pop(&loopcounterstack);}
+funcblockend:	{ pop(&loopcounterstack);}
 
 funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend{
                int offset;
@@ -639,7 +635,7 @@ break:    BREAK {
                make_stmt(&$$);
                $$.breaklist = newlist(nextquad());
                emit(jump, NULL, NULL, NULL, 0, yylineno);
-               breakstack = push(&breakstack, $$.breaklist);
+               push(&breakstack, $$.breaklist);
           }
           ;    
 
@@ -647,7 +643,7 @@ continue: CONTINUE {
                make_stmt(&$$);
                $$.contlist = newlist(nextquad());
                emit(jump, NULL, NULL, NULL, 0, yylineno);
-               contstack = push(&contstack, $$.contlist);
+               push(&contstack, $$.contlist);
           }
           ;    
 

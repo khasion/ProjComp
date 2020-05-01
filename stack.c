@@ -1,6 +1,6 @@
 #include "stack.h"
 
-Stack* push(Stack** s, int val) {
+void push(Stack** s, int val) {
      Stack* new_stack;
      new_stack = (Stack*) malloc(sizeof(Stack));
      new_stack->val = val;
@@ -12,7 +12,6 @@ Stack* push(Stack** s, int val) {
           new_stack->next = *s;
           *s = new_stack;
      }
-     return *s;
 }
 
 int pop(Stack** s) {
@@ -25,9 +24,9 @@ int pop(Stack** s) {
 }
 
 int pop_and_top(Stack** s) {
-     if (s) {
+     if (*s != NULL) {
           *s = (*s)->next;
-          if (s) return (*s)->val;
+          if (*s != NULL) return (*s)->val;
      }
      return 0;
 }
@@ -37,7 +36,7 @@ void print_stack(Stack** s) {
      int i = 0;
      temp = *s;
      while (temp) {
-          printf("%d, val:%d\n", i, (*s)->val);
+          printf("%d, val:%d\n", i,(*s)->val);
           temp = temp->next;
           i++;
      }
