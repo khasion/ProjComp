@@ -524,7 +524,7 @@ funcbody: 	block {
                ;
 
 funcblockstart:{ push(&loopcounterstack, loopcounter); loopcounter=0;};
-funcblockend:	{ pop(&loopcounterstack);}
+funcblockend:	{ loopcounter = pop(&loopcounterstack);}
 
 funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend{
                int offset;
@@ -630,7 +630,6 @@ forstmt:	forprefix N elist R_PAR N stmt {gloop--;} N  {
                patchlist(pop(&contstack), $2+1);
           }
           ;
-
 break:    BREAK {
                make_stmt(&$$);
                $$.breaklist = newlist(nextquad());
