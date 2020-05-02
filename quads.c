@@ -6,6 +6,11 @@ unsigned int currQuad = 1;
 
 unsigned int tempcounter = 0;
 
+int isInteger(double i) {
+     int temp = (int)i;
+     return ( temp == i);
+}
+
 void patchboolean(Expr* e, int line) {
      backpatch(e->truelist, nextquad());
      backpatch(e->falselist, nextquad() + 2);
@@ -163,7 +168,8 @@ Expr* newexpr_constnum(double i) {
      e->numConst = i;
 
      n = (char*) malloc(sizeof(char)*4);
-     sprintf(n, "'%d'", (int)i);
+     if (isInteger(i)) sprintf(n, "%d", (int)i);
+     else sprintf(n, "%.4f", i);
 
      e->sym = (Symbol*) malloc(sizeof(Symbol));
      e->sym->name = strdup(n);
@@ -172,6 +178,9 @@ Expr* newexpr_constnum(double i) {
 
 Expr* newexpr_conststring(char* s) {
      Expr* tmp = newexpr(conststring_e);
+     tmp->sym = (Symbol*) malloc(sizeof(Symbol));
+     tmp->sym->name = (char*) malloc(sizeof(s));
+     sprintf(tmp->sym->name, "\"%s\"", s);  
      tmp->strConst = strdup(s);
      return tmp;
 }

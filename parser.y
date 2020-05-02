@@ -51,8 +51,8 @@
 
 %type <stmtval> stmt stmts rec_stmt ifstmt whilestmt forstmt returnstmt break continue block 
 
-%type <exprval> lvalue member primary assignexpr call 
-%type <exprval> term objectdef const expr elist comma_elist indexed  
+%type <exprval> lvalue member primary assignexpr call indexed_tmp
+%type <exprval> term objectdef const expr elist comma_elist indexed indexedelem  
 
 %type <callval> callsuffix normcall methodcall
 
@@ -62,12 +62,12 @@
 
 %type <intval> N M funcbody whilestart ifprefix elseprefix whilecond
 
-%type <strval>	indexedelem  idlist
+%type <strval>	idlist
 %type <strval> funcname funcargs
 %type <strval> funcblockend funcblockstart
 
 %%
-program:	stmts {;}
+program:	stmts{;}
           ;
 
 stmts: 	stmt {
@@ -295,7 +295,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                     Expr* value = emit_iftableitem($lvalue);
                     emit(assign, value, NULL,$$,0,yylineno);
                     emit(op_add, value, newexpr_constnum(1), value,0,yylineno);
-                    emit( tablesetelem, $1, $1->index, value, nextquad() + 1,yylineno);
+                    emit(tablesetelem, $1, $1->index, value, nextquad() + 1,yylineno);
                }
                else {
                     emit(assign, $1, NULL , $$, nextquad() + 1, yylineno);
@@ -339,7 +339,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                     emit(op_sub, $1, newexpr_constnum(1), $1, nextquad() + 1,yylineno);
                }
           }
-          | primary {$<exprval>$=$<exprval>1;}
+          | primary {$$ = $1;}
           ;
 
 assignexpr:	lvalue ASSIGN expr {
@@ -356,8 +356,8 @@ assignexpr:	lvalue ASSIGN expr {
                          }
                          $$ = newexpr(assignexpr_e);
                          $$->sym = newtemp();
-                         emit(assign, $3, (Expr*) 0, $$, nextquad() + 1, yylineno);
-                         emit(assign, $$, (Expr*) 0, $1, nextquad() + 1, yylineno);
+                         emit(assign, $3, (Expr*) 0, $1, nextquad() + 1, yylineno);
+                         emit(assign, $1, (Expr*) 0, $$, nextquad() + 1, yylineno);
                     }
                }
                ;
@@ -369,7 +369,7 @@ primary: 	lvalue { $$ = emit_iftableitem($1);}
                $$ = newexpr(programfunc_e);
                $$->sym = $2;
           }
-          | const {;}
+          | const { $$ = $1;}
           ;
 
 lvalue: 	ID {
@@ -454,9 +454,9 @@ objectdef: 	L_BRA elist R_BRA {
                     int i;
                     Expr* t = newexpr(newtable_e);
                     t->sym = newtemp();
-                    emit(tablecreate, t, NULL, NULL,0,yylineno);
+                    emit(tablecreate, t, NULL, NULL, nextquad() + 1,yylineno);
                     for (i = 0; $2; $2 = $2->next)  {
-                         emit(tablesetelem, t, newexpr_constnum(i++), $2, nextquad() + 1,yylineno);
+                         emit(tablesetelem, t, newexpr_constnum(i++), $2, nextquad() + 1, yylineno);
                     }
                     $$ = t;
                }
@@ -464,19 +464,36 @@ objectdef: 	L_BRA elist R_BRA {
                     Expr* t = newexpr(newtable_e);
                     t->sym = newtemp();
                     emit(tablecreate, t, NULL, NULL, nextquad() + 1, yylineno);
-                    while ($2) {
-                         emit(tablesetelem, t, $2, $2->index, nextquad() + 1, yylineno);
-                         $2 = $2->next;
+                    Expr *tmp= $2;
+                    while (tmp) {
+                         Expr* tmp2 = tmp->index;
+                         while (tmp2) {
+                              emit(tablesetelem, tmp2, tmp, t, nextquad() + 1, yylineno);
+                              tmp2 = tmp2->index;
+                         }
+                         tmp=tmp->next;
                     }
                     $$ = t;
                }
                ;
 
-indexed: 		indexedelem {;}
-               | indexed COMMA indexedelem {;}
+indexed: 		indexedelem indexed_tmp{ 
+                    $$ = $1;
+                    $$->next=$2;
+               }
                ;
 
-indexedelem: 	LC_BRA  expr COLON expr RC_BRA
+indexed_tmp:   COMMA indexedelem indexed_tmp{
+                    $$ = $2;
+                    $$->next = $3;
+               }
+               | {$$=NULL;}
+               ;
+
+indexedelem: 	LC_BRA  expr COLON expr RC_BRA{
+                    $$=$2;
+                    $$->index = $4; 
+               }
                ;
 
 
@@ -508,7 +525,7 @@ funcprefix: 	FUNC funcname {
                     enterscopespace();
                     resetformalargsoffset();
                }
-                ;
+               ;
 
 funcargs: 	L_PAR idlist R_PAR {
                     enterfuncscope();
@@ -541,7 +558,7 @@ funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend{
           }
           ;
 const: 	INT { $$ = newexpr_constnum($1);}
-          | REAL { $$ = newexpr_constnum($1);}
+          | REAL {$$ = newexpr_constnum($1);}
           | STRING { $$ = newexpr_conststring($1);}
           | NIL { $$ = newexpr(nil_e);}
           | TRUE { $$ = newexpr_constbool(1);}

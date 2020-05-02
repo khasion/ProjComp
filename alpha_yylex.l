@@ -99,125 +99,48 @@ nil       {return NIL;}
 }
 {space}   {;}
 
-"\"" {
-
-    int c;
-    int tasos = 0;
-    string_count = -1;
-    buffer_count = 1;
-    buffer = (char*)malloc(buffer_count*MAX*sizeof(char));
-    if(buffer == NULL){
-      printf("Error in allocating memory!!!\n");
-          return -1;
-    }
-
-    while((c = input()) != EOF){
-      if(c == '\"'){
-        string_count++;
-        if(buffer_count*MAX*sizeof(char) == string_count){
-          buffer_count++;
-          buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-          if(buffer == NULL){
-            printf("Error in reallocating memory!!!\n");
-                return -1;
-          }
-        }
-
-        buffer[string_count] = '\0';
-        tasos = 1;
-        insert_list(yylineno, tokens++, buffer, "STRING", buffer, atoi(yytext));
-        break;
-      } else if(c == '\\'){
-        if((c = input()) == 'n'){
-          string_count++;
-          if(buffer_count*MAX*sizeof(char) == string_count){
-            buffer_count++;
-            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-            if(buffer == NULL){
-              printf("Error in reallocating memory!!!\n");
-                  return -1;
-            }
-          }
-          buffer[string_count] = '\n';
-        } else if(c == 't'){
-          string_count++;
-          if(buffer_count*MAX*sizeof(char) == string_count){
-            buffer_count++;
-            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-            if(buffer == NULL){
-              printf("Error in reallocating memory!!!\n");
-                  return -1;
-            }
-          }
-          buffer[string_count] = '\t';
-        } else if(c == 'b'){
-          string_count++;
-          if(buffer_count*MAX*sizeof(char) == string_count){
-            buffer_count++;
-            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-            if(buffer == NULL){
-              printf("Error in reallocating memory!!!\n");
-                  return -1;
-            }
-          }
-          buffer[string_count] = '\b';
-        } else if(c == '\\'){
-          string_count++;
-          if(buffer_count*MAX*sizeof(char) == string_count){
-            buffer_count++;
-            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-            if(buffer == NULL){
-              printf("Error in reallocating memory!!!\n");
-                  return -1;
-            }
-          }
-          buffer[string_count] = '\\';
-
-        } else if(c == '\"'){
-          string_count++;
-          if(buffer_count*MAX*sizeof(char) == string_count){
-            buffer_count++;
-            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-            if(buffer == NULL){
-              printf("Error in reallocating memory!!!\n");
-                  return -1;
-            }
-          }
-          buffer[string_count] = '\"';
-        } else {
-          if(buffer_count*MAX*sizeof(char) == string_count){
-            buffer_count++;
-            buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-            if(buffer == NULL){
-              printf("Error in reallocating memory!!!\n");
-                  return -1;
-            }
-          }
-          printf("WARNING: Illigal esc char \n");
-          buffer[string_count] = c;
-        }
-      } else {
-        string_count++;
-        if(buffer_count*MAX*sizeof(char) == string_count){
-          buffer_count++;
-          buffer = (char*)realloc(buffer,buffer_count*MAX*sizeof(char));
-          if(buffer == NULL){
-            printf("Error in reallocating memory!!!\n");
-                return -1;
-          }
-        }
-        buffer[string_count] = c;
-      }
-    }
-
-    if(tasos == 0){
-      printf("ERROR: String Open. \n");
-  	   return -1;
-    }
-    yylval.strval = strdup(yytext);
+"\"" 			{
+      char *str;
+			int cnt = 0;
+			int size = 100;
+			str = (char*) malloc(sizeof(char)*size);
+			int c;
+			while ( (c = input()) != EOF) {
+				if ( cnt >= size-2) {
+					size = size*2;
+					str = (char*) realloc(str, size);
+				}
+				if ( c == '\\') {
+					c = input();
+					switch(c) {
+					case 'n': str[cnt++] = 10; break;
+					case 'a': str[cnt++] = 7; break;
+					case 'b': str[cnt++] = 8; break;
+					case 'e': str[cnt++] = 27; break;
+					case 'f': str[cnt++] = 12; break;
+					case 'r': str[cnt++] = 13; break;
+					case 't': str[cnt++] = 9; break;
+					case 'v': str[cnt++] = 11; break;
+					case '\\': str[cnt++] = '\\'; break;
+					case '\'': str[cnt++] = '\''; break;
+					case '\"': str[cnt++] = '\"'; break;
+					case '\?': str[cnt++] = '\?'; break;
+					default: unput(c); break;
+					}
+				}
+				else if ( c == '\"') {
+					str[cnt++] = '\0';
+					break;
+				}
+				else {
+					str[cnt++] = c;
+				}
+			}
+			insert_list(yylineno, tokens++, str, "STRING", str, atoi(yytext));{
+      yylval.strval = strdup(str);
     return STRING;
   }
-
+}
 
 "/*"  {
   int c;
