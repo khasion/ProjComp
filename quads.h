@@ -80,7 +80,7 @@ void patchboolean(Expr* e, int line);
 
 Expr* member_item (Expr* lv, char* name);
 
-Expr* make_call(Expr* lv, Expr* reversed_elist);
+Expr* make_call(Expr* lv, Expr* reversed_elist, int line);
 
 Expr* emit_iftableitem(Expr* e);
 
@@ -116,6 +116,7 @@ Expr* lvalue_expr(Symbol* sym);
 unsigned nextquad();
 
 void check_arith(Expr* e, const char* context);
+void print_intermediate2();
 void print_intermediate();
 void backpatch(int list, unsigned label);
 

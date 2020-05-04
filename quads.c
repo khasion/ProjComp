@@ -92,16 +92,16 @@ unsigned get_quadlabel(unsigned list) {
      return quads[list].label;
 }
 
-Expr* make_call(Expr* lv, Expr* reversed_elist) {
+Expr* make_call(Expr* lv, Expr* reversed_elist, int line) {
      Expr* func = emit_iftableitem(lv);
      while (reversed_elist) {
-          emit(param, reversed_elist, NULL, NULL, nextquad() + 1, 0);
+          emit(param, reversed_elist, NULL, NULL, nextquad() + 1, line);
           reversed_elist = reversed_elist->next;
      }
-     emit (call, func, NULL, NULL, nextquad() + 1, func->sym->line);
+     emit (call, func, NULL, NULL, nextquad() + 1, line);
      Expr* result = newexpr(var_e);
      result->sym = newtemp();
-     emit(getretval, NULL, NULL, result, nextquad() + 1, result->sym->line);
+     emit(getretval, NULL, NULL, result, nextquad() + 1, line);
      return result;
 }
 
@@ -241,7 +241,29 @@ void check_arith(Expr* e, const char* context) {
           }
 }
 
-void print_intermediate(){
+void print_intermediate() {
+     int i;
+     char* iopcode_array[26] = {
+          "assign",           "op_add",           "op_sub",
+          "op_mul",           "op_div",           "op_mod",
+          "uminus",           "op_and",           "op_or",
+          "op_not",           "if_eq",            "if_noteq",
+          "if_lesseq",        "if_greatereq",     "if_less",
+          "if_greater",	     "call",             "param",
+          "ret",              "getretval",        "funcstart",
+          "funcend",          "tablecreate",      "jump",
+          "tablegetelem",     "tablesetelem"};
+          for (i=1; i < currQuad; i++) {
+               printf("%d: %s ", i, iopcode_array[quads[i].op]);
+               if (quads[i].result && quads[i].result->sym) printf("%s ", quads[i].result->sym->name);
+               if (quads[i].arg1 && quads[i].arg1->sym) printf("%s ", quads[i].arg1->sym->name);
+               if (quads[i].arg2 && quads[i].arg1->sym) printf("%s ", quads[i].arg2->sym->name);
+               if ( (quads[i].op >= 7 && quads[i].op <= 15) || quads[i].op == 23) printf("%d ", quads[i].label);
+               printf("[line %d] \n", quads[i].line);
+          }
+}
+
+void print_intermediate2(){
      int i;
      char* iopcode_array[26] = {
           "assign",           "op_add",           "op_sub",
