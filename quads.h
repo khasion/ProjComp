@@ -78,11 +78,11 @@ typedef struct call {
 
 void patchboolean(Expr* e, int line);
 
-Expr* member_item (Expr* lv, char* name);
+Expr* member_item (Expr* lv, char* name, int line);
 
 Expr* make_call(Expr* lv, Expr* reversed_elist, int line);
 
-Expr* emit_iftableitem(Expr* e);
+Expr* emit_iftableitem(Expr* e, int line);
 
 void make_stmt(Stmt_t* s);
 int newlist(int i);

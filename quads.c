@@ -28,9 +28,9 @@ int newlist(int i) {
      return i;
 }
 
-Expr* member_item (Expr* lv, char* name) {
+Expr* member_item (Expr* lv, char* name,int line) {
      Expr* ti = newexpr(tableitem_e); // Make a new expression
-     lv = emit_iftableitem(lv); // Emit code if r-value use of table item
+     lv = emit_iftableitem(lv, line); // Emit code if r-value use of table item
      ti->sym = lv->sym;
      ti->index = newexpr_conststring(name);// Const string index
      return ti;
@@ -93,7 +93,7 @@ unsigned get_quadlabel(unsigned list) {
 }
 
 Expr* make_call(Expr* lv, Expr* reversed_elist, int line) {
-     Expr* func = emit_iftableitem(lv);
+     Expr* func = emit_iftableitem(lv, line);
      while (reversed_elist) {
           emit(param, reversed_elist, NULL, NULL, nextquad() + 1, line);
           reversed_elist = reversed_elist->next;
@@ -105,14 +105,15 @@ Expr* make_call(Expr* lv, Expr* reversed_elist, int line) {
      return result;
 }
 
-Expr* emit_iftableitem(Expr* e) {
+Expr* emit_iftableitem(Expr* e, int line) {
      assert(e);
      if (e->type != tableitem_e) {
           return e;
      }
      Expr* result   = newexpr(var_e);
      result->sym    = newtemp();
-     emit(tablegetelem, e, e->index, result, nextquad() + 1, e->sym->line);
+     result->sym->line = line;
+     emit(tablegetelem, e, e->index, result, nextquad() + 1, line);
      return result;
 }
 

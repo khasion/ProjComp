@@ -274,7 +274,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                else if($2 != NULL && $2->type == libraryfunc_e) Error(1, yytext, yylineno);
                check_arith($2, $2->sym->name);
                if ($2->type == tableitem_e) {
-                    $$ = emit_iftableitem($2);
+                    $$ = emit_iftableitem($2, yylineno);
                     emit(op_add, $$, newexpr_constnum(1), $$, nextquad() + 1,yylineno);
                     emit(tablesetelem, $2->index, $$, $2, nextquad() + 1, yylineno);
                }
@@ -292,7 +292,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                $$ = newexpr(var_e);
                $$->sym= newtemp();
                if ($1->type == tableitem_e){
-                    Expr* value = emit_iftableitem($lvalue);
+                    Expr* value = emit_iftableitem($lvalue, yylineno);
                     emit(assign, value, NULL,$$,0,yylineno);
                     emit(op_add, value, newexpr_constnum(1), value,0,yylineno);
                     emit(tablesetelem, $1->index,value, $1, nextquad() + 1,yylineno);
@@ -307,7 +307,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                else if($2 != NULL && $2->type == libraryfunc_e) Error(1, yytext, yylineno);
                check_arith($2, $2->sym->name);
                if ($2->type == tableitem_e) {
-                    $$ = emit_iftableitem($2);
+                    $$ = emit_iftableitem($2, yylineno);
                     emit(op_sub, $$, newexpr_constnum(1), $$, 0,yylineno);
                     emit(tablesetelem, $2->index, $$, $2, nextquad() + 1, yylineno);
                }
@@ -329,7 +329,7 @@ term: 	L_PAR expr R_PAR {$$ = $2;}
                $$ = newexpr(var_e);
                $$->sym= newtemp();
                if ($1->type == tableitem_e){
-                    Expr* value = emit_iftableitem($lvalue);
+                    Expr* value = emit_iftableitem($lvalue, yylineno);
                     emit(assign, value, NULL,$$,0,yylineno);
                     emit(op_sub, value, newexpr_constnum(1), value,0,yylineno);
                     emit(tablesetelem, $1->index,value, $1, nextquad() + 1,yylineno);
@@ -346,8 +346,8 @@ assignexpr:	lvalue ASSIGN expr {
                     if($1 != NULL && $1->type == programfunc_e) Error(0, yytext, yylineno);
                     else if($1 != NULL && $1->type == libraryfunc_e) Error(1, yytext, yylineno);
                     if ($1->type == tableitem_e)  {
-                         emit(tablesetelem, $3, $1->index, $lvalue, nextquad() + 1, yylineno);
-                         $$ = emit_iftableitem ($1);
+                         emit(tablesetelem, $1->index, $3, $lvalue, nextquad() + 1, yylineno);
+                         $$ = emit_iftableitem ($1, yylineno);
                          $$->type = assignexpr_e;
                     }
                     else {
@@ -362,7 +362,7 @@ assignexpr:	lvalue ASSIGN expr {
                }
                ;
 
-primary: 	lvalue { $$ = emit_iftableitem($1);}
+primary: 	lvalue { $$ = emit_iftableitem($1, yylineno);}
           | call {;}
           | objectdef {;}
           | L_PAR funcdef R_PAR {
@@ -390,9 +390,9 @@ lvalue: 	ID {
           | member {$$ = $1;}
           ;
 
-member: 	lvalue DOT ID {$$ = member_item($1, yytext);}
+member: 	lvalue DOT ID {$$ = member_item($1, yytext,yylineno);}
           | lvalue L_BRA expr R_BRA {
-               $1 = emit_iftableitem($1);
+               $1 = emit_iftableitem($1, yylineno);
                $$ = newexpr(tableitem_e);
                $$->sym = $1->sym;
                $$->index = $3;
@@ -403,10 +403,10 @@ member: 	lvalue DOT ID {$$ = member_item($1, yytext);}
 
 call: 	call L_PAR elist R_PAR { $$ = make_call($$, $3,yylineno);}
           | lvalue callsuffix {
-               $1 = emit_iftableitem($1);
+               $1 = emit_iftableitem($1, yylineno);
                if ($2.method){
                     Expr* t = $1;
-                    $1 = emit_iftableitem(member_item(t, $2.name));
+                    $1 = emit_iftableitem(member_item(t, $2.name,yylineno), yylineno);
                     $2.elist->next = t;
                }
                $$ = make_call($1, $2.elist,yylineno);
@@ -545,6 +545,8 @@ funcblockstart:{ push(&loopcounterstack, loopcounter); loopcounter=0;};
 funcblockend:	{ loopcounter = pop(&loopcounterstack); }
 
 funcdef: 	funcprefix funcargs funcblockstart funcbody funcblockend {
+               patchlabel(retaddr, nextquad());
+               retaddr=0;
                int offset;
                $funcprefix->totalLocals = $funcbody;
                exitscopespace();
