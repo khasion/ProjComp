@@ -3,6 +3,8 @@
 
 #include "table.h"
 
+
+
 typedef struct prefix {
 	int enter;
 	int test;
@@ -63,6 +65,7 @@ typedef struct quad {
 	Expr* arg2;
 	unsigned label;
 	unsigned line;
+	unsigned taddress;
 }Quad;
 
 typedef struct call {
@@ -75,6 +78,8 @@ typedef struct call {
 #define CURR_SIZE (total*sizeof(Quad))
 #define NEW_SIZE (EXPAND_SIZE*sizeof(Quad)+CURR_SIZE)
 
+
+extern Quad* quads;
 
 void patchboolean(Expr* e, int line);
 

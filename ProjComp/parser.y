@@ -105,6 +105,7 @@ stmt:     expr SEMI {
           | block { $$ = $1;}
           | funcdef { make_stmt(&$$);}
           | SEMI { make_stmt(&$$);}
+          
           ;
 
 
