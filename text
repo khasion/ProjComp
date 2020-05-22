@@ -1,3 +1,0 @@
-bison -v --yacc --defines parser.y
-flex alpha_yylex.l
-gcc -Wall -g lex.yy.c y.tab.c table.c quads.c -o calc
